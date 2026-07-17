@@ -7,9 +7,15 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 ## Wire-up to live backend
 
 - [ ] **Replace mock catalog** — `mockProducts.ts` still drives SearchBar. Point search/scan at Product APIs (list + barcode lookup once backend exposes it).
-- [ ] **Complete Sale → `POST /api/v1/transactions`** — CheckoutFooter currently stays client-only. Must send line items, `amountReceived`, `taxRate`, `storeId`, and respect open shift.
-- [ ] **Dev API proxy** — Vite proxy (or env base URL) so `/api/v1/*` hits the Spring Boot backend locally.
+- [ ] **Complete Sale → `POST /api/v1/transactions`** — Cash “Complete Sale” is still client-only. Card path (Feature 011) already POSTs a transaction before Stripe checkout.
+- [x] **Dev API proxy** — Feature 011: Vite `server.proxy` forwards `/api` → `http://localhost:8080`.
 - [ ] **`GET /api/v1/shifts/current` dependency** — UI already calls it; blocked on backend endpoint (see backend pending). Until then hydration fails open / shows Open Shift after error.
+- [ ] **`GET /api/v1/transactions/{id}/status`** — Feature 011 polls this; backend endpoint still needed for live QR auto-complete.
+
+## Payments (frontend)
+
+- [x] **Stripe QR checkout modal + polling** — Feature 011: `StripePaymentModal`, `paymentApi`, Card button, success closes active ticket.
+- [ ] **Cash Complete Sale persistence** — Still need non-card path to POST and clear ticket on success.
 
 ## Shift UX polish
 

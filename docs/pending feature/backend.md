@@ -24,7 +24,8 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 
 - [x] **Stripe Checkout + webhook** — Feature 010: MXN Checkout Sessions, cents conversion, signature-verified `/api/v1/payments/webhook` completing local transactions.
 - [ ] **Create IN_PROGRESS transactions for card sales** — Cash path still persists `COMPLETED` immediately; card flow needs an API to open `IN_PROGRESS` tickets before `POST /payments/checkout/{id}`.
-- [ ] **Frontend Stripe redirect / return UX** — Wire register Complete Sale (card) to checkout URL + success/cancel pages (frontend pending).
+- [ ] **`GET /api/v1/transactions/{id}/status`** — Required by Feature 011 QR polling (`paymentApi.getTransactionStatus`).
+- [x] **Frontend Stripe QR / return UX** — Feature 011 shipped QR modal + polling (see frontend pending for live status endpoint dependency).
 
 ## Opt-in modules (vision / schema)
 

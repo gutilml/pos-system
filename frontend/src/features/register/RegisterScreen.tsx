@@ -5,10 +5,38 @@ import { TicketTabs } from '@/components/register/TicketTabs'
 import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
-import { selectActiveItems, useCartStore } from '@/store/useCartStore'
+import { DEFAULT_STORE_ID } from '@/api/shifts'
+import { createTransaction } from '@/api/transactions'
+import {
+  selectActiveAmountReceived,
+  selectActiveItems,
+  selectGrandTotal,
+  useCartStore,
+} from '@/store/useCartStore'
 
 export function RegisterScreen() {
   const items = useCartStore(selectActiveItems)
+
+  async function requestCardPayment(): Promise<string> {
+    const state = useCartStore.getState()
+    const cartItems = selectActiveItems(state)
+    if (cartItems.length === 0) {
+      throw new Error('Cart is empty')
+    }
+    const grandTotal = selectGrandTotal(cartItems, state.taxRate)
+    const received = selectActiveAmountReceived(state) ?? grandTotal
+
+    const transaction = await createTransaction({
+      storeId: DEFAULT_STORE_ID,
+      amountReceived: received,
+      taxRate: state.taxRate || undefined,
+      items: cartItems.map((item) => ({
+        productId: item.productId,
+        quantity: item.quantity,
+      })),
+    })
+    return transaction.id
+  }
 
   return (
     <ShiftGate>
@@ -35,7 +63,7 @@ export function RegisterScreen() {
           )}
         </section>
 
-        <CheckoutFooter />
+        <CheckoutFooter onRequestCardPayment={requestCardPayment} />
         <WeightModal />
       </div>
     </ShiftGate>
