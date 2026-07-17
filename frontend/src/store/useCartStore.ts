@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 import { lineTotal, roundMoney } from '@/lib/money'
 import type { CartItem, CartProduct } from '@/types/cart'
 
@@ -46,69 +47,81 @@ function pushOrMergeItem(
   ]
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
-  items: [],
-  taxRate: 0,
-  amountReceived: null,
-  pendingWeightProduct: null,
-
-  addItem: (product, quantity = 1) => {
-    // Weight-based items must be confirmed via the modal before entering the cart.
-    if (product.sellByWeight === true) {
-      set({ pendingWeightProduct: product })
-      return
-    }
-
-    const qty = roundMoney(quantity)
-    if (qty <= 0) return
-
-    set((state) => ({
-      items: pushOrMergeItem(state.items, product, qty),
-    }))
-  },
-
-  confirmWeight: (quantity) => {
-    const product = get().pendingWeightProduct
-    if (!product) return
-
-    const qty = roundMoney(quantity)
-    if (qty <= 0) return
-
-    set((state) => ({
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
+      items: [],
+      taxRate: 0,
+      amountReceived: null,
       pendingWeightProduct: null,
-      items: pushOrMergeItem(state.items, product, qty),
-    }))
-  },
 
-  clearPendingWeight: () => set({ pendingWeightProduct: null }),
+      addItem: (product, quantity = 1) => {
+        // Weight-based items must be confirmed via the modal before entering the cart.
+        if (product.sellByWeight === true) {
+          set({ pendingWeightProduct: product })
+          return
+        }
 
-  removeItem: (productId) => {
-    set((state) => ({
-      items: state.items.filter((item) => item.productId !== productId),
-    }))
-  },
+        const qty = roundMoney(quantity)
+        if (qty <= 0) return
 
-  updateQuantity: (productId, quantity) => {
-    const qty = roundMoney(quantity)
-    if (qty <= 0) {
-      get().removeItem(productId)
-      return
-    }
+        set((state) => ({
+          items: pushOrMergeItem(state.items, product, qty),
+        }))
+      },
 
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.productId === productId ? { ...item, quantity: qty } : item,
-      ),
-    }))
-  },
+      confirmWeight: (quantity) => {
+        const product = get().pendingWeightProduct
+        if (!product) return
 
-  clearCart: () => set({ items: [], amountReceived: null, pendingWeightProduct: null }),
+        const qty = roundMoney(quantity)
+        if (qty <= 0) return
 
-  setTaxRate: (rate) => set({ taxRate: Math.max(0, rate) }),
+        set((state) => ({
+          pendingWeightProduct: null,
+          items: pushOrMergeItem(state.items, product, qty),
+        }))
+      },
 
-  setAmountReceived: (amount) =>
-    set({ amountReceived: amount === null ? null : roundMoney(amount) }),
-}))
+      clearPendingWeight: () => set({ pendingWeightProduct: null }),
+
+      removeItem: (productId) => {
+        set((state) => ({
+          items: state.items.filter((item) => item.productId !== productId),
+        }))
+      },
+
+      updateQuantity: (productId, quantity) => {
+        const qty = roundMoney(quantity)
+        if (qty <= 0) {
+          get().removeItem(productId)
+          return
+        }
+
+        set((state) => ({
+          items: state.items.map((item) =>
+            item.productId === productId ? { ...item, quantity: qty } : item,
+          ),
+        }))
+      },
+
+      clearCart: () => set({ items: [], amountReceived: null, pendingWeightProduct: null }),
+
+      setTaxRate: (rate) => set({ taxRate: Math.max(0, rate) }),
+
+      setAmountReceived: (amount) =>
+        set({ amountReceived: amount === null ? null : roundMoney(amount) }),
+    }),
+    {
+      name: 'pos-cart',
+      partialize: (state) => ({
+        items: state.items,
+        taxRate: state.taxRate,
+        amountReceived: state.amountReceived,
+      }),
+    },
+  ),
+)
 
 export function selectSubtotal(items: CartItem[]): number {
   return roundMoney(

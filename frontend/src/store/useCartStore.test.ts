@@ -32,6 +32,7 @@ const deliHam = {
 
 describe('useCartStore', () => {
   beforeEach(() => {
+    localStorage.clear()
     useCartStore.setState({
       items: [],
       taxRate: 0,
@@ -99,5 +100,37 @@ describe('useCartStore', () => {
     expect(state.items).toHaveLength(1)
     expect(state.items[0].quantity).toBe(250)
     expect(state.items[0].productId).toBe(deliHam.id)
+  })
+
+  it('persists cart items to localStorage and can rehydrate them', async () => {
+    const { addItem, setTaxRate } = useCartStore.getState()
+    addItem(cola, 2)
+    setTaxRate(0.0825)
+
+    const raw = localStorage.getItem('pos-cart')
+    expect(raw).toBeTruthy()
+    const parsed = JSON.parse(raw!) as {
+      state: { items: unknown[]; taxRate: number }
+    }
+    expect(parsed.state.items).toHaveLength(1)
+    expect(parsed.state.taxRate).toBe(0.0825)
+
+    // Simulate a fresh session: clear memory, then restore the saved snapshot and rehydrate.
+    useCartStore.setState({
+      items: [],
+      taxRate: 0,
+      amountReceived: null,
+      pendingWeightProduct: null,
+    })
+    expect(useCartStore.getState().items).toHaveLength(0)
+
+    localStorage.setItem('pos-cart', raw!)
+    await useCartStore.persist.rehydrate()
+
+    const rehydrated = useCartStore.getState()
+    expect(rehydrated.items).toHaveLength(1)
+    expect(rehydrated.items[0].sku).toBe('1001')
+    expect(rehydrated.items[0].quantity).toBe(2)
+    expect(rehydrated.taxRate).toBe(0.0825)
   })
 })
