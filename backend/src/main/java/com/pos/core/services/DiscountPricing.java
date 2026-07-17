@@ -45,8 +45,11 @@ final class DiscountPricing {
 
         BigDecimal afterItemDiscount = applyDiscount(original, itemPct, TransactionServiceImpl.MONEY_ROUNDING);
 
+        boolean skipGlobal = excludeFromGlobalDiscounts
+                || itemPct.compareTo(BigDecimal.ZERO) > 0;
+
         BigDecimal finalUnitPrice;
-        if (excludeFromGlobalDiscounts
+        if (skipGlobal
                 || globalDiscountPercentage == null
                 || globalDiscountPercentage.compareTo(BigDecimal.ZERO) <= 0) {
             finalUnitPrice = afterItemDiscount;

@@ -175,17 +175,19 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    void create_appliesCascadingItemAndGlobalDiscountsWithExclusion() {
+    void create_appliesGlobalOnlyToLinesWithoutItemDiscountOrExclusion() {
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
+        when(productRepository.findById(chips.getId())).thenReturn(Optional.of(chips));
         when(productRepository.findById(specialPrice.getId())).thenReturn(Optional.of(specialPrice));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         TransactionRequestDTO request = request(
                 List.of(
                         line(cola.getId(), new BigDecimal("1.0000"), new BigDecimal("0.1000")),
+                        line(chips.getId(), new BigDecimal("1.0000")),
                         line(specialPrice.getId(), new BigDecimal("1.0000"))
                 ),
-                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("5.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("10.0000"))),
                 null,
                 null,
                 new BigDecimal("0.1000")
@@ -194,23 +196,16 @@ class TransactionServiceImplTest {
         TransactionResponseDTO response = transactionService.create(request);
 
         assertThat(response.globalDiscountPercentage()).isEqualByComparingTo("0.1000");
-        assertThat(response.subtotal()).isEqualByComparingTo("4.1119");
-        assertThat(response.totalDiscountAmount()).isEqualByComparingTo("0.3781");
-        assertThat(response.grandTotal()).isEqualByComparingTo("4.1119");
+        assertThat(response.subtotal()).isEqualByComparingTo("6.5410");
+        assertThat(response.totalDiscountAmount()).isEqualByComparingTo("0.4490");
 
-        assertThat(response.items().get(0).originalUnitPrice()).isEqualByComparingTo("1.9900");
-        assertThat(response.items().get(0).finalUnitPrice()).isEqualByComparingTo("1.6119");
-        assertThat(response.items().get(1).finalUnitPrice()).isEqualByComparingTo("2.5000");
-
-        ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
-        verify(transactionRepository).save(captor.capture());
-        Transaction saved = captor.getValue();
-        assertThat(saved.getItems().get(0).getFinalUnitPrice()).isEqualByComparingTo("1.6119");
-        assertThat(saved.getItems().get(1).getFinalUnitPrice()).isEqualByComparingTo("2.5000");
+        assertThat(response.items().get(0).finalUnitPrice()).isEqualByComparingTo("1.7910");
+        assertThat(response.items().get(1).finalUnitPrice()).isEqualByComparingTo("2.2500");
+        assertThat(response.items().get(2).finalUnitPrice()).isEqualByComparingTo("2.5000");
     }
 
     @Test
-    void create_appliesItemAndGlobalDiscountOnSameLine() {
+    void create_itemDiscountExcludesLineFromGlobalDiscount() {
         Product premium = new Product();
         premium.setId(UUID.fromString("55555555-5555-5555-5555-555555555555"));
         premium.setSku("PREMIUM");
@@ -222,7 +217,7 @@ class TransactionServiceImplTest {
 
         TransactionRequestDTO request = request(
                 List.of(line(premium.getId(), new BigDecimal("1.0000"), new BigDecimal("0.1000"))),
-                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("81.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("90.0000"))),
                 null,
                 null,
                 new BigDecimal("0.1000")
@@ -230,9 +225,9 @@ class TransactionServiceImplTest {
 
         TransactionResponseDTO response = transactionService.create(request);
 
-        assertThat(response.subtotal()).isEqualByComparingTo("81.0000");
-        assertThat(response.totalDiscountAmount()).isEqualByComparingTo("19.0000");
-        assertThat(response.items().get(0).finalUnitPrice()).isEqualByComparingTo("81.0000");
+        assertThat(response.subtotal()).isEqualByComparingTo("90.0000");
+        assertThat(response.totalDiscountAmount()).isEqualByComparingTo("10.0000");
+        assertThat(response.items().get(0).finalUnitPrice()).isEqualByComparingTo("90.0000");
     }
 
     @Test

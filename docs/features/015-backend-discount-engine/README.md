@@ -9,9 +9,9 @@ Checkout pricing now supports **item-level** and **cart-level (global)** discoun
 All math uses `BigDecimal`, scale 4, `HALF_UP`:
 
 1. `afterItem = originalUnitPrice × (1 − itemDiscountPercentage)`
-2. If global discount applies and the product is **not** excluded:  
+2. Global discount applies **only** when the line has **no** item discount **and** the product is **not** flagged `excludeFromGlobalDiscounts`:  
    `finalUnitPrice = afterItem × (1 − globalDiscountPercentage)`
-3. Otherwise `finalUnitPrice = afterItem`
+3. Otherwise `finalUnitPrice = afterItem` (item-discounted lines and excluded products never receive global)
 4. `lineTotal = finalUnitPrice × quantity`
 5. `totalDiscountAmount` on the transaction = sum of `(originalUnitPrice × qty − lineTotal)` across lines
 
