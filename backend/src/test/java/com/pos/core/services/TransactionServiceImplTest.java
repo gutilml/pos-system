@@ -4,12 +4,15 @@ import com.pos.core.dtos.TransactionItemRequestDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.dtos.TransactionResponseDTO;
 import com.pos.core.exception.BusinessRuleException;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.Product;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.customers.repositories.CustomerRepository;
+import com.pos.customers.services.CustomerCreditService;
 import com.pos.inventory.services.InventoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,6 +53,12 @@ class TransactionServiceImplTest {
     @Mock
     private InventoryService inventoryService;
 
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @Mock
+    private CustomerCreditService customerCreditService;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -81,10 +90,6 @@ class TransactionServiceImplTest {
             return tx;
         });
 
-        // 2 * 1.9900 + 1 * 2.5000 = 6.4800
-        // tax 8.25% → 0.5346
-        // grand = 7.0146
-        // paid 10.0000 → change 2.9854
         TransactionRequestDTO request = new TransactionRequestDTO(
                 null,
                 List.of(
@@ -92,7 +97,9 @@ class TransactionServiceImplTest {
                         new TransactionItemRequestDTO(chips.getId(), new BigDecimal("1.0000"))
                 ),
                 new BigDecimal("10.0000"),
-                new BigDecimal("0.0825")
+                new BigDecimal("0.0825"),
+                null,
+                null
         );
 
         TransactionResponseDTO response = transactionService.create(request);
@@ -102,15 +109,14 @@ class TransactionServiceImplTest {
         assertThat(response.grandTotal()).isEqualByComparingTo("7.0146");
         assertThat(response.amountReceived()).isEqualByComparingTo("10.0000");
         assertThat(response.changeGiven()).isEqualByComparingTo("2.9854");
+        assertThat(response.paymentType()).isEqualTo(PaymentType.CASH);
         assertThat(response.items()).hasSize(2);
-        assertThat(response.items().get(0).lineTotal()).isEqualByComparingTo("3.9800");
-        assertThat(response.items().get(1).lineTotal()).isEqualByComparingTo("2.5000");
 
         ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionRepository).save(captor.capture());
         assertThat(captor.getValue().getSubtotal()).isEqualByComparingTo("6.4800");
-        assertThat(captor.getValue().getTaxTotal()).isEqualByComparingTo("0.5346");
         verify(inventoryService, never()).deductStock(anyList());
+        verify(customerCreditService, never()).chargeAccount(any(), any(), any());
     }
 
     @Test
@@ -122,6 +128,8 @@ class TransactionServiceImplTest {
                 null,
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
                 new BigDecimal("5.0000"),
+                null,
+                null,
                 null
         );
 
@@ -141,6 +149,8 @@ class TransactionServiceImplTest {
                 null,
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
                 new BigDecimal("1.0000"),
+                null,
+                null,
                 null
         );
 

@@ -1,0 +1,25 @@
+package com.pos.customers.services;
+
+import com.pos.core.models.Transaction;
+import com.pos.customers.dtos.CreateCustomerRequestDTO;
+import com.pos.customers.dtos.CreditLedgerEntryDTO;
+import com.pos.customers.dtos.CustomerDTO;
+import com.pos.customers.dtos.CustomerPaymentRequestDTO;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.UUID;
+
+public interface CustomerCreditService {
+
+    CustomerDTO createCustomer(CreateCustomerRequestDTO request);
+
+    List<CreditLedgerEntryDTO> getLedger(UUID customerId);
+
+    CustomerDTO payBalance(UUID customerId, CustomerPaymentRequestDTO request);
+
+    /**
+     * Charges {@code amount} to the customer's tab (increases balance) and writes a CHARGE ledger entry.
+     */
+    void chargeAccount(UUID customerId, BigDecimal amount, Transaction transaction);
+}

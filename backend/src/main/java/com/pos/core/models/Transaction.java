@@ -1,5 +1,6 @@
 package com.pos.core.models;
 
+import com.pos.customers.models.Customer;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -36,6 +37,14 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "shift_id")
     private Shift shift;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_type", nullable = false, length = 20)
+    private PaymentType paymentType = PaymentType.CASH;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
@@ -85,6 +94,22 @@ public class Transaction {
 
     public void setShift(Shift shift) {
         this.shift = shift;
+    }
+
+    public Customer getCustomer() {
+        return customer;
+    }
+
+    public void setCustomer(Customer customer) {
+        this.customer = customer;
+    }
+
+    public PaymentType getPaymentType() {
+        return paymentType;
+    }
+
+    public void setPaymentType(PaymentType paymentType) {
+        this.paymentType = paymentType;
     }
 
     public TransactionStatus getStatus() {

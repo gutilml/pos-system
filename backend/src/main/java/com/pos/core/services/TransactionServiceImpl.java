@@ -6,6 +6,7 @@ import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.dtos.TransactionResponseDTO;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.Product;
 import com.pos.core.models.Shift;
 import com.pos.core.models.ShiftStatus;
@@ -17,6 +18,9 @@ import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.customers.models.Customer;
+import com.pos.customers.repositories.CustomerRepository;
+import com.pos.customers.services.CustomerCreditService;
 import com.pos.inventory.services.InventoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,19 +45,25 @@ public class TransactionServiceImpl implements TransactionService {
     private final StoreSettingsRepository storeSettingsRepository;
     private final ShiftRepository shiftRepository;
     private final InventoryService inventoryService;
+    private final CustomerRepository customerRepository;
+    private final CustomerCreditService customerCreditService;
 
     public TransactionServiceImpl(
             TransactionRepository transactionRepository,
             ProductRepository productRepository,
             StoreSettingsRepository storeSettingsRepository,
             ShiftRepository shiftRepository,
-            InventoryService inventoryService
+            InventoryService inventoryService,
+            CustomerRepository customerRepository,
+            CustomerCreditService customerCreditService
     ) {
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
         this.storeSettingsRepository = storeSettingsRepository;
         this.shiftRepository = shiftRepository;
         this.inventoryService = inventoryService;
+        this.customerRepository = customerRepository;
+        this.customerCreditService = customerCreditService;
     }
 
     @Override
@@ -66,8 +76,13 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BusinessRuleException("taxRate cannot be negative");
         }
 
+        PaymentType paymentType = request.paymentType() != null
+                ? request.paymentType()
+                : PaymentType.CASH;
+
         Transaction transaction = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setPaymentType(paymentType);
 
         StoreSettings store = null;
         if (request.storeId() != null) {
@@ -77,6 +92,22 @@ public class TransactionServiceImpl implements TransactionService {
             Shift shift = shiftRepository.findFirstByStoreIdAndStatus(store.getId(), ShiftStatus.OPEN)
                     .orElseThrow(() -> new BusinessRuleException("Store does not have an OPEN shift"));
             transaction.setShift(shift);
+        }
+
+        Customer customer = null;
+        if (paymentType == PaymentType.CREDIT) {
+            if (request.customerId() == null) {
+                throw new BusinessRuleException("customerId is required for CREDIT payment type");
+            }
+            customer = customerRepository.findById(request.customerId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Customer not found: " + request.customerId()));
+            transaction.setCustomer(customer);
+        } else if (request.customerId() != null) {
+            customer = customerRepository.findById(request.customerId())
+                    .orElseThrow(() -> new ResourceNotFoundException(
+                            "Customer not found: " + request.customerId()));
+            transaction.setCustomer(customer);
         }
 
         BigDecimal subtotal = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
@@ -103,12 +134,17 @@ public class TransactionServiceImpl implements TransactionService {
         BigDecimal taxTotal = subtotal.multiply(taxRate).setScale(MONEY_SCALE, MONEY_ROUNDING);
         BigDecimal grandTotal = subtotal.add(taxTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
         BigDecimal amountReceived = scaleMoney(request.amountReceived());
+        BigDecimal changeGiven;
 
-        if (amountReceived.compareTo(grandTotal) < 0) {
-            throw new BusinessRuleException("amountReceived is less than grandTotal");
+        if (paymentType == PaymentType.CREDIT) {
+            // Tab charge: no cash collected at register.
+            changeGiven = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
+        } else {
+            if (amountReceived.compareTo(grandTotal) < 0) {
+                throw new BusinessRuleException("amountReceived is less than grandTotal");
+            }
+            changeGiven = amountReceived.subtract(grandTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
         }
-
-        BigDecimal changeGiven = amountReceived.subtract(grandTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
 
         transaction.setSubtotal(subtotal);
         transaction.setTaxTotal(taxTotal);
@@ -117,6 +153,10 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setChangeGiven(changeGiven);
 
         Transaction saved = transactionRepository.save(transaction);
+
+        if (paymentType == PaymentType.CREDIT) {
+            customerCreditService.chargeAccount(saved.getCustomer().getId(), grandTotal, saved);
+        }
 
         // Opt-in inventory: only run when the store flag is explicitly enabled.
         if (isInventoryEnabled(store)) {
@@ -149,11 +189,17 @@ public class TransactionServiceImpl implements TransactionService {
 
         UUID storeId = transaction.getStore() != null ? transaction.getStore().getId() : null;
         UUID shiftId = transaction.getShift() != null ? transaction.getShift().getId() : null;
+        UUID customerId = transaction.getCustomer() != null ? transaction.getCustomer().getId() : null;
+        PaymentType paymentType = transaction.getPaymentType() != null
+                ? transaction.getPaymentType()
+                : PaymentType.CASH;
 
         return new TransactionResponseDTO(
                 transaction.getId(),
                 storeId,
                 shiftId,
+                customerId,
+                paymentType,
                 transaction.getStatus(),
                 transaction.getSubtotal(),
                 transaction.getTaxTotal(),

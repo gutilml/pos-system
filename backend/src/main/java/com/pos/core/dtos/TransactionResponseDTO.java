@@ -1,5 +1,6 @@
 package com.pos.core.dtos;
 
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.TransactionStatus;
 
 import java.math.BigDecimal;
@@ -11,6 +12,8 @@ public record TransactionResponseDTO(
         UUID id,
         UUID storeId,
         UUID shiftId,
+        UUID customerId,
+        PaymentType paymentType,
         TransactionStatus status,
         BigDecimal subtotal,
         BigDecimal taxTotal,

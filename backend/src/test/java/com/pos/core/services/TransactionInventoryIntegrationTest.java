@@ -11,6 +11,8 @@ import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.customers.repositories.CustomerRepository;
+import com.pos.customers.services.CustomerCreditService;
 import com.pos.inventory.services.InventoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +51,12 @@ class TransactionInventoryIntegrationTest {
 
     @Mock
     private InventoryService inventoryService;
+
+    @Mock
+    private CustomerRepository customerRepository;
+
+    @Mock
+    private CustomerCreditService customerCreditService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -93,13 +101,14 @@ class TransactionInventoryIntegrationTest {
                 store.getId(),
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
                 new BigDecimal("5.0000"),
+                null,
+                null,
                 null
         );
 
         transactionService.create(request);
 
         verify(inventoryService, never()).deductStock(anyList());
-        // Stock must remain untouched when the module is opted out.
         org.assertj.core.api.Assertions.assertThat(cola.getCurrentStock()).isEqualByComparingTo("50.0000");
     }
 
@@ -118,6 +127,8 @@ class TransactionInventoryIntegrationTest {
                 store.getId(),
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("2.0000"))),
                 new BigDecimal("10.0000"),
+                null,
+                null,
                 null
         );
 
@@ -135,6 +146,8 @@ class TransactionInventoryIntegrationTest {
                 null,
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
                 new BigDecimal("5.0000"),
+                null,
+                null,
                 null
         );
 

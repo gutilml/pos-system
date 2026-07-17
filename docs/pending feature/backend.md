@@ -29,7 +29,8 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 
 ## Opt-in modules (vision / schema)
 
-- [ ] **Customer credit module** — Flag in `store_settings.features`; no module yet.
+- [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
+- [ ] **Customer credit UI** — Frontend register/tab pay-down screens (see frontend pending).
 - [ ] **Multi-tier / customer pricing** — Mentioned in project vision; not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 

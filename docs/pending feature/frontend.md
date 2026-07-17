@@ -40,7 +40,7 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 ## Opt-in module UIs
 
 - [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true.
-- [ ] **Customer credit UI** — When that module exists on the backend.
+- [ ] **Customer credit UI** — When that module exists on the backend (Feature 012 shipped APIs).
 
 ## Tooling / quality
 

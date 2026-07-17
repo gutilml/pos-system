@@ -4,6 +4,7 @@ import com.pos.core.dtos.TransactionItemResponseDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.dtos.TransactionResponseDTO;
 import com.pos.core.exception.GlobalExceptionHandler;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.TransactionStatus;
 import com.pos.core.services.TransactionService;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,8 @@ class TransactionControllerTest {
                         txId,
                         null,
                         null,
+                        null,
+                        PaymentType.CASH,
                         TransactionStatus.COMPLETED,
                         new BigDecimal("1.9900"),
                         new BigDecimal("0.0000"),
@@ -78,6 +81,7 @@ class TransactionControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(txId.toString()))
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.paymentType").value("CASH"))
                 .andExpect(jsonPath("$.grandTotal").value(1.9900))
                 .andExpect(jsonPath("$.items[0].productId").value(productId.toString()));
     }
