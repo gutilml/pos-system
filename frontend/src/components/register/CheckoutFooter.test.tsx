@@ -17,36 +17,31 @@ describe('CheckoutFooter', () => {
         },
       ],
       taxRate: 0,
-      amountReceived: null,
     })
   })
 
-  it('defaults amount received to the grand total', () => {
-    render(<CheckoutFooter />)
-    const input = screen.getByLabelText('Amount Received') as HTMLInputElement
-    expect(input.value).toBe('1.9900')
-    expect(screen.getByTestId('change-due')).toHaveTextContent('0.0000')
-  })
-
-  it('selects all text when the amount received field is focused', async () => {
+  it('opens the checkout modal from Pay', async () => {
     const user = userEvent.setup()
     render(<CheckoutFooter />)
-    const input = screen.getByLabelText('Amount Received') as HTMLInputElement
 
-    const selectSpy = vi.spyOn(input, 'select')
-    await user.click(input)
-
-    expect(selectSpy).toHaveBeenCalled()
+    expect(screen.queryByRole('dialog', { name: /take payment/i })).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('open-checkout'))
+    expect(screen.getByRole('dialog', { name: /take payment/i })).toBeInTheDocument()
+    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('1.9900')
   })
 
-  it('updates change due when amount received changes', async () => {
-    const user = userEvent.setup()
+  it('disables Pay when the cart is empty', () => {
+    resetCartForTests({ items: [] })
     render(<CheckoutFooter />)
-    const input = screen.getByLabelText('Amount Received')
+    expect(screen.getByTestId('open-checkout')).toBeDisabled()
+  })
 
-    await user.click(input)
-    await user.keyboard('{Control>}a{/Control}5')
+  it('starts card payment via the provided callback', async () => {
+    const user = userEvent.setup()
+    const onRequestCardPayment = vi.fn().mockResolvedValue('tx-card-1')
+    render(<CheckoutFooter onRequestCardPayment={onRequestCardPayment} />)
 
-    expect(screen.getByTestId('change-due')).toHaveTextContent('3.0100')
+    await user.click(screen.getByRole('button', { name: 'Card' }))
+    expect(onRequestCardPayment).toHaveBeenCalled()
   })
 })

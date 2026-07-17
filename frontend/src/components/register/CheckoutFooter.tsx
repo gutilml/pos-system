@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState, type FocusEvent, type MouseEvent } from 'react'
+import { useState } from 'react'
+import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import { StripePaymentModal } from '@/components/checkout/StripePaymentModal'
-import { formatMoney, roundMoney } from '@/lib/money'
+import { formatMoney } from '@/lib/money'
 import {
-  selectActiveAmountReceived,
+  selectActiveCustomer,
   selectActiveItems,
-  selectChangeDue,
   selectGrandTotal,
   selectSubtotal,
   selectTaxTotal,
@@ -22,10 +22,10 @@ type CheckoutFooterProps = {
 export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {}) {
   const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
-  const amountReceived = useCartStore(selectActiveAmountReceived)
-  const setAmountReceived = useCartStore((s) => s.setAmountReceived)
+  const customer = useCartStore(selectActiveCustomer)
   const clearCart = useCartStore((s) => s.clearCart)
 
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [cardModalOpen, setCardModalOpen] = useState(false)
   const [activeCardTxId, setActiveCardTxId] = useState<string | null>(null)
   const [cardError, setCardError] = useState<string | null>(null)
@@ -34,32 +34,6 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
   const subtotal = selectSubtotal(items)
   const taxTotal = selectTaxTotal(items, taxRate)
   const grandTotal = selectGrandTotal(items, taxRate)
-  const changeDue = selectChangeDue(items, taxRate, amountReceived)
-
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [draft, setDraft] = useState<string | null>(null)
-
-  useEffect(() => {
-    setAmountReceived(grandTotal)
-    setDraft(null)
-  }, [grandTotal, setAmountReceived])
-
-  function handleFocus(event: FocusEvent<HTMLInputElement>) {
-    setDraft(formatMoney(amountReceived ?? grandTotal))
-    event.currentTarget.select()
-  }
-
-  function handleMouseUp(event: MouseEvent<HTMLInputElement>) {
-    event.preventDefault()
-  }
-
-  function handleBlur() {
-    if (draft !== null) {
-      const parsed = Number.parseFloat(draft)
-      setAmountReceived(Number.isFinite(parsed) ? roundMoney(parsed) : grandTotal)
-    }
-    setDraft(null)
-  }
 
   async function handleCardPayment() {
     setCardError(null)
@@ -80,9 +54,6 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
     }
   }
 
-  const displayAmount =
-    draft ?? formatMoney(amountReceived === null ? grandTotal : amountReceived)
-
   return (
     <>
       <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
@@ -101,40 +72,11 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
           </div>
         </dl>
 
-        <div className="mb-3">
-          <label htmlFor="amount-received" className="mb-1 block text-sm font-medium text-slate-700">
-            Amount Received
-          </label>
-          <input
-            ref={inputRef}
-            id="amount-received"
-            type="text"
-            inputMode="decimal"
-            value={displayAmount}
-            onChange={(e) => {
-              const next = e.target.value
-              setDraft(next)
-              const parsed = Number.parseFloat(next)
-              if (Number.isFinite(parsed)) {
-                setAmountReceived(parsed)
-              }
-            }}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            onMouseUp={handleMouseUp}
-            className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-xl tabular-nums text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2"
-          />
-        </div>
-
-        <div className="mb-4 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3">
-          <span className="font-medium text-emerald-900">Change Due</span>
-          <span
-            className="text-2xl font-semibold tabular-nums text-emerald-900"
-            data-testid="change-due"
-          >
-            {formatMoney(Math.max(0, changeDue))}
-          </span>
-        </div>
+        {customer ? (
+          <p className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900" data-testid="footer-customer">
+            Customer: <span className="font-semibold">{customer.name}</span>
+          </p>
+        ) : null}
 
         {cardError ? (
           <p className="mb-3 text-sm text-red-600" role="alert">
@@ -161,12 +103,16 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
           <button
             type="button"
             disabled={items.length === 0}
+            onClick={() => setCheckoutOpen(true)}
+            data-testid="open-checkout"
             className="flex-[2] rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
           >
-            Complete Sale
+            Pay
           </button>
         </div>
       </footer>
+
+      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
 
       <StripePaymentModal
         open={cardModalOpen}

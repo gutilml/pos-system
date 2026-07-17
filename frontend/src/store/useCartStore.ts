@@ -3,11 +3,29 @@ import { persist } from 'zustand/middleware'
 import { lineTotal, roundMoney } from '@/lib/money'
 import type { CartItem, CartProduct } from '@/types/cart'
 
+export type PaymentMethod = 'CASH' | 'CARD' | 'CREDIT'
+
+export type PaymentTender = {
+  id: string
+  method: PaymentMethod
+  amount: number
+}
+
+export type AssignedCustomer = {
+  id: string
+  name: string
+  phone: string | null
+  creditLimit: number
+  currentBalance: number
+}
+
 export type Ticket = {
   id: string
   label: string
   items: CartItem[]
   amountReceived: number | null
+  payments: PaymentTender[]
+  customer: AssignedCustomer | null
 }
 
 type CartState = {
@@ -26,21 +44,30 @@ type CartState = {
   resetAllTickets: () => void
   setTaxRate: (rate: number) => void
   setAmountReceived: (amount: number | null) => void
+  addPayment: (method: PaymentMethod, amount: number) => void
+  removePayment: (paymentId: string) => void
+  clearPayments: () => void
+  setCustomer: (customer: AssignedCustomer | null) => void
   createNewTicket: () => void
   switchTicket: (ticketId: string) => void
   closeTicket: (ticketId: string) => void
 }
 
+function newId(prefix: string): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+    return crypto.randomUUID()
+  }
+  return `${prefix}-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
 function createTicket(number: number): Ticket {
-  const id =
-    typeof crypto !== 'undefined' && 'randomUUID' in crypto
-      ? crypto.randomUUID()
-      : `ticket-${number}-${Date.now()}`
   return {
-    id,
+    id: newId('ticket'),
     label: `Ticket ${number}`,
     items: [],
     amountReceived: null,
+    payments: [],
+    customer: null,
   }
 }
 
@@ -97,6 +124,17 @@ function updateActiveTicket(
   }
 }
 
+function normalizeTicket(raw: Partial<Ticket> & { id: string; label: string }): Ticket {
+  return {
+    id: raw.id,
+    label: raw.label,
+    items: raw.items ?? [],
+    amountReceived: raw.amountReceived ?? null,
+    payments: raw.payments ?? [],
+    customer: raw.customer ?? null,
+  }
+}
+
 export function selectActiveItems(state: {
   tickets: Record<string, Ticket>
   activeTicketId: string
@@ -109,6 +147,57 @@ export function selectActiveAmountReceived(state: {
   activeTicketId: string
 }): number | null {
   return state.tickets[state.activeTicketId]?.amountReceived ?? null
+}
+
+export function selectActivePayments(state: {
+  tickets: Record<string, Ticket>
+  activeTicketId: string
+}): PaymentTender[] {
+  return state.tickets[state.activeTicketId]?.payments ?? []
+}
+
+export function selectActiveCustomer(state: {
+  tickets: Record<string, Ticket>
+  activeTicketId: string
+}): AssignedCustomer | null {
+  return state.tickets[state.activeTicketId]?.customer ?? null
+}
+
+export function selectTotalTendered(payments: PaymentTender[]): number {
+  return roundMoney(payments.reduce((sum, payment) => sum + payment.amount, 0))
+}
+
+export function selectBalanceDue(
+  items: CartItem[],
+  taxRate: number,
+  payments: PaymentTender[],
+): number {
+  return roundMoney(Math.max(0, selectGrandTotal(items, taxRate) - selectTotalTendered(payments)))
+}
+
+export function selectTenderChangeDue(
+  items: CartItem[],
+  taxRate: number,
+  payments: PaymentTender[],
+): number {
+  return roundMoney(Math.max(0, selectTotalTendered(payments) - selectGrandTotal(items, taxRate)))
+}
+
+export function selectAvailableCredit(customer: AssignedCustomer): number {
+  return roundMoney(Math.max(0, customer.creditLimit - customer.currentBalance))
+}
+
+export function selectCanCompleteSale(
+  items: CartItem[],
+  taxRate: number,
+  payments: PaymentTender[],
+  customer: AssignedCustomer | null,
+): boolean {
+  if (items.length === 0 || payments.length === 0) return false
+  if (selectTotalTendered(payments) < selectGrandTotal(items, taxRate)) return false
+  const hasCredit = payments.some((payment) => payment.method === 'CREDIT')
+  if (hasCredit && !customer) return false
+  return true
 }
 
 const bootstrap = initialTickets()
@@ -188,6 +277,8 @@ export const useCartStore = create<CartState>()(
             ...ticket,
             items: [],
             amountReceived: null,
+            payments: [],
+            customer: null,
           })),
         }))
       },
@@ -207,6 +298,48 @@ export const useCartStore = create<CartState>()(
           updateActiveTicket(state, (ticket) => ({
             ...ticket,
             amountReceived: amount === null ? null : roundMoney(amount),
+          })),
+        )
+      },
+
+      addPayment: (method, amount) => {
+        const tenderAmount = roundMoney(amount)
+        if (tenderAmount <= 0) return
+
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            payments: [
+              ...ticket.payments,
+              { id: newId('pay'), method, amount: tenderAmount },
+            ],
+          })),
+        )
+      },
+
+      removePayment: (paymentId) => {
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            payments: ticket.payments.filter((payment) => payment.id !== paymentId),
+          })),
+        )
+      },
+
+      clearPayments: () => {
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            payments: [],
+          })),
+        )
+      },
+
+      setCustomer: (customer) => {
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            customer,
           })),
         )
       },
@@ -266,7 +399,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'pos-cart',
-      version: 2,
+      version: 3,
       partialize: (state) => ({
         tickets: state.tickets,
         ticketOrder: state.ticketOrder,
@@ -291,6 +424,21 @@ export const useCartStore = create<CartState>()(
             taxRate,
           }
         }
+        if (version < 3) {
+          const tickets = (data.tickets as Record<string, Partial<Ticket>> | undefined) ?? {}
+          const normalized: Record<string, Ticket> = {}
+          for (const [id, ticket] of Object.entries(tickets)) {
+            normalized[id] = normalizeTicket({
+              ...ticket,
+              id: ticket.id ?? id,
+              label: ticket.label ?? 'Ticket',
+            })
+          }
+          return {
+            ...data,
+            tickets: normalized,
+          } as never
+        }
         return data as never
       },
     },
@@ -302,11 +450,15 @@ export function resetCartForTests(partial?: {
   items?: CartItem[]
   taxRate?: number
   amountReceived?: number | null
+  payments?: PaymentTender[]
+  customer?: AssignedCustomer | null
   pendingWeightProduct?: CartProduct | null
 }) {
   const ticket = createTicket(1)
   ticket.items = partial?.items ?? []
   ticket.amountReceived = partial?.amountReceived ?? null
+  ticket.payments = partial?.payments ?? []
+  ticket.customer = partial?.customer ?? null
   useCartStore.setState({
     tickets: { [ticket.id]: ticket },
     ticketOrder: [ticket.id],

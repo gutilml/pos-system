@@ -32,13 +32,17 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 ## Opt-in modules (vision / schema)
 
 - [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
-- [ ] **Customer credit UI** — Frontend register/tab pay-down screens (see frontend pending).
+- [ ] **Customer credit UI** — Feature 014 shipped register CREDIT assignment at checkout; dedicated tab pay-down screens still pending (see frontend).
+- [ ] **Customer search API** — Feature 014 frontend calls `GET /api/v1/customers/search?q=`; backend only has create / ledger / payments today — need name/phone search (store-scoped) returning credit limit + balance.
 - [ ] **Multi-tier / customer pricing** — Mentioned in project vision; not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 
 ## Platform / ops
 
 - [ ] **AuthN/AuthZ** — Spring Security, roles (cashier / manager / admin), store tenancy.
+- [ ] **System user accounts** — Add backend-owned cashier / manager / admin users, including create/update/deactivate APIs, password handling, store assignment, and audit-friendly identity fields separate from customer credit accounts.
+- [ ] **Session / login APIs** — Issue and validate authenticated sessions or JWTs for the frontend, including logout / refresh behavior and current-user lookup.
+- [ ] **Role-based authorization policies** — Enforce manager-only operations (drawer adjustments, shift close overrides, product/admin changes) and cashier-scoped checkout actions at the controller/service boundary.
 - [ ] **CORS / API versioning conventions** — Confirm for SPA + Fargate deployment.
 - [ ] **Seed data / fixtures** — Deterministic store + products for local/dev demos.
 

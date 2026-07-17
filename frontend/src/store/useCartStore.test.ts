@@ -2,11 +2,17 @@ import { beforeEach, describe, expect, it } from 'vitest'
 import {
   resetCartForTests,
   selectActiveAmountReceived,
+  selectActiveCustomer,
   selectActiveItems,
+  selectActivePayments,
+  selectAvailableCredit,
+  selectBalanceDue,
+  selectCanCompleteSale,
   selectChangeDue,
   selectGrandTotal,
   selectSubtotal,
   selectTaxTotal,
+  selectTotalTendered,
   useCartStore,
 } from '@/store/useCartStore'
 
@@ -156,6 +162,48 @@ describe('useCartStore', () => {
     const state = useCartStore.getState()
     expect(selectActiveItems(state)[0].sku).toBe('1001')
     expect(selectActiveAmountReceived(state)).toBe(5)
+  })
+
+  it('tracks payment tenders and balance due with scale-4 math', () => {
+    const { addItem, addPayment, removePayment } = useCartStore.getState()
+    addItem(cola, 2)
+    addItem(chips, 1)
+
+    const state0 = useCartStore.getState()
+    const items = selectActiveItems(state0)
+    expect(selectGrandTotal(items, 0)).toBe(6.48)
+    expect(selectBalanceDue(items, 0, selectActivePayments(state0))).toBe(6.48)
+
+    addPayment('CASH', 2.48)
+    addPayment('CREDIT', 4)
+
+    const state1 = useCartStore.getState()
+    const payments = selectActivePayments(state1)
+    expect(selectTotalTendered(payments)).toBe(6.48)
+    expect(selectBalanceDue(items, 0, payments)).toBe(0)
+    expect(selectCanCompleteSale(items, 0, payments, null)).toBe(false)
+
+    useCartStore.getState().setCustomer({
+      id: 'cust-1',
+      name: 'Dana',
+      phone: null,
+      creditLimit: 100,
+      currentBalance: 10,
+    })
+    const state2 = useCartStore.getState()
+    expect(
+      selectCanCompleteSale(
+        items,
+        0,
+        selectActivePayments(state2),
+        selectActiveCustomer(state2),
+      ),
+    ).toBe(true)
+    expect(selectAvailableCredit(selectActiveCustomer(state2)!)).toBe(90)
+
+    removePayment(payments[0].id)
+    const state3 = useCartStore.getState()
+    expect(selectBalanceDue(items, 0, selectActivePayments(state3))).toBe(2.48)
   })
 
   it('always keeps at least one ticket when the last tab is closed', () => {

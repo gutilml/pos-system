@@ -8,7 +8,7 @@ import { ShiftGate } from '@/components/shift/ShiftGate'
 import { DEFAULT_STORE_ID } from '@/api/shifts'
 import { createTransaction } from '@/api/transactions'
 import {
-  selectActiveAmountReceived,
+  selectActiveCustomer,
   selectActiveItems,
   selectGrandTotal,
   useCartStore,
@@ -24,16 +24,17 @@ export function RegisterScreen() {
       throw new Error('Cart is empty')
     }
     const grandTotal = selectGrandTotal(cartItems, state.taxRate)
-    const received = selectActiveAmountReceived(state) ?? grandTotal
+    const customer = selectActiveCustomer(state)
 
     const transaction = await createTransaction({
       storeId: DEFAULT_STORE_ID,
-      amountReceived: received,
       taxRate: state.taxRate || undefined,
+      customerId: customer?.id,
       items: cartItems.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
       })),
+      payments: [{ paymentMethod: 'CARD', amount: grandTotal }],
     })
     return transaction.id
   }

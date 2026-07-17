@@ -1,10 +1,18 @@
 const API_BASE = '/api/v1'
 
+export type PaymentMethodPayload = 'CASH' | 'CARD' | 'CREDIT'
+
+export type CreateTransactionPayment = {
+  paymentMethod: PaymentMethodPayload
+  amount: number
+}
+
 export type CreateTransactionRequest = {
   storeId?: string
-  amountReceived: number
   taxRate?: number
+  customerId?: string
   items: Array<{ productId: string; quantity: number }>
+  payments: CreateTransactionPayment[]
 }
 
 export type CreateTransactionResponse = {
@@ -21,8 +29,8 @@ async function parseJson<T>(response: Response): Promise<T> {
 }
 
 /**
- * Persists the current ticket as a backend transaction so Stripe checkout can attach to it.
- * Backend should return IN_PROGRESS for card flows (Feature 010 follow-up).
+ * Persists the current ticket as a backend transaction.
+ * Payload matches Feature 013: payments[] + optional customerId.
  */
 export async function createTransaction(
   request: CreateTransactionRequest,
