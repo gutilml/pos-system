@@ -54,6 +54,8 @@ class TransactionControllerTest {
                         new BigDecimal("1.9900"),
                         new BigDecimal("0.0000"),
                         new BigDecimal("1.9900"),
+                        new BigDecimal("0.0000"),
+                        new BigDecimal("0.0000"),
                         new BigDecimal("5.0000"),
                         new BigDecimal("3.0100"),
                         List.of(new PaymentResponseDTO(
@@ -65,6 +67,9 @@ class TransactionControllerTest {
                                 itemId,
                                 productId,
                                 new BigDecimal("1.0000"),
+                                new BigDecimal("1.9900"),
+                                new BigDecimal("1.9900"),
+                                new BigDecimal("0.0000"),
                                 new BigDecimal("1.9900"),
                                 new BigDecimal("1.9900")
                         )),

@@ -1,6 +1,8 @@
 package com.pos.core.dtos;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.math.BigDecimal;
@@ -21,6 +23,13 @@ public record TransactionRequestDTO(
          */
         BigDecimal taxRate,
         /** Required when any payment uses CREDIT. */
-        UUID customerId
+        UUID customerId,
+        /**
+         * Optional cart-wide discount as a decimal fraction (e.g. 0.10 for 10%).
+         * Applied after item discounts and skipped for products flagged excludeFromGlobalDiscounts.
+         */
+        @DecimalMin(value = "0.0000", inclusive = true)
+        @DecimalMax(value = "1.0000", inclusive = true)
+        BigDecimal globalDiscountPercentage
 ) {
 }

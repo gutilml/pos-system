@@ -79,6 +79,11 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BusinessRuleException("taxRate cannot be negative");
         }
 
+        BigDecimal globalDiscountPercentage = DiscountPricing.normalizePercentage(
+                request.globalDiscountPercentage()
+        );
+        validateDiscountPercentage(globalDiscountPercentage, "globalDiscountPercentage");
+
         List<PaymentRequestDTO> payments = request.payments();
         if (payments == null || payments.isEmpty()) {
             throw new BusinessRuleException("At least one payment is required");
@@ -97,6 +102,7 @@ public class TransactionServiceImpl implements TransactionService {
 
         Transaction transaction = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setGlobalDiscountPercentage(globalDiscountPercentage);
 
         StoreSettings store = null;
         if (request.storeId() != null) {
@@ -108,37 +114,57 @@ public class TransactionServiceImpl implements TransactionService {
             transaction.setShift(shift);
         }
 
-        Customer customer = null;
         if (hasCreditPayment && request.customerId() == null) {
             throw new BusinessRuleException("customerId is required when a CREDIT payment is present");
         }
         if (request.customerId() != null) {
-            customer = customerRepository.findById(request.customerId())
+            Customer customer = customerRepository.findById(request.customerId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Customer not found: " + request.customerId()));
             transaction.setCustomer(customer);
         }
 
         BigDecimal subtotal = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
+        BigDecimal totalDiscountAmount = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
 
         for (TransactionItemRequestDTO itemRequest : request.items()) {
             Product product = productRepository.findById(itemRequest.productId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found: " + itemRequest.productId()));
 
             BigDecimal quantity = scaleQuantity(itemRequest.quantity());
+            BigDecimal itemDiscountPercentage = DiscountPricing.normalizePercentage(
+                    itemRequest.itemDiscountPercentage()
+            );
+            validateDiscountPercentage(itemDiscountPercentage, "itemDiscountPercentage");
+
             // Never trust client prices — snapshot catalog price at sale time.
-            BigDecimal priceAtTime = scaleMoney(product.getSellingPrice());
-            BigDecimal lineTotal = quantity.multiply(priceAtTime).setScale(MONEY_SCALE, MONEY_ROUNDING);
+            BigDecimal originalUnitPrice = scaleMoney(product.getSellingPrice());
+            boolean excludeFromGlobal = Boolean.TRUE.equals(product.getExcludeFromGlobalDiscounts());
+
+            DiscountPricing.PricedLine priced = DiscountPricing.priceLine(
+                    originalUnitPrice,
+                    quantity,
+                    itemDiscountPercentage,
+                    globalDiscountPercentage,
+                    excludeFromGlobal
+            );
 
             TransactionItem item = new TransactionItem();
             item.setProduct(product);
             item.setQuantity(quantity);
-            item.setPriceAtTime(priceAtTime);
-            item.setLineTotal(lineTotal);
+            item.setOriginalUnitPrice(priced.originalUnitPrice());
+            item.setItemDiscountPercentage(priced.itemDiscountPercentage());
+            item.setFinalUnitPrice(priced.finalUnitPrice());
+            item.setPriceAtTime(priced.finalUnitPrice());
+            item.setLineTotal(priced.lineTotal());
             transaction.addItem(item);
 
-            subtotal = subtotal.add(lineTotal);
+            subtotal = subtotal.add(priced.lineTotal());
+            totalDiscountAmount = totalDiscountAmount.add(priced.lineDiscountAmount());
         }
+
+        subtotal = subtotal.setScale(MONEY_SCALE, MONEY_ROUNDING);
+        totalDiscountAmount = totalDiscountAmount.setScale(MONEY_SCALE, MONEY_ROUNDING);
 
         BigDecimal taxTotal = subtotal.multiply(taxRate).setScale(MONEY_SCALE, MONEY_ROUNDING);
         BigDecimal grandTotal = subtotal.add(taxTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
@@ -156,7 +182,6 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BusinessRuleException(
                     "Sum of payments (" + totalPayments + ") is less than grandTotal (" + grandTotal + ")");
         }
-        // Change can only be given against cash; CARD/CREDIT must never overpay.
         if (nonCashTotal.compareTo(grandTotal) > 0) {
             throw new BusinessRuleException(
                     "Non-cash payments (" + nonCashTotal + ") cannot exceed grandTotal (" + grandTotal + ")");
@@ -174,24 +199,32 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setSubtotal(subtotal);
         transaction.setTaxTotal(taxTotal);
         transaction.setGrandTotal(grandTotal);
+        transaction.setTotalDiscountAmount(totalDiscountAmount);
         transaction.setAmountReceived(totalPayments);
         transaction.setChangeGiven(changeGiven);
 
         Transaction saved = transactionRepository.save(transaction);
 
-        // Charge only the portion routed to CREDIT — never the full grand total.
         for (TransactionPayment payment : saved.getPayments()) {
             if (payment.getPaymentMethod() == PaymentType.CREDIT) {
                 customerCreditService.chargeAccount(saved.getCustomer().getId(), payment.getAmount(), saved);
             }
         }
 
-        // Opt-in inventory: only run when the store flag is explicitly enabled.
         if (isInventoryEnabled(store)) {
             inventoryService.deductStock(saved.getItems());
         }
 
         return toDto(saved);
+    }
+
+    static void validateDiscountPercentage(BigDecimal percentage, String fieldName) {
+        if (percentage.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException(fieldName + " cannot be negative");
+        }
+        if (percentage.compareTo(BigDecimal.ONE) > 0) {
+            throw new BusinessRuleException(fieldName + " cannot exceed 1.0000 (100%)");
+        }
     }
 
     static boolean isInventoryEnabled(StoreSettings store) {
@@ -211,6 +244,9 @@ public class TransactionServiceImpl implements TransactionService {
                     productId,
                     item.getQuantity(),
                     item.getPriceAtTime(),
+                    item.getOriginalUnitPrice(),
+                    item.getItemDiscountPercentage(),
+                    item.getFinalUnitPrice(),
                     item.getLineTotal()
             ));
         }
@@ -237,6 +273,8 @@ public class TransactionServiceImpl implements TransactionService {
                 transaction.getSubtotal(),
                 transaction.getTaxTotal(),
                 transaction.getGrandTotal(),
+                transaction.getGlobalDiscountPercentage(),
+                transaction.getTotalDiscountAmount(),
                 transaction.getAmountReceived(),
                 transaction.getChangeGiven(),
                 payments,

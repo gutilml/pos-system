@@ -16,6 +16,8 @@ public record TransactionResponseDTO(
         BigDecimal subtotal,
         BigDecimal taxTotal,
         BigDecimal grandTotal,
+        BigDecimal globalDiscountPercentage,
+        BigDecimal totalDiscountAmount,
         BigDecimal amountReceived,
         BigDecimal changeGiven,
         List<PaymentResponseDTO> payments,

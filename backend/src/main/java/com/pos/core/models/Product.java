@@ -71,6 +71,9 @@ public class Product {
     @Column(name = "is_active")
     private Boolean active = true;
 
+    @Column(name = "exclude_from_global_discounts", nullable = false)
+    private Boolean excludeFromGlobalDiscounts = false;
+
     @ManyToMany
     @JoinTable(
             name = "product_category",
@@ -205,6 +208,14 @@ public class Product {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public Boolean getExcludeFromGlobalDiscounts() {
+        return excludeFromGlobalDiscounts;
+    }
+
+    public void setExcludeFromGlobalDiscounts(Boolean excludeFromGlobalDiscounts) {
+        this.excludeFromGlobalDiscounts = excludeFromGlobalDiscounts;
     }
 
     public Set<Category> getCategories() {

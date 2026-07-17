@@ -61,6 +61,12 @@ public class Transaction {
     @Column(name = "change_given", nullable = false, precision = 12, scale = 4)
     private BigDecimal changeGiven;
 
+    @Column(name = "global_discount_percentage", nullable = false, precision = 12, scale = 4)
+    private BigDecimal globalDiscountPercentage = BigDecimal.ZERO.setScale(4);
+
+    @Column(name = "total_discount_amount", nullable = false, precision = 12, scale = 4)
+    private BigDecimal totalDiscountAmount = BigDecimal.ZERO.setScale(4);
+
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionItem> items = new ArrayList<>();
 
@@ -149,6 +155,22 @@ public class Transaction {
 
     public void setChangeGiven(BigDecimal changeGiven) {
         this.changeGiven = changeGiven;
+    }
+
+    public BigDecimal getGlobalDiscountPercentage() {
+        return globalDiscountPercentage;
+    }
+
+    public void setGlobalDiscountPercentage(BigDecimal globalDiscountPercentage) {
+        this.globalDiscountPercentage = globalDiscountPercentage;
+    }
+
+    public BigDecimal getTotalDiscountAmount() {
+        return totalDiscountAmount;
+    }
+
+    public void setTotalDiscountAmount(BigDecimal totalDiscountAmount) {
+        this.totalDiscountAmount = totalDiscountAmount;
     }
 
     public List<TransactionItem> getItems() {

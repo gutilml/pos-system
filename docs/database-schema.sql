@@ -43,6 +43,7 @@ CREATE TABLE products (
     
     -- Status
     is_active BOOLEAN DEFAULT true,
+    exclude_from_global_discounts BOOLEAN NOT NULL DEFAULT false,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
@@ -97,6 +98,8 @@ CREATE TABLE transactions (
     subtotal DECIMAL(12, 4) NOT NULL,
     tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     grand_total DECIMAL(12, 4) NOT NULL,
+    global_discount_percentage DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
+    total_discount_amount DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     amount_received DECIMAL(12, 4) NOT NULL,
     change_given DECIMAL(12, 4) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
@@ -110,7 +113,10 @@ CREATE TABLE transaction_items (
     
     -- We store prices at the time of sale so historical receipts don't change if product prices are updated later
     quantity DECIMAL(10, 4) NOT NULL,
-    price_at_time DECIMAL(12, 4) NOT NULL, 
+    price_at_time DECIMAL(12, 4) NOT NULL,
+    original_unit_price DECIMAL(12, 4) NOT NULL,
+    item_discount_percentage DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
+    final_unit_price DECIMAL(12, 4) NOT NULL,
     line_total DECIMAL(12, 4) NOT NULL
 );
 

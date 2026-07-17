@@ -19,6 +19,7 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.
 - [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.)
 - [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions.
+- [x] **Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.
 
 ## Payments
 
@@ -34,7 +35,7 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 - [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
 - [ ] **Customer credit UI** — Feature 014 shipped register CREDIT assignment at checkout; dedicated tab pay-down screens still pending (see frontend).
 - [ ] **Customer search API** — Feature 014 frontend calls `GET /api/v1/customers/search?q=`; backend only has create / ledger / payments today — need name/phone search (store-scoped) returning credit limit + balance.
-- [ ] **Multi-tier / customer pricing** — Mentioned in project vision; not designed.
+- [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 
 ## Platform / ops

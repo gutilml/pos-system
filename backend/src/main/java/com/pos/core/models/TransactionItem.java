@@ -35,6 +35,15 @@ public class TransactionItem {
     @Column(name = "price_at_time", nullable = false, precision = 12, scale = 4)
     private BigDecimal priceAtTime;
 
+    @Column(name = "original_unit_price", nullable = false, precision = 12, scale = 4)
+    private BigDecimal originalUnitPrice;
+
+    @Column(name = "item_discount_percentage", nullable = false, precision = 12, scale = 4)
+    private BigDecimal itemDiscountPercentage = BigDecimal.ZERO.setScale(4);
+
+    @Column(name = "final_unit_price", nullable = false, precision = 12, scale = 4)
+    private BigDecimal finalUnitPrice;
+
     @Column(name = "line_total", nullable = false, precision = 12, scale = 4)
     private BigDecimal lineTotal;
 
@@ -76,6 +85,30 @@ public class TransactionItem {
 
     public void setPriceAtTime(BigDecimal priceAtTime) {
         this.priceAtTime = priceAtTime;
+    }
+
+    public BigDecimal getOriginalUnitPrice() {
+        return originalUnitPrice;
+    }
+
+    public void setOriginalUnitPrice(BigDecimal originalUnitPrice) {
+        this.originalUnitPrice = originalUnitPrice;
+    }
+
+    public BigDecimal getItemDiscountPercentage() {
+        return itemDiscountPercentage;
+    }
+
+    public void setItemDiscountPercentage(BigDecimal itemDiscountPercentage) {
+        this.itemDiscountPercentage = itemDiscountPercentage;
+    }
+
+    public BigDecimal getFinalUnitPrice() {
+        return finalUnitPrice;
+    }
+
+    public void setFinalUnitPrice(BigDecimal finalUnitPrice) {
+        this.finalUnitPrice = finalUnitPrice;
     }
 
     public BigDecimal getLineTotal() {
