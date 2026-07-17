@@ -1,5 +1,6 @@
 package com.pos.core.controllers;
 
+import com.pos.core.dtos.PaymentResponseDTO;
 import com.pos.core.dtos.TransactionItemResponseDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.dtos.TransactionResponseDTO;
@@ -41,6 +42,7 @@ class TransactionControllerTest {
         UUID txId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         UUID productId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID itemId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        UUID paymentId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
         when(transactionService.create(any(TransactionRequestDTO.class))).thenReturn(
                 new TransactionResponseDTO(
@@ -48,13 +50,17 @@ class TransactionControllerTest {
                         null,
                         null,
                         null,
-                        PaymentType.CASH,
                         TransactionStatus.COMPLETED,
                         new BigDecimal("1.9900"),
                         new BigDecimal("0.0000"),
                         new BigDecimal("1.9900"),
                         new BigDecimal("5.0000"),
                         new BigDecimal("3.0100"),
+                        List.of(new PaymentResponseDTO(
+                                paymentId,
+                                PaymentType.CASH,
+                                new BigDecimal("5.0000")
+                        )),
                         List.of(new TransactionItemResponseDTO(
                                 itemId,
                                 productId,
@@ -71,7 +77,9 @@ class TransactionControllerTest {
                   "items": [
                     { "productId": "11111111-1111-1111-1111-111111111111", "quantity": 1.0000 }
                   ],
-                  "amountReceived": 5.0000
+                  "payments": [
+                    { "paymentMethod": "CASH", "amount": 5.0000 }
+                  ]
                 }
                 """;
 
@@ -81,8 +89,25 @@ class TransactionControllerTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(txId.toString()))
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
-                .andExpect(jsonPath("$.paymentType").value("CASH"))
+                .andExpect(jsonPath("$.payments[0].paymentMethod").value("CASH"))
+                .andExpect(jsonPath("$.payments[0].amount").value(5.0000))
                 .andExpect(jsonPath("$.grandTotal").value(1.9900))
                 .andExpect(jsonPath("$.items[0].productId").value(productId.toString()));
+    }
+
+    @Test
+    void createTransaction_withoutPayments_returns400() throws Exception {
+        String body = """
+                {
+                  "items": [
+                    { "productId": "11111111-1111-1111-1111-111111111111", "quantity": 1.0000 }
+                  ]
+                }
+                """;
+
+        mockMvc.perform(post("/api/v1/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isBadRequest());
     }
 }

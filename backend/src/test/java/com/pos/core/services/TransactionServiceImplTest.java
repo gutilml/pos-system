@@ -1,5 +1,6 @@
 package com.pos.core.services;
 
+import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.TransactionItemRequestDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.dtos.TransactionResponseDTO;
@@ -11,6 +12,7 @@ import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.customers.models.Customer;
 import com.pos.customers.repositories.CustomerRepository;
 import com.pos.customers.services.CustomerCreditService;
 import com.pos.inventory.services.InventoryService;
@@ -31,6 +33,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -64,6 +67,7 @@ class TransactionServiceImplTest {
 
     private Product cola;
     private Product chips;
+    private Customer customer;
 
     @BeforeEach
     void setUp() {
@@ -78,6 +82,21 @@ class TransactionServiceImplTest {
         chips.setSku("CHIPS");
         chips.setName("Chips");
         chips.setSellingPrice(new BigDecimal("2.5000"));
+
+        customer = new Customer();
+        customer.setId(UUID.fromString("33333333-3333-3333-3333-333333333333"));
+        customer.setName("Dana Tab");
+        customer.setCreditLimit(new BigDecimal("500.0000"));
+        customer.setCurrentBalance(BigDecimal.ZERO);
+    }
+
+    private static TransactionRequestDTO request(
+            List<TransactionItemRequestDTO> items,
+            List<PaymentRequestDTO> payments,
+            BigDecimal taxRate,
+            UUID customerId
+    ) {
+        return new TransactionRequestDTO(null, items, payments, taxRate, customerId);
     }
 
     @Test
@@ -90,15 +109,13 @@ class TransactionServiceImplTest {
             return tx;
         });
 
-        TransactionRequestDTO request = new TransactionRequestDTO(
-                null,
+        TransactionRequestDTO request = request(
                 List.of(
                         new TransactionItemRequestDTO(cola.getId(), new BigDecimal("2.0000")),
                         new TransactionItemRequestDTO(chips.getId(), new BigDecimal("1.0000"))
                 ),
-                new BigDecimal("10.0000"),
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("10.0000"))),
                 new BigDecimal("0.0825"),
-                null,
                 null
         );
 
@@ -109,12 +126,15 @@ class TransactionServiceImplTest {
         assertThat(response.grandTotal()).isEqualByComparingTo("7.0146");
         assertThat(response.amountReceived()).isEqualByComparingTo("10.0000");
         assertThat(response.changeGiven()).isEqualByComparingTo("2.9854");
-        assertThat(response.paymentType()).isEqualTo(PaymentType.CASH);
+        assertThat(response.payments()).hasSize(1);
+        assertThat(response.payments().get(0).paymentMethod()).isEqualTo(PaymentType.CASH);
+        assertThat(response.payments().get(0).amount()).isEqualByComparingTo("10.0000");
         assertThat(response.items()).hasSize(2);
 
         ArgumentCaptor<Transaction> captor = ArgumentCaptor.forClass(Transaction.class);
         verify(transactionRepository).save(captor.capture());
         assertThat(captor.getValue().getSubtotal()).isEqualByComparingTo("6.4800");
+        assertThat(captor.getValue().getPayments()).hasSize(1);
         verify(inventoryService, never()).deductStock(anyList());
         verify(customerCreditService, never()).chargeAccount(any(), any(), any());
     }
@@ -124,11 +144,9 @@ class TransactionServiceImplTest {
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        TransactionRequestDTO request = new TransactionRequestDTO(
-                null,
+        TransactionRequestDTO request = request(
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
-                new BigDecimal("5.0000"),
-                null,
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("5.0000"))),
                 null,
                 null
         );
@@ -142,20 +160,121 @@ class TransactionServiceImplTest {
     }
 
     @Test
-    void create_rejectsInsufficientPayment() {
+    void create_splitCashAndCredit_chargesOnlyTheCreditPortion() {
+        // Grand total: 2 x 1.9900 + 1 x 2.5000 = 6.4800 (no tax).
+        when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
+        when(productRepository.findById(chips.getId())).thenReturn(Optional.of(chips));
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        TransactionRequestDTO request = request(
+                List.of(
+                        new TransactionItemRequestDTO(cola.getId(), new BigDecimal("2.0000")),
+                        new TransactionItemRequestDTO(chips.getId(), new BigDecimal("1.0000"))
+                ),
+                List.of(
+                        new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("2.4800")),
+                        new PaymentRequestDTO(PaymentType.CREDIT, new BigDecimal("4.0000"))
+                ),
+                null,
+                customer.getId()
+        );
+
+        TransactionResponseDTO response = transactionService.create(request);
+
+        assertThat(response.grandTotal()).isEqualByComparingTo("6.4800");
+        assertThat(response.amountReceived()).isEqualByComparingTo("6.4800");
+        assertThat(response.changeGiven()).isEqualByComparingTo("0.0000");
+        assertThat(response.customerId()).isEqualTo(customer.getId());
+        assertThat(response.payments()).hasSize(2);
+
+        verify(customerCreditService).chargeAccount(
+                eq(customer.getId()),
+                eq(new BigDecimal("4.0000")),
+                any(Transaction.class)
+        );
+    }
+
+    @Test
+    void create_rejectsWhenSumOfPaymentsIsLessThanGrandTotal() {
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
 
-        TransactionRequestDTO request = new TransactionRequestDTO(
-                null,
-                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
-                new BigDecimal("1.0000"),
-                null,
+        TransactionRequestDTO request = request(
+                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("2.0000"))),
+                List.of(
+                        new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("1.0000")),
+                        new PaymentRequestDTO(PaymentType.CARD, new BigDecimal("1.0000"))
+                ),
                 null,
                 null
         );
 
         assertThatThrownBy(() -> transactionService.create(request))
                 .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("amountReceived");
+                .hasMessageContaining("Sum of payments");
+
+        verify(transactionRepository, never()).save(any(Transaction.class));
+        verify(customerCreditService, never()).chargeAccount(any(), any(), any());
+    }
+
+    @Test
+    void create_rejectsCreditPaymentWithoutCustomerId() {
+        TransactionRequestDTO request = request(
+                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CREDIT, new BigDecimal("1.9900"))),
+                null,
+                null
+        );
+
+        assertThatThrownBy(() -> transactionService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("customerId is required");
+    }
+
+    @Test
+    void create_rejectsNonCashOverpayment() {
+        when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        TransactionRequestDTO request = request(
+                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CREDIT, new BigDecimal("5.0000"))),
+                null,
+                customer.getId()
+        );
+
+        assertThatThrownBy(() -> transactionService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("Non-cash payments");
+
+        verify(customerCreditService, never()).chargeAccount(any(), any(), any());
+    }
+
+    @Test
+    void create_rejectsEmptyPayments() {
+        TransactionRequestDTO request = request(
+                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
+                List.of(),
+                null,
+                null
+        );
+
+        assertThatThrownBy(() -> transactionService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("At least one payment");
+    }
+
+    @Test
+    void create_rejectsNonPositivePaymentAmount() {
+        TransactionRequestDTO request = request(
+                List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("0.0000"))),
+                null,
+                null
+        );
+
+        assertThatThrownBy(() -> transactionService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("greater than zero");
     }
 }

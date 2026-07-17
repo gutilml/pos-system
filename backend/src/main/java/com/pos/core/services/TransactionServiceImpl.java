@@ -1,5 +1,7 @@
 package com.pos.core.services;
 
+import com.pos.core.dtos.PaymentRequestDTO;
+import com.pos.core.dtos.PaymentResponseDTO;
 import com.pos.core.dtos.TransactionItemRequestDTO;
 import com.pos.core.dtos.TransactionItemResponseDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
@@ -13,6 +15,7 @@ import com.pos.core.models.ShiftStatus;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.models.TransactionItem;
+import com.pos.core.models.TransactionPayment;
 import com.pos.core.models.TransactionStatus;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ShiftRepository;
@@ -76,13 +79,24 @@ public class TransactionServiceImpl implements TransactionService {
             throw new BusinessRuleException("taxRate cannot be negative");
         }
 
-        PaymentType paymentType = request.paymentType() != null
-                ? request.paymentType()
-                : PaymentType.CASH;
+        List<PaymentRequestDTO> payments = request.payments();
+        if (payments == null || payments.isEmpty()) {
+            throw new BusinessRuleException("At least one payment is required");
+        }
+        for (PaymentRequestDTO payment : payments) {
+            if (payment.paymentMethod() == null) {
+                throw new BusinessRuleException("Every payment must declare a paymentMethod");
+            }
+            if (payment.amount() == null || payment.amount().compareTo(BigDecimal.ZERO) <= 0) {
+                throw new BusinessRuleException("Every payment amount must be greater than zero");
+            }
+        }
+
+        boolean hasCreditPayment = payments.stream()
+                .anyMatch(payment -> payment.paymentMethod() == PaymentType.CREDIT);
 
         Transaction transaction = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
-        transaction.setPaymentType(paymentType);
 
         StoreSettings store = null;
         if (request.storeId() != null) {
@@ -95,15 +109,10 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         Customer customer = null;
-        if (paymentType == PaymentType.CREDIT) {
-            if (request.customerId() == null) {
-                throw new BusinessRuleException("customerId is required for CREDIT payment type");
-            }
-            customer = customerRepository.findById(request.customerId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Customer not found: " + request.customerId()));
-            transaction.setCustomer(customer);
-        } else if (request.customerId() != null) {
+        if (hasCreditPayment && request.customerId() == null) {
+            throw new BusinessRuleException("customerId is required when a CREDIT payment is present");
+        }
+        if (request.customerId() != null) {
             customer = customerRepository.findById(request.customerId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Customer not found: " + request.customerId()));
@@ -133,29 +142,48 @@ public class TransactionServiceImpl implements TransactionService {
 
         BigDecimal taxTotal = subtotal.multiply(taxRate).setScale(MONEY_SCALE, MONEY_ROUNDING);
         BigDecimal grandTotal = subtotal.add(taxTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
-        BigDecimal amountReceived = scaleMoney(request.amountReceived());
-        BigDecimal changeGiven;
 
-        if (paymentType == PaymentType.CREDIT) {
-            // Tab charge: no cash collected at register.
-            changeGiven = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
-        } else {
-            if (amountReceived.compareTo(grandTotal) < 0) {
-                throw new BusinessRuleException("amountReceived is less than grandTotal");
-            }
-            changeGiven = amountReceived.subtract(grandTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
+        BigDecimal totalPayments = payments.stream()
+                .map(payment -> scaleMoney(payment.amount()))
+                .reduce(BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING), BigDecimal::add);
+
+        BigDecimal nonCashTotal = payments.stream()
+                .filter(payment -> payment.paymentMethod() != PaymentType.CASH)
+                .map(payment -> scaleMoney(payment.amount()))
+                .reduce(BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING), BigDecimal::add);
+
+        if (totalPayments.compareTo(grandTotal) < 0) {
+            throw new BusinessRuleException(
+                    "Sum of payments (" + totalPayments + ") is less than grandTotal (" + grandTotal + ")");
+        }
+        // Change can only be given against cash; CARD/CREDIT must never overpay.
+        if (nonCashTotal.compareTo(grandTotal) > 0) {
+            throw new BusinessRuleException(
+                    "Non-cash payments (" + nonCashTotal + ") cannot exceed grandTotal (" + grandTotal + ")");
+        }
+
+        BigDecimal changeGiven = totalPayments.subtract(grandTotal).setScale(MONEY_SCALE, MONEY_ROUNDING);
+
+        for (PaymentRequestDTO paymentRequest : payments) {
+            TransactionPayment payment = new TransactionPayment();
+            payment.setPaymentMethod(paymentRequest.paymentMethod());
+            payment.setAmount(scaleMoney(paymentRequest.amount()));
+            transaction.addPayment(payment);
         }
 
         transaction.setSubtotal(subtotal);
         transaction.setTaxTotal(taxTotal);
         transaction.setGrandTotal(grandTotal);
-        transaction.setAmountReceived(amountReceived);
+        transaction.setAmountReceived(totalPayments);
         transaction.setChangeGiven(changeGiven);
 
         Transaction saved = transactionRepository.save(transaction);
 
-        if (paymentType == PaymentType.CREDIT) {
-            customerCreditService.chargeAccount(saved.getCustomer().getId(), grandTotal, saved);
+        // Charge only the portion routed to CREDIT — never the full grand total.
+        for (TransactionPayment payment : saved.getPayments()) {
+            if (payment.getPaymentMethod() == PaymentType.CREDIT) {
+                customerCreditService.chargeAccount(saved.getCustomer().getId(), payment.getAmount(), saved);
+            }
         }
 
         // Opt-in inventory: only run when the store flag is explicitly enabled.
@@ -187,25 +215,31 @@ public class TransactionServiceImpl implements TransactionService {
             ));
         }
 
+        List<PaymentResponseDTO> payments = new ArrayList<>();
+        for (TransactionPayment payment : transaction.getPayments()) {
+            payments.add(new PaymentResponseDTO(
+                    payment.getId(),
+                    payment.getPaymentMethod(),
+                    payment.getAmount()
+            ));
+        }
+
         UUID storeId = transaction.getStore() != null ? transaction.getStore().getId() : null;
         UUID shiftId = transaction.getShift() != null ? transaction.getShift().getId() : null;
         UUID customerId = transaction.getCustomer() != null ? transaction.getCustomer().getId() : null;
-        PaymentType paymentType = transaction.getPaymentType() != null
-                ? transaction.getPaymentType()
-                : PaymentType.CASH;
 
         return new TransactionResponseDTO(
                 transaction.getId(),
                 storeId,
                 shiftId,
                 customerId,
-                paymentType,
                 transaction.getStatus(),
                 transaction.getSubtotal(),
                 transaction.getTaxTotal(),
                 transaction.getGrandTotal(),
                 transaction.getAmountReceived(),
                 transaction.getChangeGiven(),
+                payments,
                 items,
                 transaction.getCreatedAt()
         );

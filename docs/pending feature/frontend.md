@@ -11,6 +11,7 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 - [x] **Dev API proxy** — Feature 011: Vite `server.proxy` forwards `/api` → `http://localhost:8080`.
 - [ ] **`GET /api/v1/shifts/current` dependency** — UI already calls it; blocked on backend endpoint (see backend pending). Until then hydration fails open / shows Open Shift after error.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Feature 011 polls this; backend endpoint still needed for live QR auto-complete.
+- [ ] **Adopt `payments[]` transaction payload** — Feature 013 (backend) replaced `amountReceived`/`paymentType` with a required `payments` array on `POST /api/v1/transactions`; `transactionApi.createTransaction` must be updated, and a split-tender UI can follow.
 
 ## Payments (frontend)
 

@@ -1,0 +1,9 @@
+# Tasks: Feature 013 - Backend Split Payment Refactor
+
+- [x] 1. Create the `TransactionPayment` JPA entity and Enum.
+- [x] 2. Refactor the `Transaction` entity to use a `List<TransactionPayment>`.
+- [x] 3. Update all related DTOs to accept arrays of payments.
+- [x] 4. Refactor `TransactionService` to sum payments via `BigDecimal` and validate against the grand total.
+- [x] 5. Wire the service to trigger `CustomerCreditService` only for the specific amount assigned to `CREDIT`.
+- [x] 6. Fix existing unit tests and write new test cases for split payment validation.
+- [x] 7. Review `docs/pending_features/backend.md` and update it by crossing out or removing any fulfilled requirements related to split payments.

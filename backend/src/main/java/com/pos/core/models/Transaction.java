@@ -43,10 +43,6 @@ public class Transaction {
     private Customer customer;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_type", nullable = false, length = 20)
-    private PaymentType paymentType = PaymentType.CASH;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private TransactionStatus status = TransactionStatus.COMPLETED;
 
@@ -67,6 +63,9 @@ public class Transaction {
 
     @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TransactionItem> items = new ArrayList<>();
+
+    @OneToMany(mappedBy = "transaction", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TransactionPayment> payments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -102,14 +101,6 @@ public class Transaction {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
-    }
-
-    public PaymentType getPaymentType() {
-        return paymentType;
-    }
-
-    public void setPaymentType(PaymentType paymentType) {
-        this.paymentType = paymentType;
     }
 
     public TransactionStatus getStatus() {
@@ -171,6 +162,19 @@ public class Transaction {
     public void addItem(TransactionItem item) {
         items.add(item);
         item.setTransaction(this);
+    }
+
+    public List<TransactionPayment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<TransactionPayment> payments) {
+        this.payments = payments;
+    }
+
+    public void addPayment(TransactionPayment payment) {
+        payments.add(payment);
+        payment.setTransaction(this);
     }
 
     public OffsetDateTime getCreatedAt() {

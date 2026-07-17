@@ -26,6 +26,8 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 - [ ] **Create IN_PROGRESS transactions for card sales** — Cash path still persists `COMPLETED` immediately; card flow needs an API to open `IN_PROGRESS` tickets before `POST /payments/checkout/{id}`.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Required by Feature 011 QR polling (`paymentApi.getTransactionStatus`).
 - [x] **Frontend Stripe QR / return UX** — Feature 011 shipped QR modal + polling (see frontend pending for live status endpoint dependency).
+- [x] **Split payments (multiple tenders per sale)** — Feature 013: `transaction_payments` one-to-many, `payments[]` in the transaction API, BigDecimal sum validation, per-tender CREDIT routing to the customer ledger.
+- [ ] **Stripe checkout for split-payment CARD portions** — Stripe Checkout (Feature 010) still charges the full transaction total; a CARD tender inside a split sale is recorded locally but not routed through Stripe yet.
 
 ## Opt-in modules (vision / schema)
 

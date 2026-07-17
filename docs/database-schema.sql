@@ -93,7 +93,6 @@ CREATE TABLE transactions (
     store_id UUID REFERENCES store_settings(id),
     shift_id UUID REFERENCES shifts(id),
     customer_id UUID REFERENCES customers(id),
-    payment_type VARCHAR(20) NOT NULL DEFAULT 'CASH', -- 'CASH', 'CARD', 'CREDIT'
     status VARCHAR(50) NOT NULL DEFAULT 'COMPLETED', -- 'IN_PROGRESS', 'HELD', 'COMPLETED', 'VOIDED'
     subtotal DECIMAL(12, 4) NOT NULL,
     tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
@@ -115,7 +114,15 @@ CREATE TABLE transaction_items (
     line_total DECIMAL(12, 4) NOT NULL
 );
 
--- 10. CREDIT LEDGER (audit trail for tab charges and payments)
+-- 10. TRANSACTION PAYMENTS (split tenders — one row per payment method on a receipt)
+CREATE TABLE transaction_payments (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    transaction_id UUID NOT NULL REFERENCES transactions(id) ON DELETE CASCADE,
+    payment_method VARCHAR(20) NOT NULL, -- 'CASH', 'CARD', 'CREDIT'
+    amount DECIMAL(12, 4) NOT NULL
+);
+
+-- 11. CREDIT LEDGER (audit trail for tab charges and payments)
 CREATE TABLE credit_ledger_entries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     customer_id UUID NOT NULL REFERENCES customers(id),

@@ -1,7 +1,9 @@
 package com.pos.core.services;
 
+import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.TransactionItemRequestDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.Product;
 import com.pos.core.models.Shift;
 import com.pos.core.models.ShiftStatus;
@@ -100,8 +102,7 @@ class TransactionInventoryIntegrationTest {
         TransactionRequestDTO request = new TransactionRequestDTO(
                 store.getId(),
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
-                new BigDecimal("5.0000"),
-                null,
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("5.0000"))),
                 null,
                 null
         );
@@ -126,8 +127,7 @@ class TransactionInventoryIntegrationTest {
         TransactionRequestDTO request = new TransactionRequestDTO(
                 store.getId(),
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("2.0000"))),
-                new BigDecimal("10.0000"),
-                null,
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("10.0000"))),
                 null,
                 null
         );
@@ -145,8 +145,7 @@ class TransactionInventoryIntegrationTest {
         TransactionRequestDTO request = new TransactionRequestDTO(
                 null,
                 List.of(new TransactionItemRequestDTO(cola.getId(), new BigDecimal("1.0000"))),
-                new BigDecimal("5.0000"),
-                null,
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("5.0000"))),
                 null,
                 null
         );
