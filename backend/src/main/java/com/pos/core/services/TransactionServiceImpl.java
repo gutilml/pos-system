@@ -14,6 +14,7 @@ import com.pos.core.models.TransactionStatus;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.inventory.services.InventoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,27 +22,32 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 @Transactional
 public class TransactionServiceImpl implements TransactionService {
 
+    public static final String FEATURE_ENABLE_INVENTORY = "enable_inventory";
     public static final int MONEY_SCALE = 4;
     public static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
 
     private final TransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final StoreSettingsRepository storeSettingsRepository;
+    private final InventoryService inventoryService;
 
     public TransactionServiceImpl(
             TransactionRepository transactionRepository,
             ProductRepository productRepository,
-            StoreSettingsRepository storeSettingsRepository
+            StoreSettingsRepository storeSettingsRepository,
+            InventoryService inventoryService
     ) {
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
         this.storeSettingsRepository = storeSettingsRepository;
+        this.inventoryService = inventoryService;
     }
 
     @Override
@@ -57,8 +63,9 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
 
+        StoreSettings store = null;
         if (request.storeId() != null) {
-            StoreSettings store = storeSettingsRepository.findById(request.storeId())
+            store = storeSettingsRepository.findById(request.storeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + request.storeId()));
             transaction.setStore(store);
         }
@@ -100,7 +107,22 @@ public class TransactionServiceImpl implements TransactionService {
         transaction.setAmountReceived(amountReceived);
         transaction.setChangeGiven(changeGiven);
 
-        return toDto(transactionRepository.save(transaction));
+        Transaction saved = transactionRepository.save(transaction);
+
+        // Opt-in inventory: only run when the store flag is explicitly enabled.
+        if (isInventoryEnabled(store)) {
+            inventoryService.deductStock(saved.getItems());
+        }
+
+        return toDto(saved);
+    }
+
+    static boolean isInventoryEnabled(StoreSettings store) {
+        if (store == null || store.getFeatures() == null) {
+            return false;
+        }
+        Map<String, Boolean> features = store.getFeatures();
+        return Boolean.TRUE.equals(features.get(FEATURE_ENABLE_INVENTORY));
     }
 
     private TransactionResponseDTO toDto(Transaction transaction) {

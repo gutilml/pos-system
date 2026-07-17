@@ -9,6 +9,7 @@ import com.pos.core.models.Transaction;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.inventory.services.InventoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,6 +26,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -39,6 +42,9 @@ class TransactionServiceImplTest {
 
     @Mock
     private StoreSettingsRepository storeSettingsRepository;
+
+    @Mock
+    private InventoryService inventoryService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -100,6 +106,7 @@ class TransactionServiceImplTest {
         verify(transactionRepository).save(captor.capture());
         assertThat(captor.getValue().getSubtotal()).isEqualByComparingTo("6.4800");
         assertThat(captor.getValue().getTaxTotal()).isEqualByComparingTo("0.5346");
+        verify(inventoryService, never()).deductStock(anyList());
     }
 
     @Test
