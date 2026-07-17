@@ -7,11 +7,14 @@ import com.pos.core.dtos.TransactionResponseDTO;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.Product;
+import com.pos.core.models.Shift;
+import com.pos.core.models.ShiftStatus;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.models.TransactionItem;
 import com.pos.core.models.TransactionStatus;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
 import com.pos.inventory.services.InventoryService;
@@ -36,17 +39,20 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final ProductRepository productRepository;
     private final StoreSettingsRepository storeSettingsRepository;
+    private final ShiftRepository shiftRepository;
     private final InventoryService inventoryService;
 
     public TransactionServiceImpl(
             TransactionRepository transactionRepository,
             ProductRepository productRepository,
             StoreSettingsRepository storeSettingsRepository,
+            ShiftRepository shiftRepository,
             InventoryService inventoryService
     ) {
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
         this.storeSettingsRepository = storeSettingsRepository;
+        this.shiftRepository = shiftRepository;
         this.inventoryService = inventoryService;
     }
 
@@ -68,6 +74,9 @@ public class TransactionServiceImpl implements TransactionService {
             store = storeSettingsRepository.findById(request.storeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + request.storeId()));
             transaction.setStore(store);
+            Shift shift = shiftRepository.findFirstByStoreIdAndStatus(store.getId(), ShiftStatus.OPEN)
+                    .orElseThrow(() -> new BusinessRuleException("Store does not have an OPEN shift"));
+            transaction.setShift(shift);
         }
 
         BigDecimal subtotal = BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING);
@@ -139,10 +148,12 @@ public class TransactionServiceImpl implements TransactionService {
         }
 
         UUID storeId = transaction.getStore() != null ? transaction.getStore().getId() : null;
+        UUID shiftId = transaction.getShift() != null ? transaction.getShift().getId() : null;
 
         return new TransactionResponseDTO(
                 transaction.getId(),
                 storeId,
+                shiftId,
                 transaction.getStatus(),
                 transaction.getSubtotal(),
                 transaction.getTaxTotal(),

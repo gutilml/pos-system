@@ -33,6 +33,10 @@ public class Transaction {
     @JoinColumn(name = "store_id")
     private StoreSettings store;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "shift_id")
+    private Shift shift;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private TransactionStatus status = TransactionStatus.COMPLETED;
@@ -73,6 +77,14 @@ public class Transaction {
 
     public void setStore(StoreSettings store) {
         this.store = store;
+    }
+
+    public Shift getShift() {
+        return shift;
+    }
+
+    public void setShift(Shift shift) {
+        this.shift = shift;
     }
 
     public TransactionStatus getStatus() {

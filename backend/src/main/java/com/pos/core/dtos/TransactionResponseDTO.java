@@ -10,6 +10,7 @@ import java.util.UUID;
 public record TransactionResponseDTO(
         UUID id,
         UUID storeId,
+        UUID shiftId,
         TransactionStatus status,
         BigDecimal subtotal,
         BigDecimal taxTotal,

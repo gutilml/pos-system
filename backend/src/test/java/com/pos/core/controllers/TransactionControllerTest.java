@@ -45,6 +45,7 @@ class TransactionControllerTest {
                 new TransactionResponseDTO(
                         txId,
                         null,
+                        null,
                         TransactionStatus.COMPLETED,
                         new BigDecimal("1.9900"),
                         new BigDecimal("0.0000"),

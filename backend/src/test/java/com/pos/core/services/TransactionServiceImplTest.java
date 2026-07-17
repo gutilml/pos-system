@@ -7,6 +7,7 @@ import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.models.Product;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
 import com.pos.inventory.services.InventoryService;
@@ -42,6 +43,9 @@ class TransactionServiceImplTest {
 
     @Mock
     private StoreSettingsRepository storeSettingsRepository;
+
+    @Mock
+    private ShiftRepository shiftRepository;
 
     @Mock
     private InventoryService inventoryService;

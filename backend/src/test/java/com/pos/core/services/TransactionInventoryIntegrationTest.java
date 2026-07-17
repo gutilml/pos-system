@@ -3,9 +3,12 @@ package com.pos.core.services;
 import com.pos.core.dtos.TransactionItemRequestDTO;
 import com.pos.core.dtos.TransactionRequestDTO;
 import com.pos.core.models.Product;
+import com.pos.core.models.Shift;
+import com.pos.core.models.ShiftStatus;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.core.repositories.ShiftRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
 import com.pos.inventory.services.InventoryService;
@@ -42,6 +45,9 @@ class TransactionInventoryIntegrationTest {
     private StoreSettingsRepository storeSettingsRepository;
 
     @Mock
+    private ShiftRepository shiftRepository;
+
+    @Mock
     private InventoryService inventoryService;
 
     @InjectMocks
@@ -49,6 +55,7 @@ class TransactionInventoryIntegrationTest {
 
     private Product cola;
     private StoreSettings store;
+    private Shift shift;
 
     @BeforeEach
     void setUp() {
@@ -62,6 +69,12 @@ class TransactionInventoryIntegrationTest {
         store = new StoreSettings();
         store.setId(UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"));
         store.setStoreName("Corner Market");
+
+        shift = new Shift();
+        shift.setId(UUID.fromString("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"));
+        shift.setStore(store);
+        shift.setStatus(ShiftStatus.OPEN);
+        shift.setStartingCash(new BigDecimal("100.0000"));
     }
 
     @Test
@@ -72,6 +85,7 @@ class TransactionInventoryIntegrationTest {
         store.setFeatures(features);
 
         when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(shiftRepository.findFirstByStoreIdAndStatus(store.getId(), ShiftStatus.OPEN)).thenReturn(Optional.of(shift));
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -96,6 +110,7 @@ class TransactionInventoryIntegrationTest {
         store.setFeatures(features);
 
         when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(shiftRepository.findFirstByStoreIdAndStatus(store.getId(), ShiftStatus.OPEN)).thenReturn(Optional.of(shift));
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
