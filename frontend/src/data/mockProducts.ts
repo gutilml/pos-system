@@ -6,6 +6,14 @@ export const MOCK_PRODUCTS: CartProduct[] = [
   { id: 'p-chips', sku: '1002', name: 'Chips', sellingPrice: 2.5 },
   { id: 'p-water', sku: '1003', name: 'Water 500ml', sellingPrice: 1.25 },
   { id: 'p-coffee', sku: '1004', name: 'Coffee', sellingPrice: 3.75 },
+  {
+    id: 'p-ham',
+    sku: '2001',
+    name: 'Deli Ham',
+    sellingPrice: 0.0125,
+    sellByWeight: true,
+    unitOfMeasure: 'gr',
+  },
 ]
 
 export function findMockProduct(query: string): CartProduct | undefined {

@@ -6,7 +6,10 @@ type CartState = {
   items: CartItem[]
   taxRate: number
   amountReceived: number | null
+  pendingWeightProduct: CartProduct | null
   addItem: (product: CartProduct, quantity?: number) => void
+  confirmWeight: (quantity: number) => void
+  clearPendingWeight: () => void
   removeItem: (productId: string) => void
   updateQuantity: (productId: string, quantity: number) => void
   clearCart: () => void
@@ -14,41 +17,70 @@ type CartState = {
   setAmountReceived: (amount: number | null) => void
 }
 
+function pushOrMergeItem(
+  items: CartItem[],
+  product: CartProduct,
+  quantity: number,
+): CartItem[] {
+  const qty = roundMoney(quantity)
+  if (qty <= 0) return items
+
+  const existing = items.find((item) => item.productId === product.id)
+  if (existing) {
+    return items.map((item) =>
+      item.productId === product.id
+        ? { ...item, quantity: roundMoney(item.quantity + qty) }
+        : item,
+    )
+  }
+
+  return [
+    ...items,
+    {
+      productId: product.id,
+      sku: product.sku,
+      name: product.name,
+      unitPrice: roundMoney(product.sellingPrice),
+      quantity: qty,
+    },
+  ]
+}
+
 export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   taxRate: 0,
   amountReceived: null,
+  pendingWeightProduct: null,
 
   addItem: (product, quantity = 1) => {
+    // Weight-based items must be confirmed via the modal before entering the cart.
+    if (product.sellByWeight === true) {
+      set({ pendingWeightProduct: product })
+      return
+    }
+
     const qty = roundMoney(quantity)
     if (qty <= 0) return
 
-    set((state) => {
-      const existing = state.items.find((item) => item.productId === product.id)
-      if (existing) {
-        return {
-          items: state.items.map((item) =>
-            item.productId === product.id
-              ? { ...item, quantity: roundMoney(item.quantity + qty) }
-              : item,
-          ),
-        }
-      }
-
-      return {
-        items: [
-          ...state.items,
-          {
-            productId: product.id,
-            sku: product.sku,
-            name: product.name,
-            unitPrice: roundMoney(product.sellingPrice),
-            quantity: qty,
-          },
-        ],
-      }
-    })
+    set((state) => ({
+      items: pushOrMergeItem(state.items, product, qty),
+    }))
   },
+
+  confirmWeight: (quantity) => {
+    const product = get().pendingWeightProduct
+    if (!product) return
+
+    const qty = roundMoney(quantity)
+    if (qty <= 0) return
+
+    set((state) => ({
+      pendingWeightProduct: null,
+      items: pushOrMergeItem(state.items, product, qty),
+    }))
+  },
+
+  clearPendingWeight: () => set({ pendingWeightProduct: null }),
 
   removeItem: (productId) => {
     set((state) => ({
@@ -70,7 +102,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     }))
   },
 
-  clearCart: () => set({ items: [], amountReceived: null }),
+  clearCart: () => set({ items: [], amountReceived: null, pendingWeightProduct: null }),
 
   setTaxRate: (rate) => set({ taxRate: Math.max(0, rate) }),
 

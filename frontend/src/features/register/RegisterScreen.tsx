@@ -1,6 +1,7 @@
 import { CartItemRow } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
+import { WeightModal } from '@/components/register/WeightModal'
 import { useCartStore } from '@/store/useCartStore'
 
 export function RegisterScreen() {
@@ -29,6 +30,7 @@ export function RegisterScreen() {
       </section>
 
       <CheckoutFooter />
+      <WeightModal />
     </div>
   )
 }

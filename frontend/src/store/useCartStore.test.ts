@@ -21,12 +21,22 @@ const chips = {
   sellingPrice: 2.5,
 }
 
+const deliHam = {
+  id: 'p-ham',
+  sku: '2001',
+  name: 'Deli Ham',
+  sellingPrice: 0.0125,
+  sellByWeight: true,
+  unitOfMeasure: 'gr',
+}
+
 describe('useCartStore', () => {
   beforeEach(() => {
     useCartStore.setState({
       items: [],
       taxRate: 0,
       amountReceived: null,
+      pendingWeightProduct: null,
     })
   })
 
@@ -68,5 +78,26 @@ describe('useCartStore', () => {
     updateQuantity(cola.id, 0)
 
     expect(useCartStore.getState().items).toHaveLength(0)
+  })
+
+  it('intercepts sellByWeight products into pendingWeightProduct', () => {
+    const { addItem } = useCartStore.getState()
+    addItem(deliHam)
+
+    const state = useCartStore.getState()
+    expect(state.items).toHaveLength(0)
+    expect(state.pendingWeightProduct?.id).toBe(deliHam.id)
+  })
+
+  it('confirmWeight adds the pending product with the entered quantity', () => {
+    const { addItem, confirmWeight } = useCartStore.getState()
+    addItem(deliHam)
+    confirmWeight(250)
+
+    const state = useCartStore.getState()
+    expect(state.pendingWeightProduct).toBeNull()
+    expect(state.items).toHaveLength(1)
+    expect(state.items[0].quantity).toBe(250)
+    expect(state.items[0].productId).toBe(deliHam.id)
   })
 })

@@ -3,6 +3,8 @@ export type CartProduct = {
   sku: string
   name: string
   sellingPrice: number
+  sellByWeight?: boolean
+  unitOfMeasure?: string
 }
 
 export type CartItem = {
