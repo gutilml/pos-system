@@ -13,3 +13,9 @@ spring:
       hibernate:
         jdbc:
           time_zone: UTC
+
+stripe:
+  api-key: sk_test_unit
+  webhook-secret: whsec_unit
+  success-url: http://localhost/success?session_id={CHECKOUT_SESSION_ID}
+  cancel-url: http://localhost/cancel

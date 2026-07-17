@@ -17,8 +17,14 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.
-- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses.
+- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.)
 - [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions.
+
+## Payments
+
+- [x] **Stripe Checkout + webhook** — Feature 010: MXN Checkout Sessions, cents conversion, signature-verified `/api/v1/payments/webhook` completing local transactions.
+- [ ] **Create IN_PROGRESS transactions for card sales** — Cash path still persists `COMPLETED` immediately; card flow needs an API to open `IN_PROGRESS` tickets before `POST /payments/checkout/{id}`.
+- [ ] **Frontend Stripe redirect / return UX** — Wire register Complete Sale (card) to checkout URL + success/cancel pages (frontend pending).
 
 ## Opt-in modules (vision / schema)
 
