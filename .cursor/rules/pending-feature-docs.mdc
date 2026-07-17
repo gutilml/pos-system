@@ -1,0 +1,20 @@
+---
+description: Keep docs/pending feature lists in sync when shipping work
+alwaysApply: true
+---
+
+# Pending Feature Docs Maintenance
+
+Whenever you complete, partially complete, or discover work for this POS system, update the matching pending list before finishing the task:
+
+- Backend work → `docs/pending feature/backend.md`
+- Frontend work → `docs/pending feature/frontend.md`
+
+## How to update
+
+1. **Done:** Change `[ ]` to `[x]` for items that are fully handled. Add a short note (feature number / commit) if useful.
+2. **Partial:** Leave `[ ]` but add a one-line note under the item describing what remains.
+3. **New gaps:** Append new unchecked items when implementation reveals follow-ups (do not invent scope the user did not discuss).
+4. **Promoted:** If an item becomes a formal `docs/features/00N-*` triad, note that path next to the item (keep it until shipped, then mark `[x]`).
+
+Do this in the same session as the feature work—do not wait for the user to ask. Still respect frontend/backend separation for code commits; doc updates to these pending files may ship with the side that completed the work.

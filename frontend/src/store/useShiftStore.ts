@@ -61,7 +61,7 @@ export const useShiftStore = create<ShiftState>((set, get) => ({
     set({ isLoading: true, error: null })
     try {
       await closeShiftRequest(shift.id, actualCash)
-      useCartStore.getState().clearCart()
+      useCartStore.getState().resetAllTickets()
       set({ currentShift: null, isLoading: false })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Failed to close shift'

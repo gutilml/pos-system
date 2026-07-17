@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { useCartStore } from '@/store/useCartStore'
+import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
 import { useShiftStore } from '@/store/useShiftStore'
 import type { Shift } from '@/api/shifts'
 
@@ -36,7 +36,7 @@ describe('useShiftStore', () => {
       isLoading: false,
       error: null,
     })
-    useCartStore.setState({
+    resetCartForTests({
       items: [
         {
           productId: 'p1',
@@ -46,9 +46,6 @@ describe('useShiftStore', () => {
           quantity: 1,
         },
       ],
-      taxRate: 0,
-      amountReceived: null,
-      pendingWeightProduct: null,
     })
   })
 
@@ -84,6 +81,7 @@ describe('useShiftStore', () => {
 
     expect(closeShiftRequest).toHaveBeenCalledWith('shift-1', 150)
     expect(useShiftStore.getState().currentShift).toBeNull()
-    expect(useCartStore.getState().items).toHaveLength(0)
+    expect(selectActiveItems(useCartStore.getState())).toHaveLength(0)
+    expect(useCartStore.getState().ticketOrder).toHaveLength(1)
   })
 })

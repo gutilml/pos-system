@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState, type FocusEvent, type MouseEvent } from 'react'
 import { formatMoney, roundMoney } from '@/lib/money'
 import {
+  selectActiveAmountReceived,
+  selectActiveItems,
   selectChangeDue,
   selectGrandTotal,
   selectSubtotal,
@@ -9,9 +11,9 @@ import {
 } from '@/store/useCartStore'
 
 export function CheckoutFooter() {
-  const items = useCartStore((s) => s.items)
+  const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
-  const amountReceived = useCartStore((s) => s.amountReceived)
+  const amountReceived = useCartStore(selectActiveAmountReceived)
   const setAmountReceived = useCartStore((s) => s.setAmountReceived)
   const clearCart = useCartStore((s) => s.clearCart)
 

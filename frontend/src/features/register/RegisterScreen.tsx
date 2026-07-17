@@ -1,13 +1,14 @@
 import { CartItemRow } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
+import { TicketTabs } from '@/components/register/TicketTabs'
 import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
-import { useCartStore } from '@/store/useCartStore'
+import { selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 export function RegisterScreen() {
-  const items = useCartStore((s) => s.items)
+  const items = useCartStore(selectActiveItems)
 
   return (
     <ShiftGate>
@@ -17,6 +18,7 @@ export function RegisterScreen() {
           <CashierMenu />
         </header>
 
+        <TicketTabs />
         <SearchBar />
 
         <section className="min-h-0 flex-1 overflow-y-auto bg-white" aria-label="Cart items">

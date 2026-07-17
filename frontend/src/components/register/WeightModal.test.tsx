@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { WeightModal } from '@/components/register/WeightModal'
-import { useCartStore } from '@/store/useCartStore'
+import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 const deliHam = {
   id: 'p-ham',
@@ -15,12 +15,7 @@ const deliHam = {
 
 describe('WeightModal', () => {
   beforeEach(() => {
-    useCartStore.setState({
-      items: [],
-      taxRate: 0,
-      amountReceived: null,
-      pendingWeightProduct: null,
-    })
+    resetCartForTests()
   })
 
   it('does not render when there is no pending weight product', () => {
@@ -49,8 +44,9 @@ describe('WeightModal', () => {
 
     const state = useCartStore.getState()
     expect(state.pendingWeightProduct).toBeNull()
-    expect(state.items).toHaveLength(1)
-    expect(state.items[0].quantity).toBe(250)
+    const items = selectActiveItems(state)
+    expect(items).toHaveLength(1)
+    expect(items[0].quantity).toBe(250)
   })
 
   it('cancel clears pending weight without adding to cart', async () => {
@@ -62,18 +58,13 @@ describe('WeightModal', () => {
 
     const state = useCartStore.getState()
     expect(state.pendingWeightProduct).toBeNull()
-    expect(state.items).toHaveLength(0)
+    expect(selectActiveItems(state)).toHaveLength(0)
   })
 })
 
 describe('WeightModal scale fallback', () => {
   beforeEach(() => {
-    useCartStore.setState({
-      items: [],
-      taxRate: 0,
-      amountReceived: null,
-      pendingWeightProduct: deliHam,
-    })
+    resetCartForTests({ pendingWeightProduct: deliHam })
   })
 
   it('shows fallback messaging when Web Serial is unsupported', () => {

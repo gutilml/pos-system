@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
-import { useCartStore } from '@/store/useCartStore'
+import { resetCartForTests } from '@/store/useCartStore'
 
 describe('CheckoutFooter', () => {
   beforeEach(() => {
-    useCartStore.setState({
+    resetCartForTests({
       items: [
         {
           productId: 'p-cola',
