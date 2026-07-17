@@ -4,6 +4,13 @@ import type { CartProduct } from '@/types/cart'
 export const MOCK_PRODUCTS: CartProduct[] = [
   { id: 'p-cola', sku: '1001', name: 'Cola 12oz', sellingPrice: 1.99 },
   { id: 'p-chips', sku: '1002', name: 'Chips', sellingPrice: 2.5 },
+  {
+    id: 'p-special',
+    sku: '3001',
+    name: 'Daily Special',
+    sellingPrice: 2.5,
+    excludeFromGlobalDiscounts: true,
+  },
   { id: 'p-water', sku: '1003', name: 'Water 500ml', sellingPrice: 1.25 },
   { id: 'p-coffee', sku: '1004', name: 'Coffee', sellingPrice: 3.75 },
   {

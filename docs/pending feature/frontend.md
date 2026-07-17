@@ -30,6 +30,7 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 
 ## Register / cart
 
+- [x] **Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.
 - [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when settings API exists.
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
 - [x] **Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.

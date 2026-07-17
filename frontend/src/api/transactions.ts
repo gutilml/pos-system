@@ -7,11 +7,20 @@ export type CreateTransactionPayment = {
   amount: number
 }
 
+export type CreateTransactionItem = {
+  productId: string
+  quantity: number
+  /** Decimal fraction (0.10 = 10%). */
+  itemDiscountPercentage?: number
+}
+
 export type CreateTransactionRequest = {
   storeId?: string
   taxRate?: number
   customerId?: string
-  items: Array<{ productId: string; quantity: number }>
+  /** Decimal fraction (0.10 = 10%). */
+  globalDiscountPercentage?: number
+  items: CreateTransactionItem[]
   payments: CreateTransactionPayment[]
 }
 
@@ -30,7 +39,7 @@ async function parseJson<T>(response: Response): Promise<T> {
 
 /**
  * Persists the current ticket as a backend transaction.
- * Payload matches Feature 013: payments[] + optional customerId.
+ * Payload matches Feature 013 payments[] + Feature 015 discount fields.
  */
 export async function createTransaction(
   request: CreateTransactionRequest,

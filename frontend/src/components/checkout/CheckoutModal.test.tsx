@@ -148,4 +148,43 @@ describe('CheckoutModal', () => {
     expect(onClose).toHaveBeenCalled()
     expect(useCartStore.getState().activeTicketId).not.toBe(ticketId)
   })
+
+  it('includes discount percentages in the checkout payload', async () => {
+    const user = userEvent.setup()
+    vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-2', status: 'COMPLETED' })
+
+    resetCartForTests({
+      items: [
+        {
+          productId: 'p-cola',
+          sku: '1001',
+          name: 'Cola 12oz',
+          unitPrice: 1.99,
+          quantity: 1,
+          itemDiscountPercentage: 0.1,
+        },
+      ],
+      taxRate: 0,
+      globalDiscountPercentage: 0.05,
+    })
+    useCartStore.getState().addPayment('CASH', 1.791)
+
+    render(<CheckoutModal open onClose={() => undefined} />)
+    await user.click(screen.getByTestId('complete-transaction'))
+
+    await waitFor(() => {
+      expect(createTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          globalDiscountPercentage: 0.05,
+          items: [
+            expect.objectContaining({
+              productId: 'p-cola',
+              quantity: 1,
+              itemDiscountPercentage: 0.1,
+            }),
+          ],
+        }),
+      )
+    })
+  })
 })

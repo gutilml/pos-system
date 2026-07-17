@@ -3,6 +3,7 @@ import {
   resetCartForTests,
   selectActiveAmountReceived,
   selectActiveCustomer,
+  selectActiveGlobalDiscountPercentage,
   selectActiveItems,
   selectActivePayments,
   selectAvailableCredit,
@@ -12,6 +13,7 @@ import {
   selectGrandTotal,
   selectSubtotal,
   selectTaxTotal,
+  selectTotalDiscountAmount,
   selectTotalTendered,
   useCartStore,
 } from '@/store/useCartStore'
@@ -28,6 +30,14 @@ const chips = {
   sku: '1002',
   name: 'Chips',
   sellingPrice: 2.5,
+}
+
+const special = {
+  id: 'p-special',
+  sku: '3001',
+  name: 'Daily Special',
+  sellingPrice: 2.5,
+  excludeFromGlobalDiscounts: true,
 }
 
 const deliHam = {
@@ -216,5 +226,49 @@ describe('useCartStore', () => {
     expect(state.ticketOrder).toHaveLength(1)
     expect(state.activeTicketId).not.toBe(onlyId)
     expect(selectActiveItems(state)).toHaveLength(0)
+  })
+
+  it('replicates backend discount math for item, global, and excluded lines', () => {
+    const { addItem, setItemDiscountPercentage, setGlobalDiscountPercentage } =
+      useCartStore.getState()
+
+    addItem(cola, 1)
+    addItem(chips, 1)
+    addItem(special, 1)
+
+    setItemDiscountPercentage(cola.id, 0.1)
+    setGlobalDiscountPercentage(0.1)
+
+    const state = useCartStore.getState()
+    const items = selectActiveItems(state)
+    const global = selectActiveGlobalDiscountPercentage(state)
+
+    expect(selectSubtotal(items, global)).toBe(6.541)
+    expect(selectTotalDiscountAmount(items, global)).toBe(0.449)
+    expect(items[0].itemDiscountPercentage).toBe(0.1)
+    expect(items[2].excludeFromGlobalDiscounts).toBe(true)
+  })
+
+  it('does not stack global on item-discounted lines', () => {
+    resetCartForTests({
+      items: [
+        {
+          productId: 'p-premium',
+          sku: 'PREM',
+          name: 'Premium',
+          unitPrice: 100,
+          quantity: 1,
+          itemDiscountPercentage: 0.1,
+        },
+      ],
+      globalDiscountPercentage: 0.1,
+    })
+
+    const state = useCartStore.getState()
+    const items = selectActiveItems(state)
+    const global = selectActiveGlobalDiscountPercentage(state)
+
+    expect(selectSubtotal(items, global)).toBe(90)
+    expect(selectTotalDiscountAmount(items, global)).toBe(10)
   })
 })

@@ -5,6 +5,7 @@ export type CartProduct = {
   sellingPrice: number
   sellByWeight?: boolean
   unitOfMeasure?: string
+  excludeFromGlobalDiscounts?: boolean
 }
 
 export type CartItem = {
@@ -13,4 +14,7 @@ export type CartItem = {
   name: string
   unitPrice: number
   quantity: number
+  /** Decimal fraction (0.10 = 10% off this line). */
+  itemDiscountPercentage?: number
+  excludeFromGlobalDiscounts?: boolean
 }

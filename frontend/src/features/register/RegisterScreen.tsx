@@ -9,6 +9,7 @@ import { DEFAULT_STORE_ID } from '@/api/shifts'
 import { createTransaction } from '@/api/transactions'
 import {
   selectActiveCustomer,
+  selectActiveGlobalDiscountPercentage,
   selectActiveItems,
   selectGrandTotal,
   useCartStore,
@@ -23,16 +24,20 @@ export function RegisterScreen() {
     if (cartItems.length === 0) {
       throw new Error('Cart is empty')
     }
-    const grandTotal = selectGrandTotal(cartItems, state.taxRate)
+    const grandTotal = selectGrandTotal(cartItems, state.taxRate, selectActiveGlobalDiscountPercentage(state))
+    const globalDiscount = selectActiveGlobalDiscountPercentage(state)
     const customer = selectActiveCustomer(state)
 
     const transaction = await createTransaction({
       storeId: DEFAULT_STORE_ID,
       taxRate: state.taxRate || undefined,
       customerId: customer?.id,
+      globalDiscountPercentage: globalDiscount > 0 ? globalDiscount : undefined,
       items: cartItems.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
+        itemDiscountPercentage:
+          (item.itemDiscountPercentage ?? 0) > 0 ? item.itemDiscountPercentage : undefined,
       })),
       payments: [{ paymentMethod: 'CARD', amount: grandTotal }],
     })

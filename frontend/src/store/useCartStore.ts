@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { lineTotal, roundMoney } from '@/lib/money'
+import { priceCartLine } from '@/lib/discountPricing'
+import { roundMoney } from '@/lib/money'
 import type { CartItem, CartProduct } from '@/types/cart'
 
 export type PaymentMethod = 'CASH' | 'CARD' | 'CREDIT'
@@ -26,6 +27,8 @@ export type Ticket = {
   amountReceived: number | null
   payments: PaymentTender[]
   customer: AssignedCustomer | null
+  /** Decimal fraction (0.10 = 10% cart-wide). */
+  globalDiscountPercentage: number
 }
 
 type CartState = {
@@ -48,6 +51,8 @@ type CartState = {
   removePayment: (paymentId: string) => void
   clearPayments: () => void
   setCustomer: (customer: AssignedCustomer | null) => void
+  setItemDiscountPercentage: (productId: string, fraction: number) => void
+  setGlobalDiscountPercentage: (fraction: number) => void
   createNewTicket: () => void
   switchTicket: (ticketId: string) => void
   closeTicket: (ticketId: string) => void
@@ -68,6 +73,7 @@ function createTicket(number: number): Ticket {
     amountReceived: null,
     payments: [],
     customer: null,
+    globalDiscountPercentage: 0,
   }
 }
 
@@ -106,6 +112,8 @@ function pushOrMergeItem(
       name: product.name,
       unitPrice: roundMoney(product.sellingPrice),
       quantity: qty,
+      itemDiscountPercentage: 0,
+      excludeFromGlobalDiscounts: product.excludeFromGlobalDiscounts === true,
     },
   ]
 }
@@ -132,6 +140,15 @@ function normalizeTicket(raw: Partial<Ticket> & { id: string; label: string }): 
     amountReceived: raw.amountReceived ?? null,
     payments: raw.payments ?? [],
     customer: raw.customer ?? null,
+    globalDiscountPercentage: raw.globalDiscountPercentage ?? 0,
+  }
+}
+
+function normalizeCartItem(raw: Partial<CartItem> & Pick<CartItem, 'productId' | 'sku' | 'name' | 'unitPrice' | 'quantity'>): CartItem {
+  return {
+    ...raw,
+    itemDiscountPercentage: raw.itemDiscountPercentage ?? 0,
+    excludeFromGlobalDiscounts: raw.excludeFromGlobalDiscounts === true,
   }
 }
 
@@ -163,6 +180,13 @@ export function selectActiveCustomer(state: {
   return state.tickets[state.activeTicketId]?.customer ?? null
 }
 
+export function selectActiveGlobalDiscountPercentage(state: {
+  tickets: Record<string, Ticket>
+  activeTicketId: string
+}): number {
+  return state.tickets[state.activeTicketId]?.globalDiscountPercentage ?? 0
+}
+
 export function selectTotalTendered(payments: PaymentTender[]): number {
   return roundMoney(payments.reduce((sum, payment) => sum + payment.amount, 0))
 }
@@ -171,16 +195,25 @@ export function selectBalanceDue(
   items: CartItem[],
   taxRate: number,
   payments: PaymentTender[],
+  globalDiscountPercentage = 0,
 ): number {
-  return roundMoney(Math.max(0, selectGrandTotal(items, taxRate) - selectTotalTendered(payments)))
+  return roundMoney(
+    Math.max(0, selectGrandTotal(items, taxRate, globalDiscountPercentage) - selectTotalTendered(payments)),
+  )
 }
 
 export function selectTenderChangeDue(
   items: CartItem[],
   taxRate: number,
   payments: PaymentTender[],
+  globalDiscountPercentage = 0,
 ): number {
-  return roundMoney(Math.max(0, selectTotalTendered(payments) - selectGrandTotal(items, taxRate)))
+  return roundMoney(
+    Math.max(
+      0,
+      selectTotalTendered(payments) - selectGrandTotal(items, taxRate, globalDiscountPercentage),
+    ),
+  )
 }
 
 export function selectAvailableCredit(customer: AssignedCustomer): number {
@@ -192,9 +225,12 @@ export function selectCanCompleteSale(
   taxRate: number,
   payments: PaymentTender[],
   customer: AssignedCustomer | null,
+  globalDiscountPercentage = 0,
 ): boolean {
   if (items.length === 0 || payments.length === 0) return false
-  if (selectTotalTendered(payments) < selectGrandTotal(items, taxRate)) return false
+  if (selectTotalTendered(payments) < selectGrandTotal(items, taxRate, globalDiscountPercentage)) {
+    return false
+  }
   const hasCredit = payments.some((payment) => payment.method === 'CREDIT')
   if (hasCredit && !customer) return false
   return true
@@ -279,6 +315,7 @@ export const useCartStore = create<CartState>()(
             amountReceived: null,
             payments: [],
             customer: null,
+            globalDiscountPercentage: 0,
           })),
         }))
       },
@@ -344,6 +381,30 @@ export const useCartStore = create<CartState>()(
         )
       },
 
+      setItemDiscountPercentage: (productId, fraction) => {
+        const pct = Math.max(0, Math.min(1, roundMoney(fraction)))
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            items: ticket.items.map((item) =>
+              item.productId === productId
+                ? { ...item, itemDiscountPercentage: pct }
+                : item,
+            ),
+          })),
+        )
+      },
+
+      setGlobalDiscountPercentage: (fraction) => {
+        const pct = Math.max(0, Math.min(1, roundMoney(fraction)))
+        set((state) =>
+          updateActiveTicket(state, (ticket) => ({
+            ...ticket,
+            globalDiscountPercentage: pct,
+          })),
+        )
+      },
+
       createNewTicket: () => {
         set((state) => {
           const ticket = createTicket(state.nextTicketNumber)
@@ -399,7 +460,7 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: 'pos-cart',
-      version: 3,
+      version: 4,
       partialize: (state) => ({
         tickets: state.tickets,
         ticketOrder: state.ticketOrder,
@@ -439,6 +500,23 @@ export const useCartStore = create<CartState>()(
             tickets: normalized,
           } as never
         }
+        if (version < 4) {
+          const tickets = (data.tickets as Record<string, Partial<Ticket>> | undefined) ?? {}
+          const normalized: Record<string, Ticket> = {}
+          for (const [id, ticket] of Object.entries(tickets)) {
+            const base = normalizeTicket({
+              ...ticket,
+              id: ticket.id ?? id,
+              label: ticket.label ?? 'Ticket',
+            })
+            base.items = (base.items ?? []).map((item) => normalizeCartItem(item))
+            normalized[id] = base
+          }
+          return {
+            ...data,
+            tickets: normalized,
+          } as never
+        }
         return data as never
       },
     },
@@ -452,13 +530,15 @@ export function resetCartForTests(partial?: {
   amountReceived?: number | null
   payments?: PaymentTender[]
   customer?: AssignedCustomer | null
+  globalDiscountPercentage?: number
   pendingWeightProduct?: CartProduct | null
 }) {
   const ticket = createTicket(1)
-  ticket.items = partial?.items ?? []
+  ticket.items = (partial?.items ?? []).map((item) => normalizeCartItem(item))
   ticket.amountReceived = partial?.amountReceived ?? null
   ticket.payments = partial?.payments ?? []
   ticket.customer = partial?.customer ?? null
+  ticket.globalDiscountPercentage = partial?.globalDiscountPercentage ?? 0
   useCartStore.setState({
     tickets: { [ticket.id]: ticket },
     ticketOrder: [ticket.id],
@@ -469,29 +549,62 @@ export function resetCartForTests(partial?: {
   })
 }
 
-export function selectSubtotal(items: CartItem[]): number {
+export function selectSubtotal(items: CartItem[], globalDiscountPercentage = 0): number {
   return roundMoney(
-    items.reduce((sum, item) => sum + lineTotal(item.unitPrice, item.quantity), 0),
+    items.reduce(
+      (sum, item) => sum + priceCartLine(item, globalDiscountPercentage).lineTotal,
+      0,
+    ),
   )
 }
 
-export function selectTaxTotal(items: CartItem[], taxRate: number): number {
-  return roundMoney(selectSubtotal(items) * taxRate)
+export function selectTotalDiscountAmount(
+  items: CartItem[],
+  globalDiscountPercentage = 0,
+): number {
+  return roundMoney(
+    items.reduce(
+      (sum, item) => sum + priceCartLine(item, globalDiscountPercentage).lineDiscountAmount,
+      0,
+    ),
+  )
 }
 
-export function selectGrandTotal(items: CartItem[], taxRate: number): number {
-  return roundMoney(selectSubtotal(items) + selectTaxTotal(items, taxRate))
+export function selectTaxTotal(
+  items: CartItem[],
+  taxRate: number,
+  globalDiscountPercentage = 0,
+): number {
+  return roundMoney(selectSubtotal(items, globalDiscountPercentage) * taxRate)
+}
+
+export function selectGrandTotal(
+  items: CartItem[],
+  taxRate: number,
+  globalDiscountPercentage = 0,
+): number {
+  return roundMoney(
+    selectSubtotal(items, globalDiscountPercentage) +
+      selectTaxTotal(items, taxRate, globalDiscountPercentage),
+  )
 }
 
 export function selectChangeDue(
   items: CartItem[],
   taxRate: number,
   amountReceived: number | null,
+  globalDiscountPercentage = 0,
 ): number {
   if (amountReceived === null) return 0
-  return roundMoney(amountReceived - selectGrandTotal(items, taxRate))
+  return roundMoney(
+    amountReceived - selectGrandTotal(items, taxRate, globalDiscountPercentage),
+  )
 }
 
-export function selectItemLineTotal(item: CartItem): number {
-  return lineTotal(item.unitPrice, item.quantity)
+export function selectItemLineTotal(item: CartItem, globalDiscountPercentage = 0): number {
+  return priceCartLine(item, globalDiscountPercentage).lineTotal
+}
+
+export function selectItemPricedLine(item: CartItem, globalDiscountPercentage = 0) {
+  return priceCartLine(item, globalDiscountPercentage)
 }

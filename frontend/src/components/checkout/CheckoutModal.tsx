@@ -7,6 +7,7 @@ import { TenderInputArea } from '@/components/checkout/TenderInputArea'
 import { formatMoney } from '@/lib/money'
 import {
   selectActiveCustomer,
+  selectActiveGlobalDiscountPercentage,
   selectActiveItems,
   selectActivePayments,
   selectAvailableCredit,
@@ -29,6 +30,7 @@ type CheckoutModalProps = {
 export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps) {
   const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
+  const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
   const payments = useCartStore(selectActivePayments)
   const customer = useCartStore(selectActiveCustomer)
   const activeTicketId = useCartStore((s) => s.activeTicketId)
@@ -43,11 +45,11 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const grandTotal = selectGrandTotal(items, taxRate)
+  const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
   const totalTendered = selectTotalTendered(payments)
-  const balanceDue = selectBalanceDue(items, taxRate, payments)
-  const changeDue = selectTenderChangeDue(items, taxRate, payments)
-  const canComplete = selectCanCompleteSale(items, taxRate, payments, customer)
+  const balanceDue = selectBalanceDue(items, taxRate, payments, globalDiscount)
+  const changeDue = selectTenderChangeDue(items, taxRate, payments, globalDiscount)
+  const canComplete = selectCanCompleteSale(items, taxRate, payments, customer, globalDiscount)
 
   useEffect(() => {
     if (!open) {
@@ -96,9 +98,12 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
         storeId: DEFAULT_STORE_ID,
         taxRate: taxRate || undefined,
         customerId: customer?.id,
+        globalDiscountPercentage: globalDiscount > 0 ? globalDiscount : undefined,
         items: items.map((item) => ({
           productId: item.productId,
           quantity: item.quantity,
+          itemDiscountPercentage:
+            (item.itemDiscountPercentage ?? 0) > 0 ? item.itemDiscountPercentage : undefined,
         })),
         payments: payments.map((payment) => ({
           paymentMethod: payment.method,

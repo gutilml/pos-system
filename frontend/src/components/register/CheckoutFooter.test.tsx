@@ -44,4 +44,31 @@ describe('CheckoutFooter', () => {
     await user.click(screen.getByRole('button', { name: 'Card' }))
     expect(onRequestCardPayment).toHaveBeenCalled()
   })
+
+  it('shows discount saved and reduced total when global discount applies', async () => {
+    const user = userEvent.setup()
+    resetCartForTests({
+      items: [
+        {
+          productId: 'p-cola',
+          sku: '1001',
+          name: 'Cola 12oz',
+          unitPrice: 1.99,
+          quantity: 1,
+        },
+      ],
+      taxRate: 0,
+    })
+
+    render(<CheckoutFooter />)
+    expect(screen.queryByTestId('discount-saved')).not.toBeInTheDocument()
+
+    const globalInput = screen.getByLabelText('Global Discount %')
+    await user.clear(globalInput)
+    await user.type(globalInput, '10')
+    await user.tab()
+
+    expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.1990')
+    expect(screen.getByText('Total').nextElementSibling).toHaveTextContent('1.7910')
+  })
 })
