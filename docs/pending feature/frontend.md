@@ -11,7 +11,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 | # | Feature folder | Status |
 |---|----------------|--------|
 | 018 | `docs/features/018-frontend-shift-gate-hydration/` | **Done** — honest ShiftGate (no fail-open on API error) |
-| 020 | `docs/features/020-frontend-customer-search-wireup/` | Planned — `storeId` + live search; needs 019 |
+| 020 | `docs/features/020-frontend-customer-search-wireup/` | **Done** — `storeId` + live search |
 | 022 | `docs/features/022-frontend-live-product-catalog/` | Planned — replace `mockProducts`; needs 021 |
 | 023 | `docs/features/023-frontend-external-terminal-card/` | Planned — CARD = mark paid on Pay; Stripe QR off happy path |
 
@@ -25,7 +25,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [x] **`GET /api/v1/shifts/current` dependency** — Feature 018: `fetchCurrentShift(storeId)` + ShiftGate Retry on API failure (no fail-open). Backend Feature 017.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Feature 011 polls this for Stripe QR auto-complete. **On hold with Stripe-in-POS** — not required while CARD is external-terminal + mark-paid-on-Complete.
 - [x] **Adopt `payments[]` transaction payload** — Feature 014: `createTransaction` + CheckoutModal send Feature 013 `payments[]` (+ `customerId` when credit is used).
-- [ ] **`GET /api/v1/customers/search`** — CustomerSearch UI shipped (Feature 014); blocked on backend search API (see backend pending). **Promoted:** backend 019 + frontend `docs/features/020-frontend-customer-search-wireup/`.
+- [x] **`GET /api/v1/customers/search`** — Feature 020: `searchCustomers` sends `storeId` + `q` (Feature 019 backend).
 
 ## Payments (frontend)
 

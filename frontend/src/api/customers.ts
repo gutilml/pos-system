@@ -1,3 +1,5 @@
+import { DEFAULT_STORE_ID } from '@/api/shifts'
+
 const API_BASE = '/api/v1'
 
 export type CustomerSearchResult = {
@@ -20,13 +22,16 @@ async function parseJson<T>(response: Response): Promise<T> {
 
 /**
  * Looks up store-tab customers by name or phone.
- * Backend endpoint: GET /api/v1/customers/search?q=… (Feature 014 dependency — still pending on backend).
+ * Backend: GET /api/v1/customers/search?storeId=&q= (Feature 019).
  */
-export async function searchCustomers(query: string): Promise<CustomerSearchResult[]> {
+export async function searchCustomers(
+  query: string,
+  storeId: string = DEFAULT_STORE_ID,
+): Promise<CustomerSearchResult[]> {
   const trimmed = query.trim()
   if (!trimmed) return []
 
-  const params = new URLSearchParams({ q: trimmed })
+  const params = new URLSearchParams({ storeId, q: trimmed })
   const response = await fetch(`${API_BASE}/customers/search?${params.toString()}`)
   return parseJson<CustomerSearchResult[]>(response)
 }
