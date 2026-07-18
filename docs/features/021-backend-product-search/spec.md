@@ -20,9 +20,9 @@ Add a fast product lookup API for the register: resolve scanned barcodes via exa
 * Opt-in inventory flags are not required for search; do not couple search to inventory module.
 
 ## Acceptance Criteria
-1. [ ] `GET /api/v1/products/search?q=` returns 200 and a JSON array.
-2. [ ] Exact active SKU match returns that product (preferentially / solely).
-3. [ ] Partial name/SKU search returns matching active products only.
-4. [ ] `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts` on search (and ideally list/get for consistency).
-5. [ ] Existing `GET /products`, `GET /products/{id}`, `POST /products` remain backward compatible aside from additive DTO fields.
-6. [ ] Controller + service tests cover exact SKU, partial name, inactive exclusion, blank query.
+1. [x] `GET /api/v1/products/search?q=` returns 200 and a JSON array.
+2. [x] Exact active SKU match returns that product (preferentially / solely).
+3. [x] Partial name/SKU search returns matching active products only.
+4. [x] `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts` on search (and ideally list/get for consistency).
+5. [x] Existing `GET /products`, `GET /products/{id}`, `POST /products` remain backward compatible aside from additive DTO fields.
+6. [x] Controller + service tests cover exact SKU, partial name, inactive exclusion, blank query.

@@ -12,5 +12,7 @@ public interface ProductService {
 
     ProductDTO findById(UUID id);
 
+    List<ProductDTO> search(String query);
+
     ProductDTO create(ProductRequestDTO request);
 }

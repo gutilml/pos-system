@@ -12,7 +12,7 @@ Backend slice of Phase A (small features, FE/BE separated). Implement in number 
 |---|----------------|--------|
 | 017 | `docs/features/017-backend-shift-current/` | **Done** — `GET /api/v1/shifts/current?storeId=` |
 | 019 | `docs/features/019-backend-customer-search/` | **Done** — `GET /api/v1/customers/search?storeId=&q=` |
-| 021 | `docs/features/021-backend-product-search/` | Planned — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`) |
+| 021 | `docs/features/021-backend-product-search/` | **Done** — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`) |
 
 Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.md`).
 
@@ -27,7 +27,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 ## Catalog & checkout APIs
 
-- [ ] **Product search / barcode lookup** — Register still needs fast SKU/barcode resolve (query params or dedicated endpoint). Core today is list + get-by-id. **Promoted:** `docs/features/021-backend-product-search/` (also add `sellByWeight` / `unitOfMeasure` / `excludeFromGlobalDiscounts` to `ProductDTO`).
+- [x] **Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.

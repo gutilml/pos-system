@@ -8,11 +8,13 @@ import com.pos.core.models.Category;
 import com.pos.core.models.Product;
 import com.pos.core.repositories.CategoryRepository;
 import com.pos.core.repositories.ProductRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -26,6 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     public static final int MONEY_SCALE = 4;
     public static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
+    public static final int SEARCH_LIMIT = 25;
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
@@ -47,6 +50,23 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDTO findById(UUID id) {
         return toDto(getProduct(id));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductDTO> search(String query) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        return productRepository.findBySkuIgnoreCaseAndActiveTrue(trimmed)
+                .map(product -> List.of(toDto(product)))
+                .orElseGet(() -> productRepository
+                        .searchActiveByNameOrSku(trimmed, PageRequest.of(0, SEARCH_LIMIT))
+                        .stream()
+                        .map(this::toDto)
+                        .toList());
     }
 
     @Override
@@ -165,7 +185,10 @@ public class ProductServiceImpl implements ProductService {
                 product.getCostPrice(),
                 product.getSellingPrice(),
                 product.getActive(),
-                categoryIds
+                categoryIds,
+                Boolean.TRUE.equals(product.getSellByWeight()),
+                product.getUnitOfMeasure(),
+                Boolean.TRUE.equals(product.getExcludeFromGlobalDiscounts())
         );
     }
 

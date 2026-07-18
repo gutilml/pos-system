@@ -15,12 +15,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
@@ -91,5 +97,57 @@ class ProductServiceImplTest {
         assertThatThrownBy(() -> productService.create(request))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("sellingPrice");
+    }
+
+    @Test
+    void search_returnsEmptyForBlankQuery() {
+        assertThat(productService.search("   ")).isEmpty();
+        verify(productRepository, never()).findBySkuIgnoreCaseAndActiveTrue(any());
+    }
+
+    @Test
+    void search_prefersExactActiveSkuMatch() {
+        Product cola = new Product();
+        cola.setId(UUID.fromString("55555555-5555-5555-5555-555555555555"));
+        cola.setSku("1001");
+        cola.setName("Cola 12oz");
+        cola.setSellingPrice(new BigDecimal("1.9900"));
+        cola.setActive(true);
+        cola.setSellByWeight(false);
+        cola.setExcludeFromGlobalDiscounts(false);
+
+        when(productRepository.findBySkuIgnoreCaseAndActiveTrue("1001")).thenReturn(Optional.of(cola));
+
+        List<ProductDTO> results = productService.search("1001");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).sku()).isEqualTo("1001");
+        assertThat(results.get(0).sellByWeight()).isFalse();
+        assertThat(results.get(0).excludeFromGlobalDiscounts()).isFalse();
+        verify(productRepository, never()).searchActiveByNameOrSku(any(), any());
+    }
+
+    @Test
+    void search_fallsBackToNameContainsWhenNoExactSku() {
+        Product ham = new Product();
+        ham.setId(UUID.fromString("66666666-6666-6666-6666-666666666666"));
+        ham.setSku("2001");
+        ham.setName("Deli Ham");
+        ham.setSellingPrice(new BigDecimal("8.9900"));
+        ham.setActive(true);
+        ham.setSellByWeight(true);
+        ham.setUnitOfMeasure("lb");
+        ham.setExcludeFromGlobalDiscounts(false);
+
+        when(productRepository.findBySkuIgnoreCaseAndActiveTrue("ham")).thenReturn(Optional.empty());
+        when(productRepository.searchActiveByNameOrSku(eq("ham"), any(Pageable.class)))
+                .thenReturn(List.of(ham));
+
+        List<ProductDTO> results = productService.search("ham");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).name()).isEqualTo("Deli Ham");
+        assertThat(results.get(0).sellByWeight()).isTrue();
+        assertThat(results.get(0).unitOfMeasure()).isEqualTo("lb");
     }
 }

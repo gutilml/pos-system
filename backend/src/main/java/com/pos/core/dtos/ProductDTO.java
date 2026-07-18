@@ -12,6 +12,9 @@ public record ProductDTO(
         BigDecimal costPrice,
         BigDecimal sellingPrice,
         Boolean active,
-        List<UUID> categoryIds
+        List<UUID> categoryIds,
+        Boolean sellByWeight,
+        String unitOfMeasure,
+        Boolean excludeFromGlobalDiscounts
 ) {
 }
