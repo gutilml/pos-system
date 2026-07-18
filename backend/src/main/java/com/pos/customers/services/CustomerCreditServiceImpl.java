@@ -15,11 +15,13 @@ import com.pos.customers.models.CreditLedgerEntryType;
 import com.pos.customers.models.Customer;
 import com.pos.customers.repositories.CreditLedgerEntryRepository;
 import com.pos.customers.repositories.CustomerRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -31,6 +33,7 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
     public static final String FEATURE_ENABLE_CUSTOMER_CREDIT = "enable_customer_credit";
     public static final int MONEY_SCALE = 4;
     public static final RoundingMode MONEY_ROUNDING = RoundingMode.HALF_UP;
+    public static final int SEARCH_LIMIT = 20;
 
     private final CustomerRepository customerRepository;
     private final CreditLedgerEntryRepository ledgerEntryRepository;
@@ -60,6 +63,25 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         customer.setCurrentBalance(BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING));
 
         return toCustomerDto(customerRepository.save(customer));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<CustomerDTO> searchCustomers(UUID storeId, String query) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        StoreSettings store = storeSettingsRepository.findById(storeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + storeId));
+        requireCustomerCreditEnabled(store);
+
+        return customerRepository
+                .searchByStoreAndQuery(storeId, trimmed, PageRequest.of(0, SEARCH_LIMIT))
+                .stream()
+                .map(this::toCustomerDto)
+                .toList();
     }
 
     @Override

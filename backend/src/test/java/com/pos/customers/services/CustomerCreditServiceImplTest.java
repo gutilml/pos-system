@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,9 +31,12 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import org.springframework.data.domain.Pageable;
 
 @ExtendWith(MockitoExtension.class)
 class CustomerCreditServiceImplTest {
@@ -171,6 +175,40 @@ class CustomerCreditServiceImplTest {
                 "555-0100",
                 new BigDecimal("50.0000")
         ))).isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("not enabled");
+    }
+
+    @Test
+    void searchCustomers_returnsEmptyListForBlankQueryWithoutHittingRepository() {
+        List<CustomerDTO> results = service.searchCustomers(store.getId(), "   ");
+
+        assertThat(results).isEmpty();
+        verify(customerRepository, never()).searchByStoreAndQuery(any(), any(), any());
+    }
+
+    @Test
+    void searchCustomers_mapsMatchesForStore() {
+        customer.setPhone("555-0100");
+        when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(customerRepository.searchByStoreAndQuery(eq(store.getId()), eq("ana"), any(Pageable.class)))
+                .thenReturn(List.of(customer));
+
+        List<CustomerDTO> results = service.searchCustomers(store.getId(), "ana");
+
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).name()).isEqualTo("Ana");
+        assertThat(results.get(0).phone()).isEqualTo("555-0100");
+        assertThat(results.get(0).creditLimit()).isEqualByComparingTo("100.0000");
+        assertThat(results.get(0).currentBalance()).isEqualByComparingTo("40.0000");
+    }
+
+    @Test
+    void searchCustomers_requiresFeatureFlag() {
+        store.getFeatures().put("enable_customer_credit", false);
+        when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+
+        assertThatThrownBy(() -> service.searchCustomers(store.getId(), "Ana"))
+                .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("not enabled");
     }
 }

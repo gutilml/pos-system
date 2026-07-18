@@ -11,7 +11,7 @@ Backend slice of Phase A (small features, FE/BE separated). Implement in number 
 | # | Feature folder | Status |
 |---|----------------|--------|
 | 017 | `docs/features/017-backend-shift-current/` | **Done** — `GET /api/v1/shifts/current?storeId=` |
-| 019 | `docs/features/019-backend-customer-search/` | Planned — `GET /api/v1/customers/search?storeId=&q=` |
+| 019 | `docs/features/019-backend-customer-search/` | **Done** — `GET /api/v1/customers/search?storeId=&q=` |
 | 021 | `docs/features/021-backend-product-search/` | Planned — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`) |
 
 Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.md`).
@@ -46,7 +46,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 - [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
 - [ ] **Customer credit UI** — Feature 014 shipped register CREDIT assignment at checkout; dedicated tab pay-down screens still pending (see frontend).
-- [ ] **Customer search API** — Feature 014 frontend calls `GET /api/v1/customers/search?q=`; backend only has create / ledger / payments today — need name/phone search (store-scoped) returning credit limit + balance. **Promoted:** `docs/features/019-backend-customer-search/` (`storeId` + `q`).
+- [x] **Customer search API** — Feature 019: store-scoped name/phone search (`enable_customer_credit` gated), max 20 results as `CustomerDTO[]`.
 - [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 

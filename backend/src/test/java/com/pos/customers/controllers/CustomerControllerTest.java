@@ -115,4 +115,50 @@ class CustomerControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentBalance").value(75.0000));
     }
+
+    @Test
+    void searchCustomers_returnsMatches() throws Exception {
+        UUID customerId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        UUID storeId = UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd");
+
+        when(customerCreditService.searchCustomers(eq(storeId), eq("Ana"))).thenReturn(List.of(
+                new CustomerDTO(
+                        customerId,
+                        storeId,
+                        "Ana",
+                        "555-0100",
+                        new BigDecimal("100.0000"),
+                        new BigDecimal("40.0000"),
+                        OffsetDateTime.parse("2026-07-16T12:00:00Z")
+                )
+        ));
+
+        mockMvc.perform(get("/api/v1/customers/search")
+                        .param("storeId", storeId.toString())
+                        .param("q", "Ana"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(customerId.toString()))
+                .andExpect(jsonPath("$[0].name").value("Ana"))
+                .andExpect(jsonPath("$[0].creditLimit").value(100.0000))
+                .andExpect(jsonPath("$[0].currentBalance").value(40.0000));
+    }
+
+    @Test
+    void searchCustomers_returnsEmptyArrayForBlankQuery() throws Exception {
+        UUID storeId = UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd");
+        when(customerCreditService.searchCustomers(eq(storeId), any())).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/v1/customers/search")
+                        .param("storeId", storeId.toString())
+                        .param("q", "   "))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$").isEmpty());
+    }
+
+    @Test
+    void searchCustomers_returns400WhenStoreIdMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/customers/search").param("q", "Ana"))
+                .andExpect(status().isBadRequest());
+    }
 }

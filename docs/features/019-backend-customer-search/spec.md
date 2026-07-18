@@ -17,9 +17,9 @@ Provide a store-scoped customer search endpoint so the register credit flow can 
 * Limit result size (e.g. top 20) to keep autocomplete snappy.
 
 ## Acceptance Criteria
-1. [ ] `GET /api/v1/customers/search?storeId=…&q=…` returns 200 and a JSON array of matching customers.
-2. [ ] Results are limited to the given `storeId`.
-3. [ ] Name and phone partial matches work (case-insensitive).
-4. [ ] Empty/blank `q` returns `[]` (200), not 400.
-5. [ ] Missing `storeId` returns 4xx validation error.
-6. [ ] JUnit/WebMvc + service/repository tests cover match, store isolation, and empty query.
+1. [x] `GET /api/v1/customers/search?storeId=…&q=…` returns 200 and a JSON array of matching customers.
+2. [x] Results are limited to the given `storeId`.
+3. [x] Name and phone partial matches work (case-insensitive).
+4. [x] Empty/blank `q` returns `[]` (200), not 400.
+5. [x] Missing `storeId` returns 4xx validation error.
+6. [x] JUnit/WebMvc + service/repository tests cover match, store isolation, and empty query.

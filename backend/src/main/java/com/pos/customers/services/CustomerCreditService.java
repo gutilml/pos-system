@@ -14,6 +14,8 @@ public interface CustomerCreditService {
 
     CustomerDTO createCustomer(CreateCustomerRequestDTO request);
 
+    List<CustomerDTO> searchCustomers(UUID storeId, String query);
+
     List<CreditLedgerEntryDTO> getLedger(UUID customerId);
 
     CustomerDTO payBalance(UUID customerId, CustomerPaymentRequestDTO request);
