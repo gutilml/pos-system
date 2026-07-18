@@ -17,8 +17,8 @@ Replace the register’s `mockProducts` catalog with live product search/barcode
 * Show clear “No product found” / API error messages.
 
 ## Acceptance Criteria
-1. [ ] `SearchBar` no longer imports mock catalog for production lookup.
-2. [ ] Thin `api/products.ts` (or equivalent) calls `/api/v1/products/search?q=`.
-3. [ ] Successful barcode/SKU scan adds the live product to the cart with correct price and flags.
-4. [ ] Weight and exclude-from-global flags from API drive existing UI behavior.
-5. [ ] Vitest covers mapping + SearchBar success/not-found/error paths.
+1. [x] `SearchBar` no longer imports mock catalog for production lookup.
+2. [x] Thin `api/products.ts` (or equivalent) calls `/api/v1/products/search?q=`.
+3. [x] Successful barcode/SKU scan adds the live product to the cart with correct price and flags.
+4. [x] Weight and exclude-from-global flags from API drive existing UI behavior.
+5. [x] Vitest covers mapping + SearchBar success/not-found/error paths.
