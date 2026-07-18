@@ -1,11 +1,24 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
-import { resetCartForTests } from '@/store/useCartStore'
+import { resetCartForTests, useCartStore } from '@/store/useCartStore'
+
+vi.mock('@/api/transactions', () => ({
+  createTransaction: vi.fn(),
+}))
+
+vi.mock('@/api/paymentApi', () => ({
+  createCheckoutSession: vi.fn(),
+  getTransactionStatus: vi.fn(),
+}))
+
+import { createTransaction } from '@/api/transactions'
+import { createCheckoutSession } from '@/api/paymentApi'
 
 describe('CheckoutFooter', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     resetCartForTests({
       items: [
         {
@@ -36,13 +49,23 @@ describe('CheckoutFooter', () => {
     expect(screen.getByTestId('open-checkout')).toBeDisabled()
   })
 
-  it('starts card payment via the provided callback', async () => {
+  it('records an external-terminal CARD sale without Stripe', async () => {
     const user = userEvent.setup()
-    const onRequestCardPayment = vi.fn().mockResolvedValue('tx-card-1')
-    render(<CheckoutFooter onRequestCardPayment={onRequestCardPayment} />)
+    vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-card-1', status: 'COMPLETED' })
+    const ticketId = useCartStore.getState().activeTicketId
 
-    await user.click(screen.getByRole('button', { name: 'Card' }))
-    expect(onRequestCardPayment).toHaveBeenCalled()
+    render(<CheckoutFooter />)
+    await user.click(screen.getByTestId('card-payment'))
+
+    await waitFor(() => {
+      expect(createTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payments: [{ paymentMethod: 'CARD', amount: 1.99 }],
+        }),
+      )
+    })
+    expect(createCheckoutSession).not.toHaveBeenCalled()
+    expect(useCartStore.getState().activeTicketId).not.toBe(ticketId)
   })
 
   it('shows discount saved and reduced total when global discount applies', async () => {

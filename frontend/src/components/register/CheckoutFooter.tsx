@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { CheckoutModal } from '@/components/checkout/CheckoutModal'
-import { StripePaymentModal } from '@/components/checkout/StripePaymentModal'
+import { createTransaction } from '@/api/transactions'
+import { DEFAULT_STORE_ID } from '@/api/shifts'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
 import {
@@ -14,25 +15,21 @@ import {
   useCartStore,
 } from '@/store/useCartStore'
 
-type CheckoutFooterProps = {
-  /**
-   * Prepares (or looks up) an IN_PROGRESS transaction and returns its id
-   * so the Stripe QR modal can create a Checkout Session.
-   */
-  onRequestCardPayment?: () => Promise<string>
-}
-
-export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {}) {
+/**
+ * Card = external terminal: POST COMPLETED sale with a full-amount CARD tender.
+ * Stripe QR path (Feature 011) remains in the codebase but is not used here (ON HOLD).
+ */
+export function CheckoutFooter() {
   const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
   const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
   const customer = useCartStore(selectActiveCustomer)
   const clearCart = useCartStore((s) => s.clearCart)
+  const closeTicket = useCartStore((s) => s.closeTicket)
+  const activeTicketId = useCartStore((s) => s.activeTicketId)
   const setGlobalDiscountPercentage = useCartStore((s) => s.setGlobalDiscountPercentage)
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
-  const [cardModalOpen, setCardModalOpen] = useState(false)
-  const [activeCardTxId, setActiveCardTxId] = useState<string | null>(null)
   const [cardError, setCardError] = useState<string | null>(null)
   const [cardStarting, setCardStarting] = useState(false)
   const [globalDraft, setGlobalDraft] = useState<string | null>(null)
@@ -53,18 +50,26 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
 
   async function handleCardPayment() {
     setCardError(null)
-    if (!onRequestCardPayment) {
-      setCardError('Card payment is not configured for this register.')
-      return
-    }
+    if (items.length === 0) return
 
     setCardStarting(true)
     try {
-      const transactionId = await onRequestCardPayment()
-      setActiveCardTxId(transactionId)
-      setCardModalOpen(true)
+      await createTransaction({
+        storeId: DEFAULT_STORE_ID,
+        taxRate: taxRate || undefined,
+        customerId: customer?.id,
+        globalDiscountPercentage: globalDiscount > 0 ? globalDiscount : undefined,
+        items: items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          itemDiscountPercentage:
+            (item.itemDiscountPercentage ?? 0) > 0 ? item.itemDiscountPercentage : undefined,
+        })),
+        payments: [{ paymentMethod: 'CARD', amount: grandTotal }],
+      })
+      closeTicket(activeTicketId)
     } catch (err) {
-      setCardError(err instanceof Error ? err.message : 'Unable to start card payment')
+      setCardError(err instanceof Error ? err.message : 'Unable to complete card payment')
     } finally {
       setCardStarting(false)
     }
@@ -145,9 +150,10 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
             type="button"
             disabled={items.length === 0 || cardStarting}
             onClick={() => void handleCardPayment()}
+            data-testid="card-payment"
             className="flex-1 rounded-lg border border-emerald-700 bg-white px-4 py-3 font-semibold text-emerald-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 active:bg-emerald-50"
           >
-            {cardStarting ? 'Starting…' : 'Card'}
+            {cardStarting ? 'Recording…' : 'Card'}
           </button>
           <button
             type="button"
@@ -162,15 +168,6 @@ export function CheckoutFooter({ onRequestCardPayment }: CheckoutFooterProps = {
       </footer>
 
       <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
-
-      <StripePaymentModal
-        open={cardModalOpen}
-        transactionId={activeCardTxId}
-        onClose={() => {
-          setCardModalOpen(false)
-          setActiveCardTxId(null)
-        }}
-      />
     </>
   )
 }

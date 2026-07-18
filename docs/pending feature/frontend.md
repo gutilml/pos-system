@@ -13,7 +13,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 | 018 | `docs/features/018-frontend-shift-gate-hydration/` | **Done** — honest ShiftGate (no fail-open on API error) |
 | 020 | `docs/features/020-frontend-customer-search-wireup/` | **Done** — `storeId` + live search |
 | 022 | `docs/features/022-frontend-live-product-catalog/` | **Done** — replace `mockProducts` with live search |
-| 023 | `docs/features/023-frontend-external-terminal-card/` | Planned — CARD = mark paid on Pay; Stripe QR off happy path |
+| 023 | `docs/features/023-frontend-external-terminal-card/` | **Done** — CARD = mark paid on Pay; Stripe QR off happy path |
 
 **Stripe-in-POS:** ON HOLD (2026-07-17). Keep Feature 011 code. External terminal + mark paid on Complete. Do not schedule Stripe QR / status-poll as Phase A work.
 
@@ -32,7 +32,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [x] **Stripe QR checkout modal + polling** — Feature 011 shipped; **keep in codebase**. Stripe-in-POS path **ON HOLD (2026-07-17)** for small-store design (external card terminal).
 - [x] **Split payments + store-tab assignment UI** — Feature 014: CheckoutModal tenders, CREDIT customer interception, `payments[]` checkout POST.
 - [x] **Cash / multi-tender Complete Sale persistence** — Feature 014 Pay → Complete Transaction POSTs and closes the ticket on success.
-- [ ] **CARD tender = mark paid on Pay (external terminal)** — **Decision (2026-07-17):** Do not open Stripe QR for CheckoutModal CARD tenders. Cashier takes card on a separate terminal, adds CARD tender(s), clicks **Pay / Complete**; system records sale as paid. Prefer simplifying Card button / Stripe modal later so it does not confuse cashiers; do not delete payment API clients yet. **Promoted:** `docs/features/023-frontend-external-terminal-card/`.
+- [x] **CARD tender = mark paid on Pay (external terminal)** — Feature 023: Card button POSTs `COMPLETED` + CARD tender (no Stripe QR). Pay modal CARD tenders unchanged. Stripe client code kept (ON HOLD).
 - [ ] **Split-pay CARD → Stripe session** — **ON HOLD** with Stripe-in-POS; revive when integrated card is re-enabled.
 
 ## Shift UX polish

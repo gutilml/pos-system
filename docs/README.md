@@ -71,7 +71,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 020 | FE | Done | [README](features/020-frontend-customer-search-wireup/README.md) | [spec](features/020-frontend-customer-search-wireup/spec.md) · [plan](features/020-frontend-customer-search-wireup/plan.md) · [tasks](features/020-frontend-customer-search-wireup/tasks.md) |
 | 021 | BE | Done | [README](features/021-backend-product-search/README.md) | [spec](features/021-backend-product-search/spec.md) · [plan](features/021-backend-product-search/plan.md) · [tasks](features/021-backend-product-search/tasks.md) |
 | 022 | FE | Done | [README](features/022-frontend-live-product-catalog/README.md) | [spec](features/022-frontend-live-product-catalog/spec.md) · [plan](features/022-frontend-live-product-catalog/plan.md) · [tasks](features/022-frontend-live-product-catalog/tasks.md) |
-| 023 | FE | Planned | [README](features/023-frontend-external-terminal-card/README.md) | [spec](features/023-frontend-external-terminal-card/spec.md) · [plan](features/023-frontend-external-terminal-card/plan.md) · [tasks](features/023-frontend-external-terminal-card/tasks.md) |
+| 023 | FE | Done | [README](features/023-frontend-external-terminal-card/README.md) | [spec](features/023-frontend-external-terminal-card/spec.md) · [plan](features/023-frontend-external-terminal-card/plan.md) · [tasks](features/023-frontend-external-terminal-card/tasks.md) |
 
 ---
 

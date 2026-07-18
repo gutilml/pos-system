@@ -2,10 +2,10 @@
 
 ## Status
 
-**Planned** (Phase A). Stripe-in-POS remains **ON HOLD**.
+**Done** — Phase A. Stripe-in-POS remains **ON HOLD** (code kept).
 
-## Intent
+## Behavior
 
-* Cashier takes card on a separate terminal.
-* CARD tenders + **Pay / Complete** → `COMPLETED` sale with `payments[]` including CARD.
-* Do not open Stripe QR; do not delete Stripe client/API code (Features 010/011 kept for later).
+* **Card** button: after the cashier charges an external terminal, click Card → `POST` transaction with `payments: [{ CARD, grandTotal }]` → close ticket. **No** Stripe QR / Checkout Session.
+* **Pay** modal: CARD tenders still complete via Feature 014 `createTransaction` (same mark-paid model).
+* `StripePaymentModal` / `paymentApi` remain in the repo for a later opt-in path.

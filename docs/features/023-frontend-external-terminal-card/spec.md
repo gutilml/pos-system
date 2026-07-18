@@ -16,8 +16,8 @@ Align register card sales with the small-store decision: card is taken on a **se
 * Do not remove Stripe modules from the codebase.
 
 ## Acceptance Criteria
-1. [ ] Completing checkout with one or more CARD tenders persists via existing `createTransaction` and closes the ticket; no Stripe session is created.
-2. [ ] Footer Card path no longer opens `StripePaymentModal` / does not call `createCheckoutSession`.
-3. [ ] `StripePaymentModal`, `paymentApi.ts`, and their unit tests remain in the tree (unused by the happy path).
-4. [ ] Updated component tests assert Card/Pay CARD flow does not invoke Stripe APIs.
-5. [ ] Pending frontend “CARD tender = mark paid” item marked done (Feature 023); Stripe hold notes remain clear.
+1. [x] Completing checkout with one or more CARD tenders persists via existing `createTransaction` and closes the ticket; no Stripe session is created.
+2. [x] Footer Card path no longer opens `StripePaymentModal` / does not call `createCheckoutSession`.
+3. [x] `StripePaymentModal`, `paymentApi.ts`, and their unit tests remain in the tree (unused by the happy path).
+4. [x] Updated component tests assert Card/Pay CARD flow does not invoke Stripe APIs.
+5. [x] Pending frontend “CARD tender = mark paid” item marked done (Feature 023); Stripe hold notes remain clear.
