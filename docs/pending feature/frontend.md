@@ -12,14 +12,14 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 |---|----------------|--------|
 | 018 | `docs/features/018-frontend-shift-gate-hydration/` | **Done** — honest ShiftGate (no fail-open on API error) |
 | 020 | `docs/features/020-frontend-customer-search-wireup/` | **Done** — `storeId` + live search |
-| 022 | `docs/features/022-frontend-live-product-catalog/` | Planned — replace `mockProducts`; needs 021 |
+| 022 | `docs/features/022-frontend-live-product-catalog/` | **Done** — replace `mockProducts` with live search |
 | 023 | `docs/features/023-frontend-external-terminal-card/` | Planned — CARD = mark paid on Pay; Stripe QR off happy path |
 
 **Stripe-in-POS:** ON HOLD (2026-07-17). Keep Feature 011 code. External terminal + mark paid on Complete. Do not schedule Stripe QR / status-poll as Phase A work.
 
 ## Wire-up to live backend
 
-- [ ] **Replace mock catalog** — `mockProducts.ts` still drives SearchBar. Point search/scan at Product APIs (list + barcode lookup once backend exposes it). **Promoted:** `docs/features/022-frontend-live-product-catalog/` (after 021).
+- [x] **Replace mock catalog** — Feature 022: `SearchBar` uses `GET /products/search`; `mockProducts.ts` removed.
 - [ ] **Complete Sale → `POST /api/v1/transactions`** — Card path and split-pay **Pay** modal (Feature 014) both POST transactions. Legacy single-amount cash path removed; remaining gap is richer error/toast UX when POST fails.
 - [x] **Dev API proxy** — Feature 011: Vite `server.proxy` forwards `/api` → `http://localhost:8080`.
 - [x] **`GET /api/v1/shifts/current` dependency** — Feature 018: `fetchCurrentShift(storeId)` + ShiftGate Retry on API failure (no fail-open). Backend Feature 017.

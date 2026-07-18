@@ -2,8 +2,8 @@
 
 ## Status
 
-**Planned** (Phase A). Depends on Feature 021.
+**Done** — Phase A. Depends on Feature 021.
 
 ## Intent
 
-`SearchBar` → `GET /api/v1/products/search` → `CartProduct` → existing cart / weight / discount UI. Retires `mockProducts` from the live register path.
+`SearchBar` → `searchProducts` → `toCartProduct` → cart (weight / discount flags preserved). Mock catalog removed from the register path.
