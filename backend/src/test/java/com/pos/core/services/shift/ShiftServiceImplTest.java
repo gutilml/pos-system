@@ -2,6 +2,7 @@ package com.pos.core.services.shift;
 
 import com.pos.core.dtos.shift.CloseShiftRequestDTO;
 import com.pos.core.dtos.shift.ShiftDTO;
+import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.CashDrawerEvent;
 import com.pos.core.models.CashDrawerEventType;
 import com.pos.core.models.Shift;
@@ -23,6 +24,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -57,6 +59,31 @@ class ShiftServiceImplTest {
         shift.setStore(store);
         shift.setStatus(ShiftStatus.OPEN);
         shift.setStartingCash(new BigDecimal("100.0000"));
+    }
+
+    @Test
+    void getCurrentOpenShift_returnsDtoWhenOpenShiftExists() {
+        UUID storeId = shift.getStore().getId();
+        when(shiftRepository.findFirstByStoreIdAndStatus(storeId, ShiftStatus.OPEN))
+                .thenReturn(Optional.of(shift));
+
+        ShiftDTO current = shiftService.getCurrentOpenShift(storeId);
+
+        assertThat(current.id()).isEqualTo(shift.getId());
+        assertThat(current.storeId()).isEqualTo(storeId);
+        assertThat(current.status()).isEqualTo(ShiftStatus.OPEN);
+        assertThat(current.startingCash()).isEqualByComparingTo("100.0000");
+    }
+
+    @Test
+    void getCurrentOpenShift_throwsNotFoundWhenRepositoryMiss() {
+        UUID storeId = shift.getStore().getId();
+        when(shiftRepository.findFirstByStoreIdAndStatus(storeId, ShiftStatus.OPEN))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> shiftService.getCurrentOpenShift(storeId))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining(storeId.toString());
     }
 
     @Test

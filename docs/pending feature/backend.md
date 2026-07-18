@@ -4,16 +4,30 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 
 **Maintenance:** Update this file whenever backend work is shipped or a new backend gap is found. Mark done items `[x]`, note partials, and append newly discovered follow-ups.
 
+## Phase A — live register wire-up (planned triads)
+
+Backend slice of Phase A (small features, FE/BE separated). Implement in number order where dependencies exist:
+
+| # | Feature folder | Status |
+|---|----------------|--------|
+| 017 | `docs/features/017-backend-shift-current/` | **Done** — `GET /api/v1/shifts/current?storeId=` |
+| 019 | `docs/features/019-backend-customer-search/` | Planned — `GET /api/v1/customers/search?storeId=&q=` |
+| 021 | `docs/features/021-backend-product-search/` | Planned — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`) |
+
+Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.md`).
+
+**Stripe-in-POS:** ON HOLD (2026-07-17). Keep Feature 010 APIs/code. CARD = external terminal; mark paid on Pay via `COMPLETED` + `payments[]`. Do not schedule Stripe session / IN_PROGRESS-for-Stripe / status-poll as Phase A backend work.
+
 ## Shift & cash drawer
 
-- [ ] **`GET /api/v1/shifts/current`** — Frontend ShiftGate already calls this for zero-trust hydration. Feature 007 only shipped open / events / close. Need store-scoped (and later user-scoped) “open shift or 404”.
+- [x] **`GET /api/v1/shifts/current`** — Feature 017: store-scoped open shift or 404 via `ShiftService.getCurrentOpenShift`. Unblocks frontend Feature 018.
 - [ ] **Shift history / lookup** — e.g. `GET /api/v1/shifts/{id}` and/or list closed shifts for reconciliation reports.
 - [ ] **Cashier / user on shifts** — Today shifts are store-only. Decide how authenticated cashier identity attaches to open/close and drawer events.
 - [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize).
 
 ## Catalog & checkout APIs
 
-- [ ] **Product search / barcode lookup** — Register still needs fast SKU/barcode resolve (query params or dedicated endpoint). Core today is list + get-by-id.
+- [ ] **Product search / barcode lookup** — Register still needs fast SKU/barcode resolve (query params or dedicated endpoint). Core today is list + get-by-id. **Promoted:** `docs/features/021-backend-product-search/` (also add `sellByWeight` / `unitOfMeasure` / `excludeFromGlobalDiscounts` to `ProductDTO`).
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.
@@ -24,17 +38,15 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 ## Payments
 
 - [x] **Stripe Checkout + webhook** — Feature 010: MXN Checkout Sessions, cents conversion, signature-verified `/api/v1/payments/webhook` completing local transactions.
-- [ ] **Create IN_PROGRESS transactions for card sales** — Cash path still persists `COMPLETED` immediately; card flow needs an API to open `IN_PROGRESS` tickets before `POST /payments/checkout/{id}`.
-- [ ] **`GET /api/v1/transactions/{id}/status`** — Required by Feature 011 QR polling (`paymentApi.getTransactionStatus`).
-- [x] **Frontend Stripe QR / return UX** — Feature 011 shipped QR modal + polling (see frontend pending for live status endpoint dependency).
-- [x] **Split payments (multiple tenders per sale)** — Feature 013: `transaction_payments` one-to-many, `payments[]` in the transaction API, BigDecimal sum validation, per-tender CREDIT routing to the customer ledger.
-- [ ] **Stripe checkout for split-payment CARD portions** — Stripe Checkout (Feature 010) still charges the full transaction total; a CARD tender inside a split sale is recorded locally but not routed through Stripe yet.
+- [ ] **Stripe checkout for split-payment CARD portions** — **ON HOLD (2026-07-17).** Target merchants use a **separate physical card terminal**; POS will not drive Stripe Checkout for CARD tenders for now. **Keep all existing Stripe APIs/code** (Feature 010/011) in the codebase for a later opt-in path — do not delete. When CARD is selected in checkout, treat it like any other tender: on **Pay / Complete Transaction**, persist the sale as paid (`COMPLETED` with `payments[]` including CARD). No Stripe session, no QR modal required for that path.
+- [ ] **Create IN_PROGRESS transactions for card sales** — **Deferred with Stripe hold.** Cash/complete path persists `COMPLETED` immediately; revive IN_PROGRESS + Checkout Session when Stripe card-in-POS is re-enabled.
+- [ ] **`GET /api/v1/transactions/{id}/status`** — Still useful for Feature 011 QR polling when Stripe resumes; **not blocking** the external-terminal CARD flow. Keep on backlog after Phase A live wire-up unless needed sooner.
 
 ## Opt-in modules (vision / schema)
 
 - [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
 - [ ] **Customer credit UI** — Feature 014 shipped register CREDIT assignment at checkout; dedicated tab pay-down screens still pending (see frontend).
-- [ ] **Customer search API** — Feature 014 frontend calls `GET /api/v1/customers/search?q=`; backend only has create / ledger / payments today — need name/phone search (store-scoped) returning credit limit + balance.
+- [ ] **Customer search API** — Feature 014 frontend calls `GET /api/v1/customers/search?q=`; backend only has create / ledger / payments today — need name/phone search (store-scoped) returning credit limit + balance. **Promoted:** `docs/features/019-backend-customer-search/` (`storeId` + `q`).
 - [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 

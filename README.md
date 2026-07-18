@@ -2,6 +2,14 @@
 
 Modular monolith point-of-sale: Spring Boot backend, React/Vite frontend, PostgreSQL.
 
+## Documentation hub
+
+**Do not hunt feature folders one by one.** Start at:
+
+**[docs/README.md](docs/README.md)** — topic index + links to every feature README (`002`–`023`), pending backlogs, and Phase A order.
+
+Also: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) (architecture) · [docs/pending feature/](docs/pending%20feature/) (backlog).
+
 ## Prerequisites
 
 - Docker Desktop

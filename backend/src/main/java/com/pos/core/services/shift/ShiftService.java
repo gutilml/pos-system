@@ -12,6 +12,12 @@ public interface ShiftService {
 
     ShiftDTO openShift(OpenShiftRequestDTO request);
 
+    /**
+     * Returns the store's currently OPEN shift, or throws {@link com.pos.core.exception.ResourceNotFoundException}
+     * when none exists.
+     */
+    ShiftDTO getCurrentOpenShift(UUID storeId);
+
     ShiftDTO closeShift(UUID shiftId, CloseShiftRequestDTO request);
 
     CashDrawerEventDTO addDrawerEvent(UUID shiftId, CashDrawerEventRequestDTO request);

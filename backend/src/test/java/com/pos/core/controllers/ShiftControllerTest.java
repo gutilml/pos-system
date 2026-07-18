@@ -6,6 +6,7 @@ import com.pos.core.dtos.shift.CloseShiftRequestDTO;
 import com.pos.core.dtos.shift.OpenShiftRequestDTO;
 import com.pos.core.dtos.shift.ShiftDTO;
 import com.pos.core.exception.GlobalExceptionHandler;
+import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.CashDrawerEventType;
 import com.pos.core.models.ShiftStatus;
 import com.pos.core.services.shift.ShiftService;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -37,6 +39,50 @@ class ShiftControllerTest {
 
     @MockitoBean
     private ShiftService shiftService;
+
+    @Test
+    void getCurrentOpenShift_returns200WhenOpen() throws Exception {
+        UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+        when(shiftService.getCurrentOpenShift(storeId)).thenReturn(
+                new ShiftDTO(
+                        shiftId,
+                        storeId,
+                        ShiftStatus.OPEN,
+                        new BigDecimal("100.0000"),
+                        null,
+                        null,
+                        null,
+                        OffsetDateTime.parse("2026-07-16T12:00:00Z"),
+                        null
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/shifts/current").param("storeId", storeId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(shiftId.toString()))
+                .andExpect(jsonPath("$.storeId").value(storeId.toString()))
+                .andExpect(jsonPath("$.status").value("OPEN"))
+                .andExpect(jsonPath("$.startingCash").value(100.0000));
+    }
+
+    @Test
+    void getCurrentOpenShift_returns404WhenNoneOpen() throws Exception {
+        UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+
+        when(shiftService.getCurrentOpenShift(storeId))
+                .thenThrow(new ResourceNotFoundException("No open shift for store: " + storeId));
+
+        mockMvc.perform(get("/api/v1/shifts/current").param("storeId", storeId.toString()))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void getCurrentOpenShift_returns400WhenStoreIdMissing() throws Exception {
+        mockMvc.perform(get("/api/v1/shifts/current"))
+                .andExpect(status().isBadRequest());
+    }
 
     @Test
     void openShift_returns201() throws Exception {

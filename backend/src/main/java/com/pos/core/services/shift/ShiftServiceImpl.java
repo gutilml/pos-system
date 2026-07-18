@@ -71,6 +71,14 @@ public class ShiftServiceImpl implements ShiftService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public ShiftDTO getCurrentOpenShift(UUID storeId) {
+        return shiftRepository.findFirstByStoreIdAndStatus(storeId, ShiftStatus.OPEN)
+                .map(this::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("No open shift for store: " + storeId));
+    }
+
+    @Override
     public CashDrawerEventDTO addDrawerEvent(UUID shiftId, CashDrawerEventRequestDTO request) {
         Shift shift = getShift(shiftId);
         ensureOpen(shift);
