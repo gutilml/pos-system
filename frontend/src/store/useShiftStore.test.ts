@@ -35,6 +35,7 @@ describe('useShiftStore', () => {
       currentShift: null,
       isLoading: false,
       error: null,
+      hydrationFailed: false,
     })
     resetCartForTests({
       items: [
@@ -54,7 +55,30 @@ describe('useShiftStore', () => {
 
     await useShiftStore.getState().checkCurrentShift()
 
+    expect(fetchCurrentShift).toHaveBeenCalledWith('store-1')
     expect(useShiftStore.getState().currentShift?.id).toBe('shift-1')
+    expect(useShiftStore.getState().isLoading).toBe(false)
+    expect(useShiftStore.getState().hydrationFailed).toBe(false)
+  })
+
+  it('checkCurrentShift treats null as no open shift without failing hydration', async () => {
+    vi.mocked(fetchCurrentShift).mockResolvedValue(null)
+
+    await useShiftStore.getState().checkCurrentShift()
+
+    expect(useShiftStore.getState().currentShift).toBeNull()
+    expect(useShiftStore.getState().hydrationFailed).toBe(false)
+    expect(useShiftStore.getState().error).toBeNull()
+  })
+
+  it('checkCurrentShift marks hydrationFailed on API errors', async () => {
+    vi.mocked(fetchCurrentShift).mockRejectedValue(new Error('Network down'))
+
+    await useShiftStore.getState().checkCurrentShift()
+
+    expect(useShiftStore.getState().currentShift).toBeNull()
+    expect(useShiftStore.getState().hydrationFailed).toBe(true)
+    expect(useShiftStore.getState().error).toBe('Network down')
     expect(useShiftStore.getState().isLoading).toBe(false)
   })
 

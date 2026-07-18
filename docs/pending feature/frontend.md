@@ -10,7 +10,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 | # | Feature folder | Status |
 |---|----------------|--------|
-| 018 | `docs/features/018-frontend-shift-gate-hydration/` | Planned — honest ShiftGate (no fail-open on API error); needs 017 |
+| 018 | `docs/features/018-frontend-shift-gate-hydration/` | **Done** — honest ShiftGate (no fail-open on API error) |
 | 020 | `docs/features/020-frontend-customer-search-wireup/` | Planned — `storeId` + live search; needs 019 |
 | 022 | `docs/features/022-frontend-live-product-catalog/` | Planned — replace `mockProducts`; needs 021 |
 | 023 | `docs/features/023-frontend-external-terminal-card/` | Planned — CARD = mark paid on Pay; Stripe QR off happy path |
@@ -22,7 +22,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [ ] **Replace mock catalog** — `mockProducts.ts` still drives SearchBar. Point search/scan at Product APIs (list + barcode lookup once backend exposes it). **Promoted:** `docs/features/022-frontend-live-product-catalog/` (after 021).
 - [ ] **Complete Sale → `POST /api/v1/transactions`** — Card path and split-pay **Pay** modal (Feature 014) both POST transactions. Legacy single-amount cash path removed; remaining gap is richer error/toast UX when POST fails.
 - [x] **Dev API proxy** — Feature 011: Vite `server.proxy` forwards `/api` → `http://localhost:8080`.
-- [ ] **`GET /api/v1/shifts/current` dependency** — UI already calls it; blocked on backend endpoint (see backend pending). Until then hydration fails open / shows Open Shift after error. **Promoted:** backend 017 + frontend `docs/features/018-frontend-shift-gate-hydration/` (fix fail-open).
+- [x] **`GET /api/v1/shifts/current` dependency** — Feature 018: `fetchCurrentShift(storeId)` + ShiftGate Retry on API failure (no fail-open). Backend Feature 017.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Feature 011 polls this for Stripe QR auto-complete. **On hold with Stripe-in-POS** — not required while CARD is external-terminal + mark-paid-on-Complete.
 - [x] **Adopt `payments[]` transaction payload** — Feature 014: `createTransaction` + CheckoutModal send Feature 013 `payments[]` (+ `customerId` when credit is used).
 - [ ] **`GET /api/v1/customers/search`** — CustomerSearch UI shipped (Feature 014); blocked on backend search API (see backend pending). **Promoted:** backend 019 + frontend `docs/features/020-frontend-customer-search-wireup/`.

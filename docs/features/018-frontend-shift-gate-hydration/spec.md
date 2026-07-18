@@ -16,8 +16,8 @@ Make register shift hydration honest: when `GET /api/v1/shifts/current` succeeds
 * Zero-trust: never assume a shift is open from localStorage alone.
 
 ## Acceptance Criteria
-1. [ ] `fetchCurrentShift` sends `storeId` (using `DEFAULT_STORE_ID` until auth exists).
-2. [ ] Successful “no open shift” (404 → null) still shows `OpenShiftModal`.
-3. [ ] Failed hydration sets `error` and `ShiftGate` shows retry UI; children (register) are not rendered.
-4. [ ] Successful open shift still renders register children.
-5. [ ] Vitest coverage for store + `ShiftGate`: success, 404/null, and error/retry paths.
+1. [x] `fetchCurrentShift` sends `storeId` (using `DEFAULT_STORE_ID` until auth exists).
+2. [x] Successful “no open shift” (404 → null) still shows `OpenShiftModal`.
+3. [x] Failed hydration sets `error` and `ShiftGate` shows retry UI; children (register) are not rendered.
+4. [x] Successful open shift still renders register children.
+5. [x] Vitest coverage for store + `ShiftGate`: success, 404/null, and error/retry paths.

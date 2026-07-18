@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { useShiftStore } from '@/store/useShiftStore'
 import type { Shift } from '@/api/shifts'
@@ -32,6 +33,7 @@ describe('ShiftGate', () => {
       currentShift: null,
       isLoading: true,
       error: null,
+      hydrationFailed: false,
     })
   })
 
@@ -81,5 +83,33 @@ describe('ShiftGate', () => {
     })
 
     expect(screen.queryByRole('heading', { name: /open shift/i })).not.toBeInTheDocument()
+  })
+
+  it('shows error and Retry on hydration failure instead of Open Shift', async () => {
+    const user = userEvent.setup()
+    vi.mocked(fetchCurrentShift)
+      .mockRejectedValueOnce(new Error('Backend unreachable'))
+      .mockResolvedValueOnce(openShift)
+
+    render(
+      <ShiftGate>
+        <div>Register Content</div>
+      </ShiftGate>,
+    )
+
+    await waitFor(() => {
+      expect(screen.getByTestId('shift-hydration-error')).toBeInTheDocument()
+    })
+
+    expect(screen.getByRole('alert')).toHaveTextContent(/backend unreachable/i)
+    expect(screen.queryByRole('heading', { name: /open shift/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Register Content')).not.toBeInTheDocument()
+
+    await user.click(screen.getByTestId('retry-shift-check'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Register Content')).toBeInTheDocument()
+    })
+    expect(fetchCurrentShift).toHaveBeenCalledTimes(2)
   })
 })

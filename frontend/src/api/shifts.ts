@@ -25,8 +25,15 @@ async function parseJson<T>(response: Response): Promise<T> {
   return response.json() as Promise<T>
 }
 
-export async function fetchCurrentShift(): Promise<Shift | null> {
-  const response = await fetch(`${API_BASE}/shifts/current`)
+/**
+ * Returns the store's OPEN shift, or null when the API responds 404 (no open shift).
+ * Other non-OK statuses throw so the gate can show Retry instead of fail-opening.
+ */
+export async function fetchCurrentShift(
+  storeId: string = DEFAULT_STORE_ID,
+): Promise<Shift | null> {
+  const params = new URLSearchParams({ storeId })
+  const response = await fetch(`${API_BASE}/shifts/current?${params.toString()}`)
   if (response.status === 404) {
     return null
   }

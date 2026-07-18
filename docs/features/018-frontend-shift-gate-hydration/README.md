@@ -2,15 +2,19 @@
 
 ## Status
 
-**Planned** (Phase A). Depends on Feature 017.
+**Done** — Phase A. Depends on Feature 017.
 
-## Intended behavior
+## Behavior
 
 | Hydration result | UI |
 |------------------|----|
 | Loading | Spinner (“Checking shift status…”) |
 | 404 / null | `OpenShiftModal` |
-| API / network error | Error + Retry (not Open Shift) |
+| API / network error | Error + Retry (`hydrationFailed`) — **not** Open Shift |
 | Open shift | Register children |
 
-Touches: `api/shifts.ts`, `useShiftStore.ts`, `ShiftGate.tsx`.
+## Key changes
+
+- `fetchCurrentShift(storeId)` → `GET /api/v1/shifts/current?storeId=`
+- `useShiftStore.hydrationFailed` distinguishes API failure from “no open shift”
+- `ShiftGate` Retry calls `checkCurrentShift` again
