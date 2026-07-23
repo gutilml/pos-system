@@ -43,7 +43,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [x] ~~**CARD tender = mark paid on Pay (external terminal)** — Feature 023: Card button POSTs `COMPLETED` + CARD tender (no Stripe QR). Pay modal CARD tenders unchanged. Stripe client code kept (ON HOLD).~~
 - [ ] **Split-pay CARD → Stripe session** — **ON HOLD** with Stripe-in-POS; revive when integrated card is re-enabled.
 - [x] ~~**Pay modal redesign (CASH / CARD / CREDIT split, no over-tender)** — Feature 036: remove footer Card; split CASH/CARD/CREDIT; no overpay; CREDIT needs customer; PAY + Print and pay.~~
-- [ ] **Assign customer from selling screen** — Feature **037** (`docs/features/037-frontend-assign-customer-sell-screen/`): attach customer to open ticket before Pay (after 036).
+- [x] ~~**Assign customer from selling screen** — Feature 037: attach/clear customer on open ticket before Pay.~~
 
 ## Register UX polish (decisions 2026-07-22)
 
@@ -89,7 +89,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 ## Opt-in module UIs
 
 - [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true.
-- [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD later — not Feature 036). Assign-customer-from-register → Feature **037**.
+- [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Assign-from-register shipped as Feature **037**. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD).
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 
 ## Tooling / quality

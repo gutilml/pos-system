@@ -1,10 +1,11 @@
 import { useEffect } from 'react'
+import { AuthGate } from '@/components/auth/AuthGate'
+import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
 import { CartItemRow } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
 import { TicketTabs } from '@/components/register/TicketTabs'
 import { WeightModal } from '@/components/register/WeightModal'
-import { AuthGate } from '@/components/auth/AuthGate'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
@@ -24,9 +25,12 @@ export function RegisterScreen() {
     <AuthGate>
       <ShiftGate>
         <div className="flex h-dvh max-h-dvh flex-col bg-slate-100 text-slate-900">
-          <header className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-slate-900 px-4 py-3 text-white">
+          <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-slate-900 px-4 py-3 text-white">
             <h1 className="text-lg font-semibold tracking-tight">POS Register</h1>
-            <CashierMenu />
+            <div className="flex items-center gap-2">
+              <AssignCustomerControl />
+              <CashierMenu />
+            </div>
           </header>
 
           <TicketTabs />
