@@ -25,7 +25,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Data model / JPA** | [002](features/002-backend-data-layer/README.md) | Entities + repositories from schema |
 | **Core catalog + checkout API** | [003](features/003-backend-core-api/README.md) | Products, transactions, DTOs/services |
 | **Register UI shell** | [004](features/004-frontend-register-ui/README.md) | Search, cart, footer layout |
-| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md) | Stock deduct when `enable_inventory` |
+| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields; **043** cart Stock column |
 | **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md) | Weight modal + optional scale |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md) | Open / events / close; **017** = `GET …/current` (planned) |
 | **Shift gate UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md) | Gate + persist; **018** = no fail-open (planned) |
@@ -50,6 +50,12 @@ Use this table when you know the *subject*, not the feature number.
 | **Search typeahead** | [035](features/035-frontend-search-typeahead/README.md) | FE **035** done. |
 | **Pay redesign / Print and pay** | [036](features/036-frontend-pay-modal-redesign/README.md) | FE **036** done. |
 | **Assign customer on sell screen** | [037](features/037-frontend-assign-customer-sell-screen/README.md) | FE **037** done. |
+| **Cart line chrome** | [038](features/038-frontend-cart-line-chrome/README.md) | FE **038** done. |
+| **Footer totals Total only** | [039](features/039-frontend-footer-totals-total-only/README.md) | FE **039** planned — Total (+ Discount saved when useful). |
+| **Global discount footer button** | [040](features/040-frontend-global-discount-footer-button/README.md) | FE **040** planned — Discount between Clear and Pay. |
+| **Pay modal layout polish** | [041](features/041-frontend-pay-modal-layout-polish/README.md) | FE **041** planned — mock layout; 036 tender math unchanged. |
+| **Product stock + inventory flag (API)** | [042](features/042-backend-product-stock-inventory-flag/README.md) | BE **042** planned — `currentStock`/`trackInventory` on ProductDTO; `enableInventory` on `/me`. |
+| **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** planned — Stock between Qty/Discount when inventory on. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -96,19 +102,31 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 035 | FE | Done | [README](features/035-frontend-search-typeahead/README.md) | [spec](features/035-frontend-search-typeahead/spec.md) · [plan](features/035-frontend-search-typeahead/plan.md) · [tasks](features/035-frontend-search-typeahead/tasks.md) |
 | 036 | FE | Done | [README](features/036-frontend-pay-modal-redesign/README.md) | [spec](features/036-frontend-pay-modal-redesign/spec.md) · [plan](features/036-frontend-pay-modal-redesign/plan.md) · [tasks](features/036-frontend-pay-modal-redesign/tasks.md) |
 | 037 | FE | Done | [README](features/037-frontend-assign-customer-sell-screen/README.md) | [spec](features/037-frontend-assign-customer-sell-screen/spec.md) · [plan](features/037-frontend-assign-customer-sell-screen/plan.md) · [tasks](features/037-frontend-assign-customer-sell-screen/tasks.md) |
+| 038 | FE | Done | [README](features/038-frontend-cart-line-chrome/README.md) | [spec](features/038-frontend-cart-line-chrome/spec.md) · [plan](features/038-frontend-cart-line-chrome/plan.md) · [tasks](features/038-frontend-cart-line-chrome/tasks.md) |
+| 039 | FE | Planned | [README](features/039-frontend-footer-totals-total-only/README.md) | [spec](features/039-frontend-footer-totals-total-only/spec.md) · [plan](features/039-frontend-footer-totals-total-only/plan.md) · [tasks](features/039-frontend-footer-totals-total-only/tasks.md) |
+| 040 | FE | Planned | [README](features/040-frontend-global-discount-footer-button/README.md) | [spec](features/040-frontend-global-discount-footer-button/spec.md) · [plan](features/040-frontend-global-discount-footer-button/plan.md) · [tasks](features/040-frontend-global-discount-footer-button/tasks.md) |
+| 041 | FE | Planned | [README](features/041-frontend-pay-modal-layout-polish/README.md) | [spec](features/041-frontend-pay-modal-layout-polish/spec.md) · [plan](features/041-frontend-pay-modal-layout-polish/plan.md) · [tasks](features/041-frontend-pay-modal-layout-polish/tasks.md) |
+| 042 | BE | Planned | [README](features/042-backend-product-stock-inventory-flag/README.md) | [spec](features/042-backend-product-stock-inventory-flag/spec.md) · [plan](features/042-backend-product-stock-inventory-flag/plan.md) · [tasks](features/042-backend-product-stock-inventory-flag/tasks.md) |
+| 043 | FE | Planned | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
 
 ---
 
 ## Register UX polish (planned order after Phase A)
 
-Decisions 2026-07-22. All frontend-only; implement in number order:
+Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number order:
 
-1. [032](features/032-frontend-weight-modal-keyboard/README.md) — weight field keyboard
-2. [033](features/033-frontend-money-display-2dp/README.md) — money display 2 dp
-3. [034](features/034-frontend-search-focus-lock/README.md) — search focus lock
-4. [035](features/035-frontend-search-typeahead/README.md) — search typeahead
-5. [036](features/036-frontend-pay-modal-redesign/README.md) — Pay redesign + Print and pay
-6. [037](features/037-frontend-assign-customer-sell-screen/README.md) — assign customer from sell screen
+1. [032](features/032-frontend-weight-modal-keyboard/README.md) — weight field keyboard ~~(done)~~
+2. [033](features/033-frontend-money-display-2dp/README.md) — money display 2 dp ~~(done)~~
+3. [034](features/034-frontend-search-focus-lock/README.md) — search focus lock ~~(done)~~
+4. [035](features/035-frontend-search-typeahead/README.md) — search typeahead ~~(done)~~
+5. [036](features/036-frontend-pay-modal-redesign/README.md) — Pay redesign + Print and pay ~~(done)~~
+6. [037](features/037-frontend-assign-customer-sell-screen/README.md) — assign customer from sell screen ~~(done)~~
+7. [038](features/038-frontend-cart-line-chrome/README.md) — cart line chrome (hide SKU/unit price; Product/Qty/Discount/Subtotal headers)
+8. [039](features/039-frontend-footer-totals-total-only/README.md) — footer totals: Total only
+9. [040](features/040-frontend-global-discount-footer-button/README.md) — global discount as footer button
+10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish (036 math unchanged)
+11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` (then FE 043)
+12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled (after 038 + 042)
 
 ---
 

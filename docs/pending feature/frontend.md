@@ -52,6 +52,16 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [x] ~~**Search typeahead** — Feature 035: ≥3 chars, each keystroke, max 10; Enter/click adds; barcode Enter exact still instant.~~
 - [x] ~~**Weight modal keyboard** — Feature 032: weight field accepts physical keyboard (not readOnly).~~
 
+## Register UX polish (review 2026-07-23)
+
+Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Remaining; PAY disabled until Remaining = 0). Promoted to FE-only triads (keep `[ ]` until shipped):
+
+- [x] ~~**Cart line chrome** — Feature 038: hide SKU/unit price; headers Product · Qty · Discount · Subtotal; Item % in Discount. Stock = 043.~~
+- [ ] **Footer totals: Total only** — Feature [039](../features/039-frontend-footer-totals-total-only/): remove Subtotal and Tax lines from the register footer; keep a single Total (and Discount saved only when applicable, if still useful).
+- [ ] **Global discount as footer button** — Feature [040](../features/040-frontend-global-discount-footer-button/): move global % off the always-visible footer block; use a button between **Clear** and **Pay** (opens discount entry) to free center/cart space.
+- [ ] **Pay modal layout (split tenders)** — Feature [041](../features/041-frontend-pay-modal-layout-polish/): align closer to review mock (method choices + Remaining); **PAY** only when Remaining = 0 (exact cover; no overpay — same rule as Feature 036). Print and pay stays secondary. Incremental layout polish — not a tender-math rewrite.
+- [ ] **Cart Stock column** — Feature [043](../features/043-frontend-cart-stock-column/): when `enableInventory`, insert Stock between Qty and Discount; `displayStock = currentStock − line qty` (one line per `productId`); "—" if product not tracking; hide column+header when inventory off. Depends on BE [042](../features/042-backend-product-stock-inventory-flag/) + layout [038](../features/038-frontend-cart-line-chrome/).
+
 ## Shift UX polish
 
 - [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Feature 026 prefers `/me.storeId` via `selectStoreId`; constant remains as unauthenticated/fallback until multi-store picker.
@@ -88,7 +98,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 ## Opt-in module UIs
 
-- [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true.
+- [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true. Register cart Stock column promoted separately as Feature [043](../features/043-frontend-cart-stock-column/) (needs BE [042](../features/042-backend-product-stock-inventory-flag/)).
 - [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Assign-from-register shipped as Feature **037**. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD).
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 

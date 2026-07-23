@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { CartItemRow } from '@/components/register/CartItemRow'
+import { CartItemRow, CartListHeader } from '@/components/register/CartItemRow'
 import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 describe('CartItemRow', () => {
@@ -28,7 +28,7 @@ describe('CartItemRow', () => {
     })
   })
 
-  it('shows strikethrough original total when item is discounted', () => {
+  it('hides SKU and unit price from the sell list', () => {
     render(
       <ul>
         <CartItemRow
@@ -44,6 +44,8 @@ describe('CartItemRow', () => {
       </ul>,
     )
 
+    expect(screen.getByTestId('cart-product-name-p-cola')).toHaveTextContent('Cola 12oz')
+    expect(screen.queryByText('1001')).not.toBeInTheDocument()
     expect(screen.getByTestId('original-total-p-cola')).toHaveTextContent('1.99')
     expect(screen.getByTestId('line-total-p-cola')).toHaveTextContent('1.79')
   })
@@ -67,27 +69,17 @@ describe('CartItemRow', () => {
     expect(screen.getByTestId('no-global-badge-p-special')).toHaveTextContent('No Global %')
   })
 
-  it('omits code prefix when sku is empty (name-only product)', () => {
-    render(
-      <ul>
-        <CartItemRow
-          item={{
-            productId: 'p-svc',
-            sku: '',
-            name: 'Service Fee',
-            unitPrice: 10,
-            quantity: 1,
-          }}
-        />
-      </ul>,
-    )
-
-    expect(screen.getByText('Service Fee')).toBeInTheDocument()
-    expect(screen.getByTestId('line-total-p-svc')).toHaveTextContent('10.00')
-    expect(screen.queryByText(/·/)).not.toBeInTheDocument()
+  it('renders Product Qty Discount Subtotal headers without Stock', () => {
+    render(<CartListHeader />)
+    const header = screen.getByTestId('cart-list-header')
+    expect(header).toHaveTextContent('Product')
+    expect(header).toHaveTextContent('Qty')
+    expect(header).toHaveTextContent('Discount')
+    expect(header).toHaveTextContent('Subtotal')
+    expect(header).not.toHaveTextContent('Stock')
   })
 
-  it('updates item discount percentage on blur', async () => {
+  it('updates item discount percentage on blur from the Discount column', async () => {
     const user = userEvent.setup()
     render(
       <ul>

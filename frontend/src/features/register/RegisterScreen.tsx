@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { AuthGate } from '@/components/auth/AuthGate'
 import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
-import { CartItemRow } from '@/components/register/CartItemRow'
+import { CartItemRow, CartListHeader } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
 import { TicketTabs } from '@/components/register/TicketTabs'
@@ -42,11 +42,14 @@ export function RegisterScreen() {
                 Scan a barcode or search by name to start a ticket.
               </p>
             ) : (
-              <ul>
-                {items.map((item) => (
-                  <CartItemRow key={item.productId} item={item} />
-                ))}
-              </ul>
+              <>
+                <CartListHeader />
+                <ul>
+                  {items.map((item) => (
+                    <CartItemRow key={item.productId} item={item} />
+                  ))}
+                </ul>
+              </>
             )}
           </section>
 

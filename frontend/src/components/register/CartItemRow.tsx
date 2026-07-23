@@ -9,11 +9,18 @@ import {
 } from '@/store/useCartStore'
 import type { CartItem } from '@/types/cart'
 
+/** Shared cart columns (Feature 038). Feature 043 may insert Stock between Qty and Discount. */
+export const CART_ROW_GRID =
+  'grid grid-cols-[minmax(0,1fr)_auto_5.5rem_6.5rem_auto] items-center gap-x-3 gap-y-1'
+
 type CartItemRowProps = {
   item: CartItem
+  /** When true, reserve/render Stock cell — Feature 043. */
+  showStock?: boolean
+  stockDisplay?: string
 }
 
-export function CartItemRow({ item }: CartItemRowProps) {
+export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemRowProps) {
   const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const removeItem = useCartStore((s) => s.removeItem)
@@ -33,14 +40,21 @@ export function CartItemRow({ item }: CartItemRowProps) {
     setDraftPct(null)
   }
 
+  const gridClass = showStock
+    ? 'grid grid-cols-[minmax(0,1fr)_auto_4.5rem_5.5rem_6.5rem_auto] items-center gap-x-3 gap-y-1'
+    : CART_ROW_GRID
+
   return (
     <li
-      className="flex items-start gap-3 border-b border-slate-100 px-4 py-3"
+      className={`${gridClass} border-b border-slate-100 px-4 py-3`}
       data-register-editable
+      data-testid={`cart-row-${item.productId}`}
     >
-      <div className="min-w-0 flex-1">
+      <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate font-medium text-slate-900">{item.name}</p>
+          <p className="truncate font-medium text-slate-900" data-testid={`cart-product-name-${item.productId}`}>
+            {item.name}
+          </p>
           {item.excludeFromGlobalDiscounts ? (
             <span
               className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900"
@@ -50,35 +64,9 @@ export function CartItemRow({ item }: CartItemRowProps) {
             </span>
           ) : null}
         </div>
-        <p className="text-sm text-slate-500">
-          {item.sku ? `${item.sku} · ` : ''}
-          {formatMoney(item.unitPrice)}
-        </p>
-        <label className="mt-2 flex items-center gap-1 text-xs text-slate-600">
-          <span>Item %</span>
-          <input
-            type="text"
-            inputMode="decimal"
-            aria-label={`Item discount percent for ${item.name}`}
-            value={displayPct}
-            onChange={(e) => setDraftPct(e.target.value)}
-            onBlur={() => {
-              commitItemDiscount()
-              requestRegisterSearchFocus()
-            }}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                commitItemDiscount()
-                ;(e.target as HTMLInputElement).blur()
-              }
-            }}
-            placeholder="0"
-            className="w-14 rounded border border-slate-300 px-1.5 py-0.5 text-sm tabular-nums text-slate-900"
-          />
-        </label>
       </div>
 
-      <div className="flex items-center gap-2 pt-1">
+      <div className="flex items-center gap-2 justify-self-center">
         <button
           type="button"
           aria-label={`Decrease quantity of ${item.name}`}
@@ -100,7 +88,43 @@ export function CartItemRow({ item }: CartItemRowProps) {
         </button>
       </div>
 
-      <div className="w-28 pt-1 text-right">
+      {showStock ? (
+        <p
+          className="justify-self-end text-sm tabular-nums text-slate-700"
+          data-testid={`cart-stock-${item.productId}`}
+        >
+          {stockDisplay ?? '—'}
+        </p>
+      ) : null}
+
+      <div className="justify-self-stretch">
+        <label className="sr-only" htmlFor={`item-discount-${item.productId}`}>
+          Item discount percent for {item.name}
+        </label>
+        <input
+          id={`item-discount-${item.productId}`}
+          type="text"
+          inputMode="decimal"
+          aria-label={`Item discount percent for ${item.name}`}
+          value={displayPct}
+          onChange={(e) => setDraftPct(e.target.value)}
+          onBlur={() => {
+            commitItemDiscount()
+            requestRegisterSearchFocus()
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              commitItemDiscount()
+              ;(e.target as HTMLInputElement).blur()
+            }
+          }}
+          placeholder="%"
+          className="w-full rounded border border-slate-300 px-2 py-1.5 text-sm tabular-nums text-slate-900"
+          data-testid={`item-discount-${item.productId}`}
+        />
+      </div>
+
+      <div className="justify-self-end text-right">
         {hasDiscount ? (
           <p
             className="text-sm tabular-nums text-slate-400 line-through"
@@ -126,5 +150,30 @@ export function CartItemRow({ item }: CartItemRowProps) {
         Remove
       </button>
     </li>
+  )
+}
+
+type CartListHeaderProps = {
+  showStock?: boolean
+}
+
+export function CartListHeader({ showStock = false }: CartListHeaderProps) {
+  const gridClass = showStock
+    ? 'grid grid-cols-[minmax(0,1fr)_auto_4.5rem_5.5rem_6.5rem_auto] items-center gap-x-3'
+    : CART_ROW_GRID
+
+  return (
+    <div
+      className={`${gridClass} border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-500`}
+      data-testid="cart-list-header"
+      role="row"
+    >
+      <span>Product</span>
+      <span className="justify-self-center">Qty</span>
+      {showStock ? <span className="justify-self-end">Stock</span> : null}
+      <span>Discount</span>
+      <span className="justify-self-end">Subtotal</span>
+      <span className="sr-only">Actions</span>
+    </div>
   )
 }
