@@ -52,7 +52,9 @@ class ProductControllerTest {
                 List.of(),
                 false,
                 null,
-                false
+                false,
+                true,
+                new BigDecimal("12.0000")
         );
     }
 
@@ -69,7 +71,9 @@ class ProductControllerTest {
                 .andExpect(jsonPath("$[0].skus[1]").value("SKU-ALT"))
                 .andExpect(jsonPath("$[0].sellingPrice").value(1.9900))
                 .andExpect(jsonPath("$[0].sellByWeight").value(false))
-                .andExpect(jsonPath("$[0].excludeFromGlobalDiscounts").value(false));
+                .andExpect(jsonPath("$[0].excludeFromGlobalDiscounts").value(false))
+                .andExpect(jsonPath("$[0].trackInventory").value(true))
+                .andExpect(jsonPath("$[0].currentStock").value(12.0000));
     }
 
     @Test
@@ -80,7 +84,9 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/v1/products/search").param("q", "cola"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Cola"))
-                .andExpect(jsonPath("$[0].sku").value("SKU-1"));
+                .andExpect(jsonPath("$[0].sku").value("SKU-1"))
+                .andExpect(jsonPath("$[0].trackInventory").value(true))
+                .andExpect(jsonPath("$[0].currentStock").value(12.0000));
     }
 
     @Test

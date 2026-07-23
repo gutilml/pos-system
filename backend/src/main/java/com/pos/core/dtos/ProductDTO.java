@@ -17,7 +17,9 @@ public record ProductDTO(
         List<UUID> categoryIds,
         Boolean sellByWeight,
         String unitOfMeasure,
-        Boolean excludeFromGlobalDiscounts
+        Boolean excludeFromGlobalDiscounts,
+        Boolean trackInventory,
+        BigDecimal currentStock
 ) {
     /**
      * {@code sku} is a transitional alias of {@code primarySku} (nullable when the product has no codes).

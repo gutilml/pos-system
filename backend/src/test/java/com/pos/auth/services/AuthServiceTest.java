@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -79,7 +80,48 @@ class AuthServiceTest {
         assertThat(result.username()).isEqualTo("admin");
         assertThat(result.role()).isEqualTo(Role.ADMIN);
         assertThat(result.storeId()).isEqualTo(store.getId());
+        assertThat(result.enableInventory()).isFalse();
         verify(authCookieService).writeJwtCookie(response, "jwt-token");
+    }
+
+    @Test
+    void login_exposesEnableInventoryWhenFeatureOn() {
+        store.setFeatures(Map.of("enable_inventory", true));
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.enableInventory()).isTrue();
+    }
+
+    @Test
+    void login_enableInventoryFalseWhenFeatureExplicitlyOff() {
+        store.setFeatures(Map.of("enable_inventory", false));
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.enableInventory()).isFalse();
+    }
+
+    @Test
+    void login_enableInventoryFalseWhenNoStore() {
+        admin.setStore(null);
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, null))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.enableInventory()).isFalse();
+        assertThat(result.storeId()).isNull();
     }
 
     @Test
@@ -118,5 +160,6 @@ class AuthServiceTest {
 
         assertThat(me.username()).isEqualTo("admin");
         assertThat(me.storeName()).isEqualTo("Demo Corner Store");
+        assertThat(me.enableInventory()).isFalse();
     }
 }

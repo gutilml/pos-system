@@ -82,7 +82,15 @@ public class AuthService {
                 user.getRole(),
                 store == null ? null : store.getId(),
                 store == null ? null : store.getStoreName(),
-                user.isActive()
+                user.isActive(),
+                isInventoryEnabled(store)
         );
+    }
+
+    static boolean isInventoryEnabled(com.pos.core.models.StoreSettings store) {
+        if (store == null || store.getFeatures() == null) {
+            return false;
+        }
+        return Boolean.TRUE.equals(store.getFeatures().get("enable_inventory"));
     }
 }

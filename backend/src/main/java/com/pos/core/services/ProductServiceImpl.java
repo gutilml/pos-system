@@ -285,7 +285,11 @@ public class ProductServiceImpl implements ProductService {
                 categoryIds,
                 Boolean.TRUE.equals(product.getSellByWeight()),
                 product.getUnitOfMeasure(),
-                Boolean.TRUE.equals(product.getExcludeFromGlobalDiscounts())
+                Boolean.TRUE.equals(product.getExcludeFromGlobalDiscounts()),
+                Boolean.TRUE.equals(product.getTrackInventory()),
+                product.getCurrentStock() == null
+                        ? BigDecimal.ZERO.setScale(4)
+                        : product.getCurrentStock()
         );
     }
 

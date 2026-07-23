@@ -10,6 +10,7 @@ public record UserResponseDTO(
         Role role,
         UUID storeId,
         String storeName,
-        boolean active
+        boolean active,
+        boolean enableInventory
 ) {
 }

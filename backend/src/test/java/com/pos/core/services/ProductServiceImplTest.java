@@ -176,6 +176,8 @@ class ProductServiceImplTest {
         assertThat(results.get(0).sku()).isEqualTo("1001");
         assertThat(results.get(0).primarySku()).isEqualTo("1001");
         assertThat(results.get(0).skus()).containsExactly("1001");
+        assertThat(results.get(0).trackInventory()).isFalse();
+        assertThat(results.get(0).currentStock()).isEqualByComparingTo("0.0000");
         verify(productRepository, never()).searchActiveByNameOrCode(any(), any());
     }
 
@@ -206,6 +208,8 @@ class ProductServiceImplTest {
         );
         ham.setSellByWeight(true);
         ham.setUnitOfMeasure("lb");
+        ham.setTrackInventory(true);
+        ham.setCurrentStock(new BigDecimal("4.5000"));
 
         when(productRepository.findActiveByCodeIgnoreCase("ham")).thenReturn(Optional.empty());
         when(productRepository.searchActiveByNameOrCode(eq("ham"), any(Pageable.class)))
@@ -217,6 +221,8 @@ class ProductServiceImplTest {
         assertThat(results.get(0).name()).isEqualTo("Deli Ham");
         assertThat(results.get(0).sellByWeight()).isTrue();
         assertThat(results.get(0).unitOfMeasure()).isEqualTo("lb");
+        assertThat(results.get(0).trackInventory()).isTrue();
+        assertThat(results.get(0).currentStock()).isEqualByComparingTo("4.5000");
     }
 
     @Test
