@@ -1,0 +1,21 @@
+---
+description: Every feature triad must cite PROJECT_CONTEXT.md and .cursorrules
+globs: docs/features/**/*
+alwaysApply: false
+---
+
+# Feature triad — global rules banner
+
+Every feature under `docs/features/00N-*/` **must** include this exact reminder in **README.md**, **spec.md**, **plan.md**, and **tasks.md** (near the top, typically right after the title or Status):
+
+```markdown
+## Global rules
+
+Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`.
+```
+
+## When writing or updating triads
+
+- New features (planner drafts + saved triad files): always include the section.
+- Implementing a feature: re-read that banner plus `PROJECT_CONTEXT.md` and `.cursorrules` (FE/BE separation, tests, atomic commits, pending docs).
+- Do not invent alternate wording; keep the sentence above so agents and humans see one consistent instruction.
