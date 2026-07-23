@@ -9,6 +9,7 @@
 | Pending backend backlog | [`pending feature/backend.md`](pending%20feature/backend.md) |
 | Pending frontend backlog | [`pending feature/frontend.md`](pending%20feature/frontend.md) |
 | Database schema reference | [`database-schema.sql`](database-schema.sql) |
+| Local demo seed data | [`seed-data.sql`](seed-data.sql) |
 | Local run instructions | [`../README.md`](../README.md) |
 
 Each shipped or planned feature lives under `docs/features/00N-*/` with a small README plus (usually) `spec.md`, `plan.md`, and `tasks.md`.

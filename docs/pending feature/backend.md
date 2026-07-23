@@ -57,7 +57,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [ ] **Session / login APIs** — Issue and validate authenticated sessions or JWTs for the frontend, including logout / refresh behavior and current-user lookup.
 - [ ] **Role-based authorization policies** — Enforce manager-only operations (drawer adjustments, shift close overrides, product/admin changes) and cashier-scoped checkout actions at the controller/service boundary.
 - [ ] **CORS / API versioning conventions** — Confirm for SPA + Fargate deployment.
-- [ ] **Seed data / fixtures** — Deterministic store + products for local/dev demos.
+- [x] **Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers. Re-runnable. Auth users still blocked until AuthN/AuthZ.
 
 ---
 

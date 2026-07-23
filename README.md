@@ -24,7 +24,23 @@ Also: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) (architecture) · [docs/pending f
 docker compose up -d
 ```
 
-### 2. Backend
+### 2. Apply schema + seed demo data
+
+Backend uses `ddl-auto: validate`, so the schema must exist before Spring Boot starts.
+
+```bash
+# Schema (first time / empty DB)
+Get-Content docs\database-schema.sql | docker exec -i pos-postgres psql -U pos -d pos
+
+# Demo store, 10 products, 2 credit customers (safe to re-run)
+Get-Content docs\seed-data.sql | docker exec -i pos-postgres psql -U pos -d pos
+```
+
+Seed store id is `00000000-0000-0000-0000-000000000001` (matches frontend `DEFAULT_STORE_ID`).
+
+**Note:** There is no login yet — Auth/RBAC is the next platform feature. `admin`/`admin` cannot be seeded until user accounts exist.
+
+### 3. Backend
 
 ```bash
 cd backend
@@ -40,7 +56,7 @@ cd backend
 
 API: http://localhost:8080
 
-### 3. Frontend
+### 4. Frontend
 
 ```bash
 cd frontend
