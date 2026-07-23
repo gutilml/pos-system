@@ -185,17 +185,17 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
           <h2 id="checkout-modal-title" className="text-xl font-semibold text-slate-900">
             Take payment
           </h2>
-          <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-            <div className="rounded-lg bg-slate-50 px-3 py-2">
+          <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+            <div className="rounded-xl bg-slate-50 px-3 py-3">
               <dt className="text-slate-500">Grand total</dt>
-              <dd className="text-lg font-semibold tabular-nums text-slate-900" data-testid="checkout-grand-total">
+              <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-900" data-testid="checkout-grand-total">
                 {formatMoney(grandTotal)}
               </dd>
             </div>
-            <div className="rounded-lg bg-amber-50 px-3 py-2">
-              <dt className="text-amber-800">Remaining</dt>
+            <div className="rounded-xl bg-amber-50 px-3 py-3 ring-1 ring-amber-200">
+              <dt className="font-medium text-amber-800">Remaining</dt>
               <dd
-                className="text-lg font-semibold tabular-nums text-amber-900"
+                className="mt-1 text-2xl font-semibold tabular-nums text-amber-950"
                 data-testid="checkout-balance-due"
               >
                 {formatMoney(balanceDue)}

@@ -53,7 +53,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Cart line chrome** | [038](features/038-frontend-cart-line-chrome/README.md) | FE **038** done. |
 | **Footer totals Total only** | [039](features/039-frontend-footer-totals-total-only/README.md) | FE **039** done. |
 | **Global discount footer button** | [040](features/040-frontend-global-discount-footer-button/README.md) | FE **040** done. |
-| **Pay modal layout polish** | [041](features/041-frontend-pay-modal-layout-polish/README.md) | FE **041** planned — mock layout; 036 tender math unchanged. |
+| **Pay modal layout polish** | [041](features/041-frontend-pay-modal-layout-polish/README.md) | FE **041** done. |
 | **Product stock + inventory flag (API)** | [042](features/042-backend-product-stock-inventory-flag/README.md) | BE **042** planned — `currentStock`/`trackInventory` on ProductDTO; `enableInventory` on `/me`. |
 | **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** planned — Stock between Qty/Discount when inventory on. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
@@ -105,7 +105,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 038 | FE | Done | [README](features/038-frontend-cart-line-chrome/README.md) | [spec](features/038-frontend-cart-line-chrome/spec.md) · [plan](features/038-frontend-cart-line-chrome/plan.md) · [tasks](features/038-frontend-cart-line-chrome/tasks.md) |
 | 039 | FE | Done | [README](features/039-frontend-footer-totals-total-only/README.md) | [spec](features/039-frontend-footer-totals-total-only/spec.md) · [plan](features/039-frontend-footer-totals-total-only/plan.md) · [tasks](features/039-frontend-footer-totals-total-only/tasks.md) |
 | 040 | FE | Done | [README](features/040-frontend-global-discount-footer-button/README.md) | [spec](features/040-frontend-global-discount-footer-button/spec.md) · [plan](features/040-frontend-global-discount-footer-button/plan.md) · [tasks](features/040-frontend-global-discount-footer-button/tasks.md) |
-| 041 | FE | Planned | [README](features/041-frontend-pay-modal-layout-polish/README.md) | [spec](features/041-frontend-pay-modal-layout-polish/spec.md) · [plan](features/041-frontend-pay-modal-layout-polish/plan.md) · [tasks](features/041-frontend-pay-modal-layout-polish/tasks.md) |
+| 041 | FE | Done | [README](features/041-frontend-pay-modal-layout-polish/README.md) | [spec](features/041-frontend-pay-modal-layout-polish/spec.md) · [plan](features/041-frontend-pay-modal-layout-polish/plan.md) · [tasks](features/041-frontend-pay-modal-layout-polish/tasks.md) |
 | 042 | BE | Planned | [README](features/042-backend-product-stock-inventory-flag/README.md) | [spec](features/042-backend-product-stock-inventory-flag/spec.md) · [plan](features/042-backend-product-stock-inventory-flag/plan.md) · [tasks](features/042-backend-product-stock-inventory-flag/tasks.md) |
 | 043 | FE | Planned | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
 
@@ -124,7 +124,7 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 7. [038](features/038-frontend-cart-line-chrome/README.md) — cart line chrome (hide SKU/unit price; Product/Qty/Discount/Subtotal headers)
 8. [039](features/039-frontend-footer-totals-total-only/README.md) — footer totals: Total only
 9. [040](features/040-frontend-global-discount-footer-button/README.md) — global discount as footer button
-10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish (036 math unchanged)
+10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish ~~(done)~~
 11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` (then FE 043)
 12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled (after 038 + 042)
 

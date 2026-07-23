@@ -52,46 +52,49 @@ export function TenderInputArea({
 
   return (
     <div className="space-y-3" data-testid="tender-input">
-      <div className="flex gap-2">
-        {METHODS.map((option) => (
-          <button
-            key={option}
-            type="button"
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+        <div className="min-w-0 flex-1">
+          <label htmlFor="tender-amount" className="mb-1 block text-sm font-medium text-slate-700">
+            Amount ({method})
+          </label>
+          <input
+            id="tender-amount"
+            type="text"
+            inputMode="decimal"
+            aria-label="Tender amount"
             disabled={disabled}
-            onClick={() => handleMethodChange(option)}
-            className={`flex-1 rounded-lg border px-2 py-2 text-sm font-semibold ${
-              method === option
-                ? 'border-emerald-700 bg-emerald-50 text-emerald-900'
-                : 'border-slate-300 bg-white text-slate-700'
-            } disabled:cursor-not-allowed disabled:opacity-50`}
-          >
-            {option}
-          </button>
-        ))}
-      </div>
+            value={draft}
+            onChange={(e) => {
+              setDraft(e.target.value)
+              setLocalError(null)
+            }}
+            onFocus={() => setDraft(formatMoney(Math.max(0, remainingBalance)))}
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-2xl tabular-nums text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
+          />
+          {localError ? (
+            <p className="mt-1 text-sm text-red-600" role="alert" data-testid="tender-amount-error">
+              {localError}
+            </p>
+          ) : null}
+        </div>
 
-      <div>
-        <label htmlFor="tender-amount" className="mb-1 block text-sm font-medium text-slate-700">
-          Tender amount
-        </label>
-        <input
-          id="tender-amount"
-          type="text"
-          inputMode="decimal"
-          disabled={disabled}
-          value={draft}
-          onChange={(e) => {
-            setDraft(e.target.value)
-            setLocalError(null)
-          }}
-          onFocus={() => setDraft(formatMoney(Math.max(0, remainingBalance)))}
-          className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-lg tabular-nums text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
-        />
-        {localError ? (
-          <p className="mt-1 text-sm text-red-600" role="alert" data-testid="tender-amount-error">
-            {localError}
-          </p>
-        ) : null}
+        <div className="flex gap-2 sm:w-28 sm:flex-col" role="group" aria-label="Payment method">
+          {METHODS.map((option) => (
+            <button
+              key={option}
+              type="button"
+              disabled={disabled}
+              onClick={() => handleMethodChange(option)}
+              className={`flex-1 rounded-lg border px-2 py-2.5 text-sm font-semibold sm:py-3 ${
+                method === option
+                  ? 'border-emerald-700 bg-emerald-50 text-emerald-900'
+                  : 'border-slate-300 bg-white text-slate-700'
+              } disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {option}
+            </button>
+          ))}
+        </div>
       </div>
 
       <button
