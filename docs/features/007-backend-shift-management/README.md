@@ -16,10 +16,17 @@ Adds backend shift lifecycle tracking for cash registers. A store can have one o
 
 All money uses `BigDecimal` scale 4 and `HALF_UP`.
 
+**Feature 029** updated the expected-cash formula (CASH tenders only; CARD/CREDIT are sales summary):
+
 ```text
-expected_cash = starting_cash + sum(transaction.grand_total) + pay_ins - pay_outs
-discrepancy = actual_cash - expected_cash
+expected_cash = starting_cash
+              + sum(CASH transaction_payments for COMPLETED sales)
+              − sum(change_given for COMPLETED sales)
+              + pay_ins − pay_outs
+discrepancy = actual_cash − expected_cash
 ```
+
+Closed `ShiftDTO` also returns `totalCashPayments`, `totalCardPayments`, `totalCreditPayments`, and `totalSalesGrandTotal` for the post-close ticket (Feature 030).
 
 Transactions with a `storeId` must have an active `OPEN` shift for that store. Transactions without a store remain supported for existing tests and non-store flows.
 

@@ -40,6 +40,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Feature 026 prefers `/me.storeId` via `selectStoreId`; constant remains as unauthenticated/fallback until multi-store picker.
 - [ ] **Cash drawer pay-in / pay-out UI** — Backend `POST /shifts/{id}/events` exists; no cashier UI yet.
 - [x] **Post-close discrepancy ticket** — Feature 024: after blind close, `ShiftCloseTicket` shows API expected/actual/discrepancy; Print via `window.print`; Done → Open Shift gate. No manager auth.
+- [x] **Post-close ticket CARD + CREDIT totals** — Feature 030: blind count kept; ticket sales summary shows CASH / CARD / CREDIT (store tab) + sales grand total from Feature 029.
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling.
 
 ## Register / cart

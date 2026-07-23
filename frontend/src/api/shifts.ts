@@ -12,6 +12,11 @@ export type Shift = {
   discrepancy: number | null
   openedAt: string | null
   closedAt: string | null
+  /** CLOSED only — Feature 029/030 sales summary */
+  totalCashPayments?: number | null
+  totalCardPayments?: number | null
+  totalCreditPayments?: number | null
+  totalSalesGrandTotal?: number | null
 }
 
 /** Fallback when `/me.storeId` is null; prefer auth store id in the UI. */

@@ -24,7 +24,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [ ] **Shift history / lookup** — e.g. `GET /api/v1/shifts/{id}` and/or list closed shifts for reconciliation reports.
 - [ ] **Cashier / user on shifts** — Today shifts are store-only (`shifts` has no user columns). **Decision (2026-07-22): Option C — defer.** Auth v1 ships login/JWT/CSRF without changing shift schema or open/current/close rules (still one OPEN shift per store). Follow-up later: prefer **A** (audit `opened_by` / `closed_by`) before **B** (one open shift per user).
 - [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize).
-- [ ] **Expected cash = CASH tenders only** — Today `calculateExpectedCash` sums all transaction `grandTotal`s for the shift. With CARD/CREDIT/split tenders, drawer expected cash can be overstated. Follow-up: sum CASH `transaction_payments` (+ pay-ins − pay-outs). Surfaces on Feature 024 discrepancy ticket; not part of 024.
+- [x] **Expected cash = CASH tenders only** — Feature 029: starting + CASH payments − change_given + pay-ins − pay-outs. CARD/CREDIT on closed `ShiftDTO` for FE **030**.
 
 ## Catalog & checkout APIs
 

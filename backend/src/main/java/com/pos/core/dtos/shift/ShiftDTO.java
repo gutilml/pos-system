@@ -15,6 +15,10 @@ public record ShiftDTO(
         BigDecimal actualCash,
         BigDecimal discrepancy,
         OffsetDateTime openedAt,
-        OffsetDateTime closedAt
+        OffsetDateTime closedAt,
+        BigDecimal totalCashPayments,
+        BigDecimal totalCardPayments,
+        BigDecimal totalCreditPayments,
+        BigDecimal totalSalesGrandTotal
 ) {
 }

@@ -9,6 +9,7 @@ import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.CashDrawerEvent;
 import com.pos.core.models.CashDrawerEventType;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.Shift;
 import com.pos.core.models.ShiftStatus;
 import com.pos.core.models.StoreSettings;
@@ -110,10 +111,15 @@ public class ShiftServiceImpl implements ShiftService {
         return toDto(shiftRepository.save(shift));
     }
 
+    /**
+     * Drawer expected cash: starting + CASH tenders − change given + pay-ins − pay-outs.
+     * CARD/CREDIT and sale grand totals are excluded (Feature 029).
+     */
     BigDecimal calculateExpectedCash(Shift shift) {
         BigDecimal expected = scaleMoney(shift.getStartingCash());
-        BigDecimal cashSales = transactionRepository.sumGrandTotalByShiftId(shift.getId());
-        expected = expected.add(scaleMoney(cashSales));
+        BigDecimal cashPayments = paymentSum(shift.getId(), PaymentType.CASH);
+        BigDecimal changeGiven = scaleMoney(transactionRepository.sumChangeGivenByShiftId(shift.getId()));
+        expected = expected.add(cashPayments).subtract(changeGiven);
 
         for (CashDrawerEvent event : shift.getDrawerEvents()) {
             BigDecimal amount = scaleMoney(event.getAmount());
@@ -140,6 +146,19 @@ public class ShiftServiceImpl implements ShiftService {
 
     private ShiftDTO toDto(Shift shift) {
         UUID storeId = shift.getStore() != null ? shift.getStore().getId() : null;
+
+        BigDecimal totalCashPayments = null;
+        BigDecimal totalCardPayments = null;
+        BigDecimal totalCreditPayments = null;
+        BigDecimal totalSalesGrandTotal = null;
+
+        if (shift.getStatus() == ShiftStatus.CLOSED && shift.getId() != null) {
+            totalCashPayments = paymentSum(shift.getId(), PaymentType.CASH);
+            totalCardPayments = paymentSum(shift.getId(), PaymentType.CARD);
+            totalCreditPayments = paymentSum(shift.getId(), PaymentType.CREDIT);
+            totalSalesGrandTotal = scaleMoney(transactionRepository.sumGrandTotalByShiftId(shift.getId()));
+        }
+
         return new ShiftDTO(
                 shift.getId(),
                 storeId,
@@ -149,8 +168,16 @@ public class ShiftServiceImpl implements ShiftService {
                 shift.getActualCash(),
                 shift.getDiscrepancy(),
                 shift.getOpenedAt(),
-                shift.getClosedAt()
+                shift.getClosedAt(),
+                totalCashPayments,
+                totalCardPayments,
+                totalCreditPayments,
+                totalSalesGrandTotal
         );
+    }
+
+    private BigDecimal paymentSum(UUID shiftId, PaymentType method) {
+        return scaleMoney(transactionRepository.sumPaymentAmountByShiftIdAndMethod(shiftId, method));
     }
 
     private CashDrawerEventDTO toDto(CashDrawerEvent event) {

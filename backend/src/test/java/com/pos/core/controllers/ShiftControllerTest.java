@@ -40,24 +40,30 @@ class ShiftControllerTest {
     @MockitoBean
     private ShiftService shiftService;
 
+    private static ShiftDTO openShiftDto(UUID shiftId, UUID storeId) {
+        return new ShiftDTO(
+                shiftId,
+                storeId,
+                ShiftStatus.OPEN,
+                new BigDecimal("100.0000"),
+                null,
+                null,
+                null,
+                OffsetDateTime.parse("2026-07-16T12:00:00Z"),
+                null,
+                null,
+                null,
+                null,
+                null
+        );
+    }
+
     @Test
     void getCurrentOpenShift_returns200WhenOpen() throws Exception {
         UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-        when(shiftService.getCurrentOpenShift(storeId)).thenReturn(
-                new ShiftDTO(
-                        shiftId,
-                        storeId,
-                        ShiftStatus.OPEN,
-                        new BigDecimal("100.0000"),
-                        null,
-                        null,
-                        null,
-                        OffsetDateTime.parse("2026-07-16T12:00:00Z"),
-                        null
-                )
-        );
+        when(shiftService.getCurrentOpenShift(storeId)).thenReturn(openShiftDto(shiftId, storeId));
 
         mockMvc.perform(get("/api/v1/shifts/current").param("storeId", storeId.toString()))
                 .andExpect(status().isOk())
@@ -89,19 +95,7 @@ class ShiftControllerTest {
         UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
-        when(shiftService.openShift(any(OpenShiftRequestDTO.class))).thenReturn(
-                new ShiftDTO(
-                        shiftId,
-                        storeId,
-                        ShiftStatus.OPEN,
-                        new BigDecimal("100.0000"),
-                        null,
-                        null,
-                        null,
-                        OffsetDateTime.parse("2026-07-16T12:00:00Z"),
-                        null
-                )
-        );
+        when(shiftService.openShift(any(OpenShiftRequestDTO.class))).thenReturn(openShiftDto(shiftId, storeId));
 
         String body = """
                 {
@@ -152,7 +146,7 @@ class ShiftControllerTest {
     }
 
     @Test
-    void closeShift_returns200WithDiscrepancy() throws Exception {
+    void closeShift_returns200WithDiscrepancyAndTenderTotals() throws Exception {
         UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
         UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
 
@@ -166,7 +160,11 @@ class ShiftControllerTest {
                         new BigDecimal("150.0000"),
                         new BigDecimal("0.0100"),
                         OffsetDateTime.parse("2026-07-16T12:00:00Z"),
-                        OffsetDateTime.parse("2026-07-16T20:00:00Z")
+                        OffsetDateTime.parse("2026-07-16T20:00:00Z"),
+                        new BigDecimal("40.0000"),
+                        new BigDecimal("25.0000"),
+                        new BigDecimal("10.0000"),
+                        new BigDecimal("75.0000")
                 )
         );
 
@@ -182,6 +180,10 @@ class ShiftControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CLOSED"))
                 .andExpect(jsonPath("$.expectedCash").value(149.9900))
-                .andExpect(jsonPath("$.discrepancy").value(0.0100));
+                .andExpect(jsonPath("$.discrepancy").value(0.0100))
+                .andExpect(jsonPath("$.totalCashPayments").value(40.0000))
+                .andExpect(jsonPath("$.totalCardPayments").value(25.0000))
+                .andExpect(jsonPath("$.totalCreditPayments").value(10.0000))
+                .andExpect(jsonPath("$.totalSalesGrandTotal").value(75.0000));
     }
 }

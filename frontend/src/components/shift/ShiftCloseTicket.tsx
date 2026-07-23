@@ -19,6 +19,11 @@ function formatTimestamp(value: string | null): string {
   return date.toLocaleString()
 }
 
+function moneyOrDash(value: number | null | undefined): string {
+  if (value == null) return '—'
+  return formatMoney(value)
+}
+
 export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
   const clearLastClosedShift = useShiftStore((s) => s.clearLastClosedShift)
 
@@ -82,6 +87,36 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
               <dd className="tabular-nums" data-testid="ticket-discrepancy">
                 {formatMoney(discrepancy)}
               </dd>
+            </div>
+
+            <div className="border-t border-slate-200 pt-3">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Sales summary
+              </p>
+              <div className="flex justify-between gap-4">
+                <dt>Cash payments</dt>
+                <dd className="tabular-nums text-slate-900" data-testid="ticket-total-cash">
+                  {moneyOrDash(shift.totalCashPayments)}
+                </dd>
+              </div>
+              <div className="mt-2 flex justify-between gap-4">
+                <dt>Card</dt>
+                <dd className="tabular-nums text-slate-900" data-testid="ticket-total-card">
+                  {moneyOrDash(shift.totalCardPayments)}
+                </dd>
+              </div>
+              <div className="mt-2 flex justify-between gap-4">
+                <dt>Credit (store tab)</dt>
+                <dd className="tabular-nums text-slate-900" data-testid="ticket-total-credit">
+                  {moneyOrDash(shift.totalCreditPayments)}
+                </dd>
+              </div>
+              <div className="mt-2 flex justify-between gap-4">
+                <dt>Sales grand total</dt>
+                <dd className="tabular-nums text-slate-900" data-testid="ticket-sales-grand-total">
+                  {moneyOrDash(shift.totalSalesGrandTotal)}
+                </dd>
+              </div>
             </div>
           </dl>
         </div>

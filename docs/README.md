@@ -42,6 +42,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Close shift discrepancy print** | [024](features/024-frontend-shift-discrepancy-ticket/README.md) | No manager auth; browser print ticket after blind close |
 | **Auth / RBAC / users** | [025](features/025-backend-auth-v1/README.md), [026](features/026-frontend-auth-v1/README.md) | BE + FE Auth v1 done. User CRUD / role policies / multi-store deferred. |
 | **Multi SKU / barcode (1→N)** | [027](features/027-backend-multi-sku/README.md), [028](features/028-frontend-multi-sku/README.md) | BE + FE done. Admin SKU UI deferred. |
+| **Expected cash / close ticket tenders** | [029](features/029-backend-expected-cash-tenders/README.md), [030](features/030-frontend-shift-close-ticket-tenders/README.md) | BE **029** + FE **030** done. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -79,6 +80,8 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 026 | FE | Done | [README](features/026-frontend-auth-v1/README.md) | [spec](features/026-frontend-auth-v1/spec.md) · [plan](features/026-frontend-auth-v1/plan.md) · [tasks](features/026-frontend-auth-v1/tasks.md) |
 | 027 | BE | Done | [README](features/027-backend-multi-sku/README.md) | [spec](features/027-backend-multi-sku/spec.md) · [plan](features/027-backend-multi-sku/plan.md) · [tasks](features/027-backend-multi-sku/tasks.md) |
 | 028 | FE | Done | [README](features/028-frontend-multi-sku/README.md) | [spec](features/028-frontend-multi-sku/spec.md) · [plan](features/028-frontend-multi-sku/plan.md) · [tasks](features/028-frontend-multi-sku/tasks.md) |
+| 029 | BE | Done | [README](features/029-backend-expected-cash-tenders/README.md) | [spec](features/029-backend-expected-cash-tenders/spec.md) · [plan](features/029-backend-expected-cash-tenders/plan.md) · [tasks](features/029-backend-expected-cash-tenders/tasks.md) |
+| 030 | FE | Done | [README](features/030-frontend-shift-close-ticket-tenders/README.md) | [spec](features/030-frontend-shift-close-ticket-tenders/spec.md) · [plan](features/030-frontend-shift-close-ticket-tenders/plan.md) · [tasks](features/030-frontend-shift-close-ticket-tenders/tasks.md) |
 
 ---
 
@@ -99,8 +102,16 @@ Live register wire-up. Prefer **backend then matching frontend**. Stripe session
 2. For requirements / design / checklist: `spec.md` → `plan.md` → `tasks.md` in the same folder.
 3. After shipping: mark pending items in `docs/pending feature/*` and keep this index status column updated.
 
+Every triad file must include:
+
+```markdown
+## Global rules
+
+Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`.
+```
+
 ---
 
 ## Maintenance
 
-When you add `docs/features/00N-*/README.md`, add a row to **Feature catalog** and a line under **Topic → where to go** in the same change. Do not leave orphan READMEs without an index entry.
+When you add `docs/features/00N-*/README.md`, add a row to **Feature catalog** and a line under **Topic → where to go** in the same change. Do not leave orphan READMEs without an index entry. Include the **Global rules** section in README, spec, plan, and tasks (see `.cursor/rules/feature-triad-global-rules.mdc`).

@@ -38,12 +38,15 @@ describe('CloseShiftModal', () => {
     })
   })
 
-  it('keeps the blind count blind (no expected totals before submit)', () => {
+  it('keeps the blind count blind (no expected or tender totals before submit)', () => {
     render(<CloseShiftModal open onClose={() => undefined} />)
 
     expect(screen.getByRole('heading', { name: /blind count/i })).toBeInTheDocument()
     expect(screen.queryByTestId('ticket-expected-cash')).not.toBeInTheDocument()
     expect(screen.queryByText('Expected cash')).not.toBeInTheDocument()
+    expect(screen.queryByText(/sales summary/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/^Card$/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/credit \(store tab\)/i)).not.toBeInTheDocument()
     expect(screen.getByLabelText(/actual cash/i)).toBeInTheDocument()
   })
 
@@ -57,6 +60,10 @@ describe('CloseShiftModal', () => {
       actualCash: 150,
       discrepancy: 0,
       closedAt: '2026-07-16T20:00:00Z',
+      totalCashPayments: 40,
+      totalCardPayments: 20,
+      totalCreditPayments: 5,
+      totalSalesGrandTotal: 65,
     })
 
     render(<CloseShiftModal open onClose={onClose} />)
@@ -68,5 +75,6 @@ describe('CloseShiftModal', () => {
       expect(onClose).toHaveBeenCalled()
     })
     expect(useShiftStore.getState().lastClosedShift?.expectedCash).toBe(150)
+    expect(useShiftStore.getState().lastClosedShift?.totalCardPayments).toBe(20)
   })
 })
