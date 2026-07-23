@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react'
 import { createTransaction } from '@/api/transactions'
 import { CustomerSearch } from '@/components/checkout/CustomerSearch'
-import { PaymentTenderList } from '@/components/checkout/PaymentTenderList'
 import { SaleTicket, type SaleTicketPayload } from '@/components/checkout/SaleTicket'
-import { TenderInputArea } from '@/components/checkout/TenderInputArea'
+import { TenderAmountFields } from '@/components/checkout/TenderAmountFields'
 import { formatMoney } from '@/lib/money'
 import { useT } from '@/i18n/useT'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
@@ -20,7 +19,6 @@ import {
   selectTotalTendered,
   useCartStore,
   type AssignedCustomer,
-  type PaymentMethod,
 } from '@/store/useCartStore'
 
 type CheckoutModalProps = {
@@ -37,15 +35,13 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const payments = useCartStore(selectActivePayments)
   const customer = useCartStore(selectActiveCustomer)
   const activeTicketId = useCartStore((s) => s.activeTicketId)
-  const addPayment = useCartStore((s) => s.addPayment)
-  const removePayment = useCartStore((s) => s.removePayment)
+  const upsertPayment = useCartStore((s) => s.upsertPayment)
   const clearPayments = useCartStore((s) => s.clearPayments)
   const setCustomer = useCartStore((s) => s.setCustomer)
   const closeTicket = useCartStore((s) => s.closeTicket)
   const storeId = useAuthStore(selectStoreId)
 
   const [requireCustomer, setRequireCustomer] = useState(false)
-  const [pendingCreditAmount, setPendingCreditAmount] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saleReceipt, setSaleReceipt] = useState<SaleTicketPayload | null>(null)
@@ -54,11 +50,11 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const totalTendered = selectTotalTendered(payments)
   const balanceDue = selectBalanceDue(items, taxRate, payments, globalDiscount)
   const canComplete = selectCanCompleteSale(items, taxRate, payments, customer, globalDiscount)
+  const hasCreditTender = payments.some((payment) => payment.method === 'CREDIT')
 
   useEffect(() => {
     if (!open) {
       setRequireCustomer(false)
-      setPendingCreditAmount(null)
       setSubmitting(false)
       setError(null)
       setSaleReceipt(null)
@@ -67,36 +63,32 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
 
   if (!open && !saleReceipt) return null
 
-  function requestCreditGate(amount?: number) {
-    if (customer) return false
-    setRequireCustomer(true)
-    if (amount !== undefined) {
-      setPendingCreditAmount(amount)
-    }
-    return true
-  }
-
   function abandonCreditPath() {
     setRequireCustomer(false)
-    setPendingCreditAmount(null)
     setError(null)
   }
 
-  function handleAddTender(method: PaymentMethod, amount: number) {
+  function handleUpsert(method: Parameters<typeof upsertPayment>[0], amount: number): boolean {
     setError(null)
-    if (method === 'CREDIT' && requestCreditGate(amount)) {
-      return
+    return upsertPayment(method, amount)
+  }
+
+  function handleCreditBlur(amount: number) {
+    if (amount > 0 && !customer) {
+      setRequireCustomer(true)
     }
-    addPayment(method, amount)
+  }
+
+  function handleClearCustomer() {
+    setCustomer(null)
+    if (hasCreditTender) {
+      setRequireCustomer(true)
+    }
   }
 
   function handleCustomerAssigned(next: AssignedCustomer) {
     setCustomer(next)
     setRequireCustomer(false)
-    if (pendingCreditAmount !== null && pendingCreditAmount > 0) {
-      addPayment('CREDIT', pendingCreditAmount)
-      setPendingCreditAmount(null)
-    }
   }
 
   function buildReceiptSnapshot(): SaleTicketPayload {
@@ -226,7 +218,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
               </div>
               <button
                 type="button"
-                onClick={() => setCustomer(null)}
+                onClick={handleClearCustomer}
                 className="text-xs font-medium text-emerald-900 underline"
               >
                 Clear
@@ -234,7 +226,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             </div>
           ) : null}
 
-          {requireCustomer || (!customer && payments.some((p) => p.method === 'CREDIT')) ? (
+          {requireCustomer ? (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-3" data-testid="credit-customer-gate">
               <p className="mb-2 text-sm font-medium text-amber-950">
                 Assign a customer before charging store credit.
@@ -251,13 +243,10 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             </div>
           ) : null}
 
-          <PaymentTenderList payments={payments} onRemove={removePayment} />
-          <TenderInputArea
-            remainingBalance={balanceDue}
-            onAdd={handleAddTender}
-            onRequestCredit={() => {
-              requestCreditGate()
-            }}
+          <TenderAmountFields
+            payments={payments}
+            onUpsert={handleUpsert}
+            onCreditBlur={handleCreditBlur}
             disabled={submitting}
           />
 

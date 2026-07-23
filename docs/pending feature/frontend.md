@@ -63,6 +63,8 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Pay modal layout (split tenders)** — Feature 041: amount left + method stack; Remaining emphasized; PAY when Remaining = 0 (036 math unchanged).~~
 - [x] ~~**Cart Stock column** — Feature 043: when `enableInventory`, Stock between Qty and Discount; `displayStock = currentStock − line qty`; "—" if not tracking; hide when inventory off.~~
 - [x] ~~**UI locale EN/ES (store preference)** — Feature 046: hydrate from `/me.uiLocale`; CashierMenu EN/ES; PATCH store preferences (DB). Depends on BE 045. No localStorage as source of truth.~~
+- [x] ~~**Pay three amount fields (Option A)** — Feature [047](../features/047-frontend-pay-three-amount-fields/README.md): always-visible CASH/CARD/CREDIT amounts; live Remaining; no overpay; no Add tender / tender list; CREDIT blur → customer gate.~~
+- [ ] **UI locale coverage polish** — After 046: (1) `AssignCustomerControl` button + popup/`CustomerSearch` still English; (2) TicketTabs “+ New Ticket” → ES “Ticket nuevo”; (3) cart Stock header → **Inv** (short label). Promote to a small FE triad when scheduled.
 
 ## Shift UX polish
 

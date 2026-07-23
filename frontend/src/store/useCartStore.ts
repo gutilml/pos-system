@@ -48,6 +48,8 @@ type CartState = {
   setTaxRate: (rate: number) => void
   setAmountReceived: (amount: number | null) => void
   addPayment: (method: PaymentMethod, amount: number) => void
+  /** At most one tender per method; amount ≤ 0 removes; rejects overpay. */
+  upsertPayment: (method: PaymentMethod, amount: number) => boolean
   removePayment: (paymentId: string) => void
   clearPayments: () => void
   setCustomer: (customer: AssignedCustomer | null) => void
@@ -345,30 +347,62 @@ export const useCartStore = create<CartState>()(
         )
       },
 
-      addPayment: (method, amount) => {
+      upsertPayment: (method, amount) => {
         const tenderAmount = roundMoney(amount)
-        if (tenderAmount <= 0) return
-
         const state = get()
         const ticket = state.tickets[state.activeTicketId]
-        if (!ticket) return
-        const balanceDue = selectBalanceDue(
+        if (!ticket) return false
+
+        if (tenderAmount <= 0) {
+          if (!ticket.payments.some((payment) => payment.method === method)) {
+            return true
+          }
+          set((prev) =>
+            updateActiveTicket(prev, (active) => ({
+              ...active,
+              payments: active.payments.filter((payment) => payment.method !== method),
+            })),
+          )
+          return true
+        }
+
+        const others = ticket.payments.filter((payment) => payment.method !== method)
+        const othersSum = selectTotalTendered(others)
+        const grandTotal = selectGrandTotal(
           ticket.items,
           state.taxRate,
-          ticket.payments,
           ticket.globalDiscountPercentage,
         )
-        if (tenderAmount > balanceDue) return
+        const maxForMethod = roundMoney(Math.max(0, grandTotal - othersSum))
+        if (tenderAmount > maxForMethod) return false
 
         set((prev) =>
-          updateActiveTicket(prev, (active) => ({
-            ...active,
-            payments: [
-              ...active.payments,
-              { id: newId('pay'), method, amount: tenderAmount },
-            ],
-          })),
+          updateActiveTicket(prev, (active) => {
+            const existing = active.payments.find((payment) => payment.method === method)
+            if (existing) {
+              return {
+                ...active,
+                payments: active.payments.map((payment) =>
+                  payment.method === method
+                    ? { ...payment, amount: tenderAmount }
+                    : payment,
+                ),
+              }
+            }
+            return {
+              ...active,
+              payments: [
+                ...active.payments,
+                { id: newId('pay'), method, amount: tenderAmount },
+              ],
+            }
+          }),
         )
+        return true
+      },
+
+      addPayment: (method, amount) => {
+        get().upsertPayment(method, amount)
       },
 
       removePayment: (paymentId) => {

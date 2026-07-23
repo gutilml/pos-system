@@ -44,8 +44,7 @@ export type MessageKey =
   | 'checkout.cancel'
   | 'checkout.printAndPay'
   | 'checkout.pay'
-  | 'checkout.addTender'
-  | 'checkout.noTenders'
+  | 'checkout.overpay'
   | 'shift.openTitle'
   | 'shift.startingCash'
   | 'shift.openAction'
@@ -99,8 +98,7 @@ export const en: MessageDict = {
   'checkout.cancel': 'Cancel',
   'checkout.printAndPay': 'Print and pay',
   'checkout.pay': 'PAY',
-  'checkout.addTender': 'Add tender',
-  'checkout.noTenders': 'No tenders yet. Add cash, card, or store credit below.',
+  'checkout.overpay': 'Amount cannot exceed remaining balance',
   'shift.openTitle': 'Open shift',
   'shift.startingCash': 'Starting cash',
   'shift.openAction': 'Open shift',
@@ -153,8 +151,7 @@ export const es: MessageDict = {
   'checkout.cancel': 'Cancelar',
   'checkout.printAndPay': 'Imprimir y cobrar',
   'checkout.pay': 'COBRAR',
-  'checkout.addTender': 'Agregar pago',
-  'checkout.noTenders': 'Sin pagos aún. Agrega efectivo, tarjeta o crédito abajo.',
+  'checkout.overpay': 'El monto no puede superar el saldo restante',
   'shift.openTitle': 'Abrir turno',
   'shift.startingCash': 'Efectivo inicial',
   'shift.openAction': 'Abrir turno',

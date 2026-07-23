@@ -175,7 +175,7 @@ describe('useCartStore', () => {
   })
 
   it('tracks payment tenders and balance due with scale-4 math', () => {
-    const { addItem, addPayment, removePayment } = useCartStore.getState()
+    const { addItem, upsertPayment, removePayment } = useCartStore.getState()
     addItem(cola, 2)
     addItem(chips, 1)
 
@@ -184,8 +184,8 @@ describe('useCartStore', () => {
     expect(selectGrandTotal(items, 0)).toBe(6.48)
     expect(selectBalanceDue(items, 0, selectActivePayments(state0))).toBe(6.48)
 
-    addPayment('CASH', 2.48)
-    addPayment('CREDIT', 4)
+    expect(upsertPayment('CASH', 2.48)).toBe(true)
+    expect(upsertPayment('CREDIT', 4)).toBe(true)
 
     const state1 = useCartStore.getState()
     const payments = selectActivePayments(state1)
@@ -214,6 +214,24 @@ describe('useCartStore', () => {
     removePayment(payments[0].id)
     const state3 = useCartStore.getState()
     expect(selectBalanceDue(items, 0, selectActivePayments(state3))).toBe(2.48)
+  })
+
+  it('upsertPayment replaces per method, clears on zero, and rejects overpay', () => {
+    const { addItem, upsertPayment } = useCartStore.getState()
+    addItem(cola, 2)
+    addItem(chips, 1)
+
+    expect(upsertPayment('CASH', 2)).toBe(true)
+    expect(upsertPayment('CASH', 3)).toBe(true)
+    expect(selectActivePayments(useCartStore.getState())).toEqual([
+      expect.objectContaining({ method: 'CASH', amount: 3 }),
+    ])
+
+    expect(upsertPayment('CARD', 10)).toBe(false)
+    expect(selectActivePayments(useCartStore.getState())).toHaveLength(1)
+
+    expect(upsertPayment('CASH', 0)).toBe(true)
+    expect(selectActivePayments(useCartStore.getState())).toHaveLength(0)
   })
 
   it('always keeps at least one ticket when the last tab is closed', () => {

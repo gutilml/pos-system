@@ -58,6 +58,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** done. |
 | **Cart header column alignment** | [044](features/044-frontend-cart-header-column-alignment/README.md) | FE **044** done. |
 | **Store preferences / UI locale** | [045](features/045-backend-store-preferences/README.md), [046](features/046-frontend-ui-locale/README.md) | BE **045** + FE **046** done — DB `preferences` + EN/ES UI. |
+| **Pay three amount fields** | [047](features/047-frontend-pay-three-amount-fields/README.md) | FE **047** done — CASH/CARD/CREDIT fields; no Add tender. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -113,6 +114,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 044 | FE | Done | [README](features/044-frontend-cart-header-column-alignment/README.md) | [spec](features/044-frontend-cart-header-column-alignment/spec.md) · [plan](features/044-frontend-cart-header-column-alignment/plan.md) · [tasks](features/044-frontend-cart-header-column-alignment/tasks.md) |
 | 045 | BE | Done | [README](features/045-backend-store-preferences/README.md) | [spec](features/045-backend-store-preferences/spec.md) · [plan](features/045-backend-store-preferences/plan.md) · [tasks](features/045-backend-store-preferences/tasks.md) |
 | 046 | FE | Done | [README](features/046-frontend-ui-locale/README.md) | [spec](features/046-frontend-ui-locale/spec.md) · [plan](features/046-frontend-ui-locale/plan.md) · [tasks](features/046-frontend-ui-locale/tasks.md) |
+| 047 | FE | Done | [README](features/047-frontend-pay-three-amount-fields/README.md) | [spec](features/047-frontend-pay-three-amount-fields/spec.md) · [plan](features/047-frontend-pay-three-amount-fields/plan.md) · [tasks](features/047-frontend-pay-three-amount-fields/tasks.md) |
 
 ---
 
@@ -133,6 +135,7 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` ~~(done)~~
 12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled ~~(done)~~
 13. [044](features/044-frontend-cart-header-column-alignment/README.md) — cart header/column alignment ~~(done)~~
+14. [047](features/047-frontend-pay-three-amount-fields/README.md) — Pay three amount fields (Option A) ~~(done)~~
 
 ---
 
