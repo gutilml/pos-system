@@ -46,9 +46,11 @@ describe('CheckoutFooter', () => {
     expect(screen.queryByTestId('card-payment')).not.toBeInTheDocument()
   })
 
-  it('shows discount saved and reduced total when global discount applies', async () => {
+  it('shows discount saved and Total only (no Subtotal or Tax)', async () => {
     const user = userEvent.setup()
     render(<CheckoutFooter />)
+    expect(screen.queryByText('Subtotal')).not.toBeInTheDocument()
+    expect(screen.queryByText('Tax')).not.toBeInTheDocument()
     expect(screen.queryByTestId('discount-saved')).not.toBeInTheDocument()
 
     const globalInput = screen.getByLabelText('Global Discount %')
@@ -57,6 +59,6 @@ describe('CheckoutFooter', () => {
     await user.tab()
 
     expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.20')
-    expect(screen.getByText('Total').nextElementSibling).toHaveTextContent('1.79')
+    expect(screen.getByTestId('footer-total')).toHaveTextContent('1.79')
   })
 })

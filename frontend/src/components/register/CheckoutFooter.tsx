@@ -8,8 +8,6 @@ import {
   selectActiveGlobalDiscountPercentage,
   selectActiveItems,
   selectGrandTotal,
-  selectSubtotal,
-  selectTaxTotal,
   selectTotalDiscountAmount,
   useCartStore,
 } from '@/store/useCartStore'
@@ -28,8 +26,6 @@ export function CheckoutFooter() {
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [globalDraft, setGlobalDraft] = useState<string | null>(null)
 
-  const subtotal = selectSubtotal(items, globalDiscount)
-  const taxTotal = selectTaxTotal(items, taxRate, globalDiscount)
   const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
   const discountSaved = selectTotalDiscountAmount(items, globalDiscount)
 
@@ -82,17 +78,11 @@ export function CheckoutFooter() {
               </dd>
             </div>
           ) : null}
-          <div className="flex justify-between">
-            <dt>Subtotal</dt>
-            <dd className="tabular-nums text-slate-900">{formatMoney(subtotal)}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt>Tax</dt>
-            <dd className="tabular-nums text-slate-900">{formatMoney(taxTotal)}</dd>
-          </div>
           <div className="flex justify-between text-base font-semibold text-slate-900">
             <dt>Total</dt>
-            <dd className="tabular-nums">{formatMoney(grandTotal)}</dd>
+            <dd className="tabular-nums" data-testid="footer-total">
+              {formatMoney(grandTotal)}
+            </dd>
           </div>
         </dl>
 
