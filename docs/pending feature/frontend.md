@@ -44,7 +44,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 ## Register / cart
 
-- [ ] **Multi SKU/barcode per product (UX)** — Mirrors backend **1 product → N codes** decision (2026-07-22); **zero codes allowed** (name-search-only). Today register uses a single `sku` (Features 021/022). After BE: any linked code scans to the same product; products with no codes only via typed name search. **Admin:** manage an optional list of SKU/barcodes (add/remove, mark primary). Cart can show primary code when present. Out of scope until backend triad exists.
+- [x] **Multi SKU/barcode per product (UX)** — Feature 028: register consumes `skus` / `primarySku`; cart shows primary when present; name-only OK. Admin SKU list UI still deferred.
 - [x] **Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.
 - [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when settings API exists.
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.

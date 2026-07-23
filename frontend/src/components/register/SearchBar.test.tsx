@@ -26,6 +26,8 @@ describe('SearchBar', () => {
       {
         id: 'p-special',
         sku: '3001',
+        primarySku: '3001',
+        skus: ['3001', 'ALT-3001'],
         name: 'Daily Special',
         sellingPrice: 2.5,
         sellByWeight: false,
@@ -43,8 +45,31 @@ describe('SearchBar', () => {
 
     const item = selectActiveItems(useCartStore.getState())[0]
     expect(item.productId).toBe('p-special')
+    expect(item.sku).toBe('3001')
     expect(item.excludeFromGlobalDiscounts).toBe(true)
     expect(searchProducts).toHaveBeenCalledWith('3001')
+  })
+
+  it('maps primarySku when transitional sku is absent', async () => {
+    const user = userEvent.setup()
+    vi.mocked(searchProducts).mockResolvedValue([
+      {
+        id: 'p-cola',
+        primarySku: '7501000000028',
+        skus: ['7501000000028', '7501000001025'],
+        name: 'Cola 355ml',
+        sellingPrice: 14,
+      },
+    ])
+
+    render(<SearchBar autoFocus={false} />)
+    await user.type(screen.getByLabelText(/search or scan/i), '7501000001025')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => {
+      expect(selectActiveItems(useCartStore.getState())).toHaveLength(1)
+    })
+    expect(selectActiveItems(useCartStore.getState())[0].sku).toBe('7501000000028')
   })
 
   it('shows not found when the API returns no rows', async () => {

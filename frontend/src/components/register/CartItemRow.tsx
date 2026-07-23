@@ -47,7 +47,8 @@ export function CartItemRow({ item }: CartItemRowProps) {
           ) : null}
         </div>
         <p className="text-sm text-slate-500">
-          {item.sku} · {formatMoney(item.unitPrice)}
+          {item.sku ? `${item.sku} · ` : ''}
+          {formatMoney(item.unitPrice)}
         </p>
         <label className="mt-2 flex items-center gap-1 text-xs text-slate-600">
           <span>Item %</span>

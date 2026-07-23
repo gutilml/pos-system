@@ -67,6 +67,26 @@ describe('CartItemRow', () => {
     expect(screen.getByTestId('no-global-badge-p-special')).toHaveTextContent('No Global %')
   })
 
+  it('omits code prefix when sku is empty (name-only product)', () => {
+    render(
+      <ul>
+        <CartItemRow
+          item={{
+            productId: 'p-svc',
+            sku: '',
+            name: 'Service Fee',
+            unitPrice: 10,
+            quantity: 1,
+          }}
+        />
+      </ul>,
+    )
+
+    expect(screen.getByText('Service Fee')).toBeInTheDocument()
+    expect(screen.getByTestId('line-total-p-svc')).toHaveTextContent('10.0000')
+    expect(screen.queryByText(/·/)).not.toBeInTheDocument()
+  })
+
   it('updates item discount percentage on blur', async () => {
     const user = userEvent.setup()
     render(

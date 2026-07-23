@@ -5,7 +5,10 @@ const API_BASE = '/api/v1'
 
 export type ProductApi = {
   id: string
-  sku: string
+  /** Transitional alias of primarySku (Feature 027). */
+  sku?: string | null
+  primarySku?: string | null
+  skus?: string[]
   name: string
   description?: string | null
   costPrice?: number
@@ -20,7 +23,7 @@ export type ProductApi = {
 export function toCartProduct(dto: ProductApi): CartProduct {
   return {
     id: dto.id,
-    sku: dto.sku,
+    sku: dto.primarySku ?? dto.sku ?? '',
     name: dto.name,
     sellingPrice: Number(dto.sellingPrice),
     sellByWeight: dto.sellByWeight === true,
@@ -30,7 +33,7 @@ export function toCartProduct(dto: ProductApi): CartProduct {
 }
 
 /**
- * Register catalog lookup — exact SKU preferred on the backend (Feature 021).
+ * Register catalog lookup — exact code preferred on the backend (Features 021 / 027).
  */
 export async function searchProducts(query: string): Promise<ProductApi[]> {
   const trimmed = query.trim()
