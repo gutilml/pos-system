@@ -35,11 +35,16 @@ export function toCartProduct(dto: ProductApi): CartProduct {
 /**
  * Register catalog lookup — exact code preferred on the backend (Features 021 / 027).
  */
-export async function searchProducts(query: string): Promise<ProductApi[]> {
+export async function searchProducts(
+  query: string,
+  signal?: AbortSignal,
+): Promise<ProductApi[]> {
   const trimmed = query.trim()
   if (!trimmed) return []
 
   const params = new URLSearchParams({ q: trimmed })
-  const response = await apiFetch(`${API_BASE}/products/search?${params.toString()}`)
+  const response = await apiFetch(`${API_BASE}/products/search?${params.toString()}`, {
+    signal,
+  })
   return parseJson<ProductApi[]>(response)
 }
