@@ -244,13 +244,13 @@ INSERT INTO customers (id, store_id, name, phone, credit_limit, current_balance)
         150.0000
     );
 
--- BCrypt hashes for plaintext "admin" / "cashier" (cost 10). Regenerate with:
--- python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt(rounds=10)).decode())"
+-- BCrypt hashes for plaintext "admin" / "cashier" (cost 10, $2a$ for Spring BCryptPasswordEncoder).
+-- Regenerate: python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt(rounds=10, prefix=b'2a')).decode())"
 INSERT INTO users (id, username, password_hash, role, store_id, is_active) VALUES
     (
         '00000000-0000-0000-0000-000000000401',
         'admin',
-        '$2b$10$RtVi/T.dMr3VzR5NN71L5OiqUJnOAkrTPssfRTY8KXKVSnOAHIbfq',
+        '$2a$10$8SgogJ7SpV8.4wt/4R3W2u8YWET2oJky5q5BuCoMAhvA8NSDoNJva',
         'ADMIN',
         '00000000-0000-0000-0000-000000000001',
         true
@@ -258,7 +258,7 @@ INSERT INTO users (id, username, password_hash, role, store_id, is_active) VALUE
     (
         '00000000-0000-0000-0000-000000000402',
         'cashier',
-        '$2b$10$HX/JihurdXFzKe63ImLQTuJ7P7J15jjiMgrvkMz17T31I4L3HLU/i',
+        '$2a$10$V/WezvLnEDvgX5GdeZvLa.9nafA2nEQS.S62HGZOa6jbHnnS4rsSy',
         'CASHIER',
         '00000000-0000-0000-0000-000000000001',
         true

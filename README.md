@@ -24,6 +24,8 @@ Also: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) (architecture) · [docs/pending f
 docker compose up -d
 ```
 
+Postgres is published on host port **5433** (avoids clashing with a local Windows PostgreSQL on 5432). Backend JDBC URL matches this in `application.yml`.
+
 ### 2. Apply schema + seed demo data
 
 Backend uses `ddl-auto: validate`, so the schema must exist before Spring Boot starts.
