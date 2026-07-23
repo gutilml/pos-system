@@ -35,9 +35,9 @@ describe('ShiftCloseTicket', () => {
   it('renders expected, actual, and discrepancy from the closed shift', () => {
     render(<ShiftCloseTicket shift={closedShift} />)
 
-    expect(screen.getByTestId('ticket-expected-cash')).toHaveTextContent('150.0000')
-    expect(screen.getByTestId('ticket-actual-cash')).toHaveTextContent('148.5000')
-    expect(screen.getByTestId('ticket-discrepancy')).toHaveTextContent('-1.5000')
+    expect(screen.getByTestId('ticket-expected-cash')).toHaveTextContent('150.00')
+    expect(screen.getByTestId('ticket-actual-cash')).toHaveTextContent('148.50')
+    expect(screen.getByTestId('ticket-discrepancy')).toHaveTextContent('-1.50')
     expect(screen.getByTestId('ticket-discrepancy-label')).toHaveTextContent(/shortage/i)
   })
 
@@ -45,10 +45,10 @@ describe('ShiftCloseTicket', () => {
     render(<ShiftCloseTicket shift={closedShift} />)
 
     expect(screen.getByText(/sales summary/i)).toBeInTheDocument()
-    expect(screen.getByTestId('ticket-total-cash')).toHaveTextContent('50.0000')
-    expect(screen.getByTestId('ticket-total-card')).toHaveTextContent('25.0000')
-    expect(screen.getByTestId('ticket-total-credit')).toHaveTextContent('10.0000')
-    expect(screen.getByTestId('ticket-sales-grand-total')).toHaveTextContent('85.0000')
+    expect(screen.getByTestId('ticket-total-cash')).toHaveTextContent('50.00')
+    expect(screen.getByTestId('ticket-total-card')).toHaveTextContent('25.00')
+    expect(screen.getByTestId('ticket-total-credit')).toHaveTextContent('10.00')
+    expect(screen.getByTestId('ticket-sales-grand-total')).toHaveTextContent('85.00')
     expect(screen.getByText(/credit \(store tab\)/i)).toBeInTheDocument()
   })
 

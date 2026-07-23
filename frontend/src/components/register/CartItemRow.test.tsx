@@ -44,8 +44,8 @@ describe('CartItemRow', () => {
       </ul>,
     )
 
-    expect(screen.getByTestId('original-total-p-cola')).toHaveTextContent('1.9900')
-    expect(screen.getByTestId('line-total-p-cola')).toHaveTextContent('1.7910')
+    expect(screen.getByTestId('original-total-p-cola')).toHaveTextContent('1.99')
+    expect(screen.getByTestId('line-total-p-cola')).toHaveTextContent('1.79')
   })
 
   it('shows No Global % badge for excluded products', () => {
@@ -83,7 +83,7 @@ describe('CartItemRow', () => {
     )
 
     expect(screen.getByText('Service Fee')).toBeInTheDocument()
-    expect(screen.getByTestId('line-total-p-svc')).toHaveTextContent('10.0000')
+    expect(screen.getByTestId('line-total-p-svc')).toHaveTextContent('10.00')
     expect(screen.queryByText(/·/)).not.toBeInTheDocument()
   })
 

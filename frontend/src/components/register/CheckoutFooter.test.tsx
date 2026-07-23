@@ -40,7 +40,7 @@ describe('CheckoutFooter', () => {
     expect(screen.queryByRole('dialog', { name: /take payment/i })).not.toBeInTheDocument()
     await user.click(screen.getByTestId('open-checkout'))
     expect(screen.getByRole('dialog', { name: /take payment/i })).toBeInTheDocument()
-    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('1.9900')
+    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('1.99')
   })
 
   it('disables Pay when the cart is empty', () => {
@@ -91,7 +91,7 @@ describe('CheckoutFooter', () => {
     await user.type(globalInput, '10')
     await user.tab()
 
-    expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.1990')
-    expect(screen.getByText('Total').nextElementSibling).toHaveTextContent('1.7910')
+    expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.20')
+    expect(screen.getByText('Total').nextElementSibling).toHaveTextContent('1.79')
   })
 })

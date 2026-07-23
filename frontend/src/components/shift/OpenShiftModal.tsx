@@ -9,7 +9,7 @@ export function OpenShiftModal() {
   const clearError = useShiftStore((s) => s.clearError)
   const storeId = useAuthStore(selectStoreId)
 
-  const [amount, setAmount] = useState('100.0000')
+  const [amount, setAmount] = useState('100.00')
   const [localError, setLocalError] = useState<string | null>(null)
 
   async function handleSubmit(event: FormEvent) {

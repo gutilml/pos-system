@@ -47,24 +47,24 @@ describe('CheckoutModal', () => {
     const user = userEvent.setup()
     render(<CheckoutModal open onClose={() => undefined} />)
 
-    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('6.4800')
-    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('6.4800')
+    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('6.48')
+    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('6.48')
     expect(screen.getByTestId('complete-transaction')).toBeDisabled()
 
     const amount = screen.getByLabelText('Tender amount')
     await user.clear(amount)
-    await user.type(amount, '2.4800')
+    await user.type(amount, '2.48')
     await user.click(screen.getByRole('button', { name: 'Add tender' }))
 
-    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('4.0000')
+    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('4.00')
     expect(screen.getByTestId('complete-transaction')).toBeDisabled()
 
     await user.clear(screen.getByLabelText('Tender amount'))
-    await user.type(screen.getByLabelText('Tender amount'), '4.0000')
+    await user.type(screen.getByLabelText('Tender amount'), '4.00')
     await user.click(screen.getByRole('button', { name: 'Add tender' }))
 
-    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.0000')
-    expect(screen.getByTestId('checkout-tendered')).toHaveTextContent('6.4800')
+    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
+    expect(screen.getByTestId('checkout-tendered')).toHaveTextContent('6.48')
     expect(screen.getByTestId('complete-transaction')).toBeEnabled()
   })
 
@@ -87,7 +87,7 @@ describe('CheckoutModal', () => {
     expect(screen.getByTestId('customer-search')).toBeInTheDocument()
 
     await user.clear(screen.getByLabelText('Tender amount'))
-    await user.type(screen.getByLabelText('Tender amount'), '4.0000')
+    await user.type(screen.getByLabelText('Tender amount'), '4.00')
     await user.click(screen.getByRole('button', { name: 'Add tender' }))
 
     // Still blocked — no customer assigned yet.
@@ -101,7 +101,7 @@ describe('CheckoutModal', () => {
     await user.click(await screen.findByRole('button', { name: /Dana Tab/ }))
 
     expect(screen.getByTestId('assigned-customer')).toHaveTextContent('Dana Tab')
-    expect(screen.getByTestId('assigned-customer')).toHaveTextContent('450.0000')
+    expect(screen.getByTestId('assigned-customer')).toHaveTextContent('450.00')
 
     await waitFor(() => {
       expect(selectActivePayments(useCartStore.getState())).toHaveLength(1)
