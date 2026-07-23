@@ -58,7 +58,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 - [x] ~~**Cart line chrome** — Feature 038: hide SKU/unit price; headers Product · Qty · Discount · Subtotal; Item % in Discount. Stock = 043.~~
 - [x] ~~**Footer totals: Total only** — Feature 039: remove Subtotal/Tax from footer; keep Total (+ Discount saved when useful).~~
-- [ ] **Global discount as footer button** — Feature [040](../features/040-frontend-global-discount-footer-button/): move global % off the always-visible footer block; use a button between **Clear** and **Pay** (opens discount entry) to free center/cart space.
+- [x] ~~**Global discount as footer button** — Feature 040: Discount between Clear and Pay opens global % entry.~~
 - [ ] **Pay modal layout (split tenders)** — Feature [041](../features/041-frontend-pay-modal-layout-polish/): align closer to review mock (method choices + Remaining); **PAY** only when Remaining = 0 (exact cover; no overpay — same rule as Feature 036). Print and pay stays secondary. Incremental layout polish — not a tender-math rewrite.
 - [ ] **Cart Stock column** — Feature [043](../features/043-frontend-cart-stock-column/): when `enableInventory`, insert Stock between Qty and Discount; `displayStock = currentStock − line qty` (one line per `productId`); "—" if product not tracking; hide column+header when inventory off. Depends on BE [042](../features/042-backend-product-stock-inventory-flag/) + layout [038](../features/038-frontend-cart-line-chrome/).
 

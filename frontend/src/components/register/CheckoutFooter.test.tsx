@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
@@ -41,24 +41,28 @@ describe('CheckoutFooter', () => {
     expect(screen.getByTestId('open-checkout')).toBeDisabled()
   })
 
-  it('does not show a footer Card shortcut', () => {
+  it('does not show a permanent global discount input', () => {
     render(<CheckoutFooter />)
-    expect(screen.queryByTestId('card-payment')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Global Discount %')).not.toBeInTheDocument()
+    expect(screen.getByTestId('open-global-discount')).toBeInTheDocument()
   })
 
-  it('shows discount saved and Total only (no Subtotal or Tax)', async () => {
+  it('applies global discount from the Discount button modal', async () => {
     const user = userEvent.setup()
     render(<CheckoutFooter />)
-    expect(screen.queryByText('Subtotal')).not.toBeInTheDocument()
-    expect(screen.queryByText('Tax')).not.toBeInTheDocument()
     expect(screen.queryByTestId('discount-saved')).not.toBeInTheDocument()
+
+    await user.click(screen.getByTestId('open-global-discount'))
+    expect(screen.getByTestId('global-discount-modal')).toBeInTheDocument()
 
     const globalInput = screen.getByLabelText('Global Discount %')
     await user.clear(globalInput)
     await user.type(globalInput, '10')
-    await user.tab()
+    await user.click(screen.getByTestId('apply-global-discount'))
 
+    expect(screen.queryByTestId('global-discount-modal')).not.toBeInTheDocument()
     expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.20')
     expect(screen.getByTestId('footer-total')).toHaveTextContent('1.79')
+    expect(screen.getByTestId('open-global-discount')).toHaveTextContent(/10/)
   })
 })
