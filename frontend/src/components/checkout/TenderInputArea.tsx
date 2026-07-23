@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { formatMoney, roundMoney } from '@/lib/money'
+import { useT } from '@/i18n/useT'
 import type { PaymentMethod } from '@/store/useCartStore'
 
 type TenderInputAreaProps = {
@@ -17,6 +18,7 @@ export function TenderInputArea({
   onRequestCredit,
   disabled = false,
 }: TenderInputAreaProps) {
+  const t = useT()
   const [method, setMethod] = useState<PaymentMethod>('CASH')
   const [draft, setDraft] = useState(() => formatMoney(Math.max(0, remainingBalance)))
   const [localError, setLocalError] = useState<string | null>(null)
@@ -103,7 +105,7 @@ export function TenderInputArea({
         onClick={handleAdd}
         className="w-full rounded-lg bg-slate-900 px-4 py-2.5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-slate-800"
       >
-        Add tender
+        {t('checkout.addTender')}
       </button>
     </div>
   )

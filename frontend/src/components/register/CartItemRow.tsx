@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney, roundMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
+import { useT } from '@/i18n/useT'
 import {
   selectActiveGlobalDiscountPercentage,
   selectItemPricedLine,
@@ -9,9 +10,12 @@ import {
 } from '@/store/useCartStore'
 import type { CartItem } from '@/types/cart'
 
-/** Shared cart columns (Feature 038). Feature 043 may insert Stock between Qty and Discount. */
+/** Shared cart columns (Features 038 / 043). Fixed tracks so header and rows stay aligned. */
 export const CART_ROW_GRID =
-  'grid grid-cols-[minmax(0,1fr)_auto_5.5rem_6.5rem_auto] items-center gap-x-3 gap-y-1'
+  'grid grid-cols-[minmax(0,1fr)_9.5rem_5.5rem_6.5rem_4.5rem] items-center gap-x-3'
+
+export const CART_ROW_GRID_WITH_STOCK =
+  'grid grid-cols-[minmax(0,1fr)_9.5rem_4.5rem_5.5rem_6.5rem_4.5rem] items-center gap-x-3'
 
 export function formatCartStockDisplay(item: CartItem): string {
   if (item.trackInventory !== true) return '—'
@@ -26,6 +30,7 @@ type CartItemRowProps = {
 }
 
 export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemRowProps) {
+  const t = useT()
   const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
   const updateQuantity = useCartStore((s) => s.updateQuantity)
   const removeItem = useCartStore((s) => s.removeItem)
@@ -46,9 +51,7 @@ export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemR
     setDraftPct(null)
   }
 
-  const gridClass = showStock
-    ? 'grid grid-cols-[minmax(0,1fr)_auto_4.5rem_5.5rem_6.5rem_auto] items-center gap-x-3 gap-y-1'
-    : CART_ROW_GRID
+  const gridClass = showStock ? CART_ROW_GRID_WITH_STOCK : CART_ROW_GRID
 
   return (
     <li
@@ -66,7 +69,7 @@ export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemR
               className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900"
               data-testid={`no-global-badge-${item.productId}`}
             >
-              No Global %
+              {t('cart.noGlobal')}
             </span>
           ) : null}
         </div>
@@ -153,7 +156,7 @@ export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemR
         onClick={() => removeItem(item.productId)}
         className="rounded-lg px-2 py-2 text-sm text-slate-500 hover:bg-slate-100 hover:text-red-600"
       >
-        Remove
+        {t('cart.remove')}
       </button>
     </li>
   )
@@ -164,9 +167,8 @@ type CartListHeaderProps = {
 }
 
 export function CartListHeader({ showStock = false }: CartListHeaderProps) {
-  const gridClass = showStock
-    ? 'grid grid-cols-[minmax(0,1fr)_auto_4.5rem_5.5rem_6.5rem_auto] items-center gap-x-3'
-    : CART_ROW_GRID
+  const t = useT()
+  const gridClass = showStock ? CART_ROW_GRID_WITH_STOCK : CART_ROW_GRID
 
   return (
     <div
@@ -174,11 +176,11 @@ export function CartListHeader({ showStock = false }: CartListHeaderProps) {
       data-testid="cart-list-header"
       role="row"
     >
-      <span>Product</span>
-      <span className="justify-self-center">Qty</span>
-      {showStock ? <span className="justify-self-end">Stock</span> : null}
-      <span>Discount</span>
-      <span className="justify-self-end">Subtotal</span>
+      <span>{t('cart.product')}</span>
+      <span className="justify-self-center text-center">{t('cart.qty')}</span>
+      {showStock ? <span className="justify-self-end text-right">{t('cart.stock')}</span> : null}
+      <span className="text-left">{t('cart.discount')}</span>
+      <span className="justify-self-end text-right">{t('cart.subtotal')}</span>
       <span className="sr-only">Actions</span>
     </div>
   )

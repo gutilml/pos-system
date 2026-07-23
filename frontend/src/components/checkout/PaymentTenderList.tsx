@@ -1,4 +1,5 @@
 import { formatMoney } from '@/lib/money'
+import { useT } from '@/i18n/useT'
 import type { PaymentTender } from '@/store/useCartStore'
 
 type PaymentTenderListProps = {
@@ -7,10 +8,11 @@ type PaymentTenderListProps = {
 }
 
 export function PaymentTenderList({ payments, onRemove }: PaymentTenderListProps) {
+  const t = useT()
   if (payments.length === 0) {
     return (
       <p className="rounded-lg border border-dashed border-slate-300 px-3 py-4 text-center text-sm text-slate-500">
-        No tenders yet. Add cash, card, or store credit below.
+        {t('checkout.noTenders')}
       </p>
     )
   }

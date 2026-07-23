@@ -5,6 +5,7 @@ import { PaymentTenderList } from '@/components/checkout/PaymentTenderList'
 import { SaleTicket, type SaleTicketPayload } from '@/components/checkout/SaleTicket'
 import { TenderInputArea } from '@/components/checkout/TenderInputArea'
 import { formatMoney } from '@/lib/money'
+import { useT } from '@/i18n/useT'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import {
   selectActiveCustomer,
@@ -29,6 +30,7 @@ type CheckoutModalProps = {
 }
 
 export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps) {
+  const t = useT()
   const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
   const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
@@ -183,17 +185,17 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       <div className="flex max-h-[90dvh] w-full max-w-lg flex-col overflow-hidden rounded-2xl bg-white shadow-xl">
         <div className="border-b border-slate-200 px-5 py-4">
           <h2 id="checkout-modal-title" className="text-xl font-semibold text-slate-900">
-            Take payment
+            {t('checkout.title')}
           </h2>
           <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-xl bg-slate-50 px-3 py-3">
-              <dt className="text-slate-500">Grand total</dt>
+              <dt className="text-slate-500">{t('checkout.grandTotal')}</dt>
               <dd className="mt-1 text-2xl font-semibold tabular-nums text-slate-900" data-testid="checkout-grand-total">
                 {formatMoney(grandTotal)}
               </dd>
             </div>
             <div className="rounded-xl bg-amber-50 px-3 py-3 ring-1 ring-amber-200">
-              <dt className="font-medium text-amber-800">Remaining</dt>
+              <dt className="font-medium text-amber-800">{t('checkout.remaining')}</dt>
               <dd
                 className="mt-1 text-2xl font-semibold tabular-nums text-amber-950"
                 data-testid="checkout-balance-due"
@@ -203,7 +205,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             </div>
           </dl>
           <p className="mt-2 text-sm text-slate-600">
-            Tendered{' '}
+            {t('checkout.tendered')}{' '}
             <span className="font-medium tabular-nums text-slate-900" data-testid="checkout-tendered">
               {formatMoney(totalTendered)}
             </span>
@@ -273,7 +275,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             disabled={submitting}
             className="rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 disabled:opacity-50 sm:flex-1"
           >
-            Cancel
+            {t('checkout.cancel')}
           </button>
           <button
             type="button"
@@ -282,7 +284,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             data-testid="print-and-pay"
             className="rounded-xl border border-emerald-700 px-4 py-3 text-sm font-semibold text-emerald-900 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 sm:flex-1"
           >
-            Print and pay
+            {t('checkout.printAndPay')}
           </button>
           <button
             type="button"
@@ -291,7 +293,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             data-testid="complete-transaction"
             className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800 sm:flex-[2]"
           >
-            {submitting ? 'Saving…' : 'PAY'}
+            {submitting ? t('common.loading') : t('checkout.pay')}
           </button>
         </div>
       </div>

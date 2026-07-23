@@ -57,7 +57,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Product stock + inventory flag (API)** | [042](features/042-backend-product-stock-inventory-flag/README.md) | BE **042** done. |
 | **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** done. |
 | **Cart header column alignment** | [044](features/044-frontend-cart-header-column-alignment/README.md) | FE **044** done. |
-| **Store preferences / UI locale** | [045](features/045-backend-store-preferences/README.md), [046](features/046-frontend-ui-locale/README.md) | BE **045** done — DB `preferences` + settings API; FE **046** planned — EN/ES via store `uiLocale`. |
+| **Store preferences / UI locale** | [045](features/045-backend-store-preferences/README.md), [046](features/046-frontend-ui-locale/README.md) | BE **045** + FE **046** done — DB `preferences` + EN/ES UI. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -112,7 +112,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 043 | FE | Done | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
 | 044 | FE | Done | [README](features/044-frontend-cart-header-column-alignment/README.md) | [spec](features/044-frontend-cart-header-column-alignment/spec.md) · [plan](features/044-frontend-cart-header-column-alignment/plan.md) · [tasks](features/044-frontend-cart-header-column-alignment/tasks.md) |
 | 045 | BE | Done | [README](features/045-backend-store-preferences/README.md) | [spec](features/045-backend-store-preferences/spec.md) · [plan](features/045-backend-store-preferences/plan.md) · [tasks](features/045-backend-store-preferences/tasks.md) |
-| 046 | FE | Planned | [README](features/046-frontend-ui-locale/README.md) | [spec](features/046-frontend-ui-locale/spec.md) · [plan](features/046-frontend-ui-locale/plan.md) · [tasks](features/046-frontend-ui-locale/tasks.md) |
+| 046 | FE | Done | [README](features/046-frontend-ui-locale/README.md) | [spec](features/046-frontend-ui-locale/spec.md) · [plan](features/046-frontend-ui-locale/plan.md) · [tasks](features/046-frontend-ui-locale/tasks.md) |
 
 ---
 

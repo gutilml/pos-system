@@ -57,10 +57,12 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Remaining; PAY disabled until Remaining = 0). Promoted to FE-only triads (keep `[ ]` until shipped):
 
 - [x] ~~**Cart line chrome** — Feature 038: hide SKU/unit price; headers Product · Qty · Discount · Subtotal; Item % in Discount. Stock = 043.~~
+- [x] ~~**Cart header column alignment** — Feature 044: shared fixed grid tracks so Qty/Stock/Discount/Subtotal headers sit over their cells.~~
 - [x] ~~**Footer totals: Total only** — Feature 039: remove Subtotal/Tax from footer; keep Total (+ Discount saved when useful).~~
 - [x] ~~**Global discount as footer button** — Feature 040: Discount between Clear and Pay opens global % entry.~~
 - [x] ~~**Pay modal layout (split tenders)** — Feature 041: amount left + method stack; Remaining emphasized; PAY when Remaining = 0 (036 math unchanged).~~
 - [x] ~~**Cart Stock column** — Feature 043: when `enableInventory`, Stock between Qty and Discount; `displayStock = currentStock − line qty`; "—" if not tracking; hide when inventory off.~~
+- [x] ~~**UI locale EN/ES (store preference)** — Feature 046: hydrate from `/me.uiLocale`; CashierMenu EN/ES; PATCH store preferences (DB). Depends on BE 045. No localStorage as source of truth.~~
 
 ## Shift UX polish
 
@@ -74,7 +76,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 - [x] ~~**Multi SKU/barcode per product (UX)** — Feature 028: register consumes `skus` / `primarySku`; cart shows primary when present; name-only OK. Admin SKU list UI still deferred.~~
 - [x] ~~**Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.~~
-- [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when settings API exists.
+- [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when Feature [045](../features/045-backend-store-preferences/) preferences (e.g. `default_tax_rate`) ship.
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
 - [ ] **Void tickets** — UI for void once backend supports those statuses.

@@ -1,7 +1,9 @@
 import { useState, type FormEvent } from 'react'
+import { useT } from '@/i18n/useT'
 import { useAuthStore } from '@/store/useAuthStore'
 
 export function LoginForm() {
+  const t = useT()
   const login = useAuthStore((s) => s.login)
   const error = useAuthStore((s) => s.error)
   const clearError = useAuthStore((s) => s.clearError)
@@ -17,7 +19,7 @@ export function LoginForm() {
     setLocalError(null)
 
     if (!username.trim() || !password) {
-      setLocalError('Enter username and password')
+      setLocalError(t('login.missingCredentials'))
       return
     }
 
@@ -42,14 +44,12 @@ export function LoginForm() {
         aria-labelledby="login-title"
       >
         <h1 id="login-title" className="text-xl font-semibold text-slate-900">
-          Sign in
+          {t('login.title')}
         </h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Enter your cashier or admin credentials to open the register.
-        </p>
+        <p className="mt-2 text-sm text-slate-600">{t('login.subtitle')}</p>
 
         <label htmlFor="login-username" className="mt-5 mb-1 block text-sm font-medium text-slate-700">
-          Username
+          {t('login.username')}
         </label>
         <input
           id="login-username"
@@ -62,7 +62,7 @@ export function LoginForm() {
         />
 
         <label htmlFor="login-password" className="mt-4 mb-1 block text-sm font-medium text-slate-700">
-          Password
+          {t('login.password')}
         </label>
         <input
           id="login-password"
@@ -84,7 +84,7 @@ export function LoginForm() {
           disabled={submitting}
           className="mt-5 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
         >
-          {submitting ? 'Signing in…' : 'Sign in'}
+          {submitting ? t('login.submitting') : t('login.submit')}
         </button>
       </form>
     </div>

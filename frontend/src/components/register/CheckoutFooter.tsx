@@ -3,6 +3,7 @@ import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
+import { useT } from '@/i18n/useT'
 import {
   selectActiveCustomer,
   selectActiveGlobalDiscountPercentage,
@@ -16,6 +17,7 @@ import {
  * Pay opens the checkout modal. Global discount is a button between Clear and Pay (Feature 040).
  */
 export function CheckoutFooter() {
+  const t = useT()
   const items = useCartStore(selectActiveItems)
   const taxRate = useCartStore((s) => s.taxRate)
   const globalDiscount = useCartStore(selectActiveGlobalDiscountPercentage)
@@ -52,14 +54,14 @@ export function CheckoutFooter() {
         <dl className="mb-4 space-y-1 text-sm text-slate-600">
           {discountSaved > 0 ? (
             <div className="flex justify-between text-emerald-800">
-              <dt>Discount saved</dt>
+              <dt>{t('footer.discountSaved')}</dt>
               <dd className="tabular-nums font-medium" data-testid="discount-saved">
                 −{formatMoney(discountSaved)}
               </dd>
             </div>
           ) : null}
           <div className="flex justify-between text-base font-semibold text-slate-900">
-            <dt>Total</dt>
+            <dt>{t('footer.total')}</dt>
             <dd className="tabular-nums" data-testid="footer-total">
               {formatMoney(grandTotal)}
             </dd>
@@ -68,7 +70,7 @@ export function CheckoutFooter() {
 
         {customer ? (
           <p className="mb-3 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900" data-testid="footer-customer">
-            Customer: <span className="font-semibold">{customer.name}</span>
+            {t('footer.customer')}: <span className="font-semibold">{customer.name}</span>
           </p>
         ) : null}
 
@@ -78,7 +80,7 @@ export function CheckoutFooter() {
             onClick={() => clearCart()}
             className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
           >
-            Clear
+            {t('footer.clear')}
           </button>
           <button
             type="button"
@@ -86,7 +88,7 @@ export function CheckoutFooter() {
             onClick={openDiscount}
             className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
           >
-            {globalDiscount > 0 ? `Discount ${activePctLabel}%` : 'Discount'}
+            {globalDiscount > 0 ? `${t('footer.discount')} ${activePctLabel}%` : t('footer.discount')}
           </button>
           <button
             type="button"
@@ -95,7 +97,7 @@ export function CheckoutFooter() {
             data-testid="open-checkout"
             className="flex-[2] rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
           >
-            Pay
+            {t('footer.pay')}
           </button>
         </div>
       </footer>
@@ -110,10 +112,10 @@ export function CheckoutFooter() {
         >
           <div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl" data-register-editable>
             <h2 id="global-discount-title" className="text-lg font-semibold text-slate-900">
-              Global discount
+              {t('footer.discount')}
             </h2>
             <label htmlFor="global-discount" className="mt-4 mb-1 block text-sm font-medium text-slate-700">
-              Global Discount %
+              {t('footer.globalDiscountLabel')}
             </label>
             <input
               id="global-discount"
@@ -134,7 +136,7 @@ export function CheckoutFooter() {
                 onClick={closeDiscount}
                 className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700"
               >
-                Cancel
+                {t('footer.cancel')}
               </button>
               <button
                 type="button"
@@ -142,7 +144,7 @@ export function CheckoutFooter() {
                 onClick={applyDiscount}
                 className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white"
               >
-                Apply
+                {t('footer.applyDiscount')}
               </button>
             </div>
           </div>

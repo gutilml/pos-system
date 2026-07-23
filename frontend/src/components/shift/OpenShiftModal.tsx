@@ -1,8 +1,10 @@
 import { useState, type FormEvent } from 'react'
+import { useT } from '@/i18n/useT'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
 export function OpenShiftModal() {
+  const t = useT()
   const openShift = useShiftStore((s) => s.openShift)
   const isLoading = useShiftStore((s) => s.isLoading)
   const error = useShiftStore((s) => s.error)
@@ -42,14 +44,14 @@ export function OpenShiftModal() {
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
       >
         <h2 id="open-shift-title" className="text-xl font-semibold text-slate-900">
-          Open Shift
+          {t('shift.openTitle')}
         </h2>
         <p className="mt-2 text-sm text-slate-600">
           Enter the starting cash float before using the register.
         </p>
 
         <label htmlFor="starting-cash" className="mt-5 mb-1 block text-sm font-medium text-slate-700">
-          Starting Cash
+          {t('shift.startingCash')}
         </label>
         <input
           id="starting-cash"
@@ -72,7 +74,7 @@ export function OpenShiftModal() {
           disabled={isLoading}
           className="mt-5 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
         >
-          {isLoading ? 'Opening…' : 'Open Shift'}
+          {isLoading ? t('common.loading') : t('shift.openAction')}
         </button>
       </form>
     </div>

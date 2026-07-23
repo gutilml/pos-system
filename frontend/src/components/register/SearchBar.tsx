@@ -6,6 +6,7 @@ import {
   requestRegisterSearchFocus,
 } from '@/lib/registerSearchFocus'
 import { useCartStore } from '@/store/useCartStore'
+import { useT } from '@/i18n/useT'
 
 type SearchBarProps = {
   autoFocus?: boolean
@@ -15,6 +16,7 @@ const TYPEAHEAD_MIN_CHARS = 3
 const TYPEAHEAD_MAX_RESULTS = 10
 
 export function SearchBar({ autoFocus = true }: SearchBarProps) {
+  const t = useT()
   const [query, setQuery] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
@@ -101,14 +103,14 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
     try {
       const rows = await searchProducts(trimmed)
       if (rows.length === 0) {
-        setError('No product found')
+        setError(t('search.noProduct'))
         clearSuggestions()
         return
       }
 
       addProduct(rows[0])
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Product search failed')
+      setError(err instanceof Error ? err.message : t('search.failed'))
     } finally {
       setSearching(false)
       requestRegisterSearchFocus()
@@ -165,7 +167,7 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
       className="relative shrink-0 border-b border-slate-200 bg-white px-4 py-3"
     >
       <label htmlFor="register-search" className="sr-only">
-        Search or scan barcode
+        {t('search.placeholder')}
       </label>
       <input
         ref={inputRef}
@@ -183,7 +185,7 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
         }}
         onKeyDown={handleKeyDown}
         onBlur={handleBlur}
-        placeholder="Search / Scan Barcode"
+        placeholder={t('search.placeholder')}
         autoComplete="off"
         disabled={searching}
         className="w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-lg text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2 disabled:opacity-60"

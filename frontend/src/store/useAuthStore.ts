@@ -7,6 +7,8 @@ import {
   type AuthUser,
 } from '@/api/auth'
 import { DEFAULT_STORE_ID } from '@/api/shifts'
+import { patchStoreSettings } from '@/api/storeSettings'
+import { normalizeLocale, type Locale } from '@/i18n/locale'
 import { useCartStore } from '@/store/useCartStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
@@ -20,13 +22,19 @@ type AuthState = {
   login: (username: string, password: string) => Promise<void>
   logout: () => Promise<void>
   clearError: () => void
+  setLocaleAndPersist: (locale: Locale) => Promise<void>
 }
 
 export function selectStoreId(state: AuthState): string {
   return state.user?.storeId ?? DEFAULT_STORE_ID
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
+function applyDocumentLang(user: AuthUser | null) {
+  if (typeof document === 'undefined') return
+  document.documentElement.lang = normalizeLocale(user?.uiLocale)
+}
+
+export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   status: 'idle',
   error: null,
@@ -38,8 +46,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       await fetchCsrf()
       const user = await fetchMe()
+      applyDocumentLang(user)
       set({ user, status: 'authenticated', error: null })
     } catch {
+      applyDocumentLang(null)
       set({ user: null, status: 'unauthenticated', error: null })
     }
   },
@@ -48,6 +58,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ error: null })
     try {
       const user = await loginRequest(username, password)
+      applyDocumentLang(user)
       set({ user, status: 'authenticated', error: null })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed'
@@ -71,6 +82,31 @@ export const useAuthStore = create<AuthState>((set) => ({
       hydrationFailed: false,
     })
     useCartStore.getState().resetAllTickets()
+    applyDocumentLang(null)
     set({ user: null, status: 'unauthenticated' })
+  },
+
+  setLocaleAndPersist: async (locale) => {
+    const { user } = get()
+    const storeId = user?.storeId
+    if (!user || !storeId) {
+      throw new Error('Not authenticated')
+    }
+    const previous = user
+    const optimistic = { ...user, uiLocale: locale }
+    applyDocumentLang(optimistic)
+    set({ user: optimistic, error: null })
+    try {
+      const updated = await patchStoreSettings(storeId, {
+        preferences: { ui_locale: locale },
+      })
+      const nextUser = { ...user, uiLocale: normalizeLocale(updated.uiLocale) }
+      applyDocumentLang(nextUser)
+      set({ user: nextUser })
+    } catch (error) {
+      applyDocumentLang(previous)
+      set({ user: previous })
+      throw error
+    }
   },
 }))
