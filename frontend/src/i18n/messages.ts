@@ -37,6 +37,18 @@ export type MessageKey =
   | 'footer.globalDiscountLabel'
   | 'footer.applyDiscount'
   | 'footer.cancel'
+  | 'customer.change'
+  | 'customer.assignTitle'
+  | 'customer.assignHint'
+  | 'customer.availableCredit'
+  | 'customer.find'
+  | 'customer.placeholder'
+  | 'customer.searching'
+  | 'customer.noneFound'
+  | 'customer.searchFailed'
+  | 'tickets.new'
+  | 'tickets.newAria'
+  | 'tickets.openList'
   | 'checkout.title'
   | 'checkout.grandTotal'
   | 'checkout.remaining'
@@ -77,7 +89,7 @@ export const en: MessageDict = {
   'search.failed': 'Product search failed',
   'cart.product': 'Product',
   'cart.qty': 'Qty',
-  'cart.stock': 'Stock',
+  'cart.stock': 'Inv',
   'cart.discount': 'Discount',
   'cart.subtotal': 'Subtotal',
   'cart.remove': 'Remove',
@@ -91,6 +103,18 @@ export const en: MessageDict = {
   'footer.globalDiscountLabel': 'Global Discount %',
   'footer.applyDiscount': 'Apply',
   'footer.cancel': 'Cancel',
+  'customer.change': 'Change customer',
+  'customer.assignTitle': 'Assign customer',
+  'customer.assignHint': 'Attach a store-credit customer to this ticket before Pay.',
+  'customer.availableCredit': 'Available credit',
+  'customer.find': 'Find customer',
+  'customer.placeholder': 'Name or phone',
+  'customer.searching': 'Searching…',
+  'customer.noneFound': 'No customers found.',
+  'customer.searchFailed': 'Customer search failed',
+  'tickets.new': '+ New Ticket',
+  'tickets.newAria': 'New ticket',
+  'tickets.openList': 'Open tickets',
   'checkout.title': 'Take payment',
   'checkout.grandTotal': 'Grand total',
   'checkout.remaining': 'Remaining',
@@ -130,7 +154,7 @@ export const es: MessageDict = {
   'search.failed': 'Error al buscar productos',
   'cart.product': 'Producto',
   'cart.qty': 'Cant.',
-  'cart.stock': 'Stock',
+  'cart.stock': 'Inv',
   'cart.discount': 'Descuento',
   'cart.subtotal': 'Subtotal',
   'cart.remove': 'Quitar',
@@ -144,6 +168,18 @@ export const es: MessageDict = {
   'footer.globalDiscountLabel': 'Descuento global %',
   'footer.applyDiscount': 'Aplicar',
   'footer.cancel': 'Cancelar',
+  'customer.change': 'Cambiar cliente',
+  'customer.assignTitle': 'Asignar cliente',
+  'customer.assignHint': 'Asigna un cliente con crédito de tienda a este ticket antes de cobrar.',
+  'customer.availableCredit': 'Crédito disponible',
+  'customer.find': 'Buscar cliente',
+  'customer.placeholder': 'Nombre o teléfono',
+  'customer.searching': 'Buscando…',
+  'customer.noneFound': 'No se encontraron clientes.',
+  'customer.searchFailed': 'Error al buscar clientes',
+  'tickets.new': '+ Ticket nuevo',
+  'tickets.newAria': 'Ticket nuevo',
+  'tickets.openList': 'Tickets abiertos',
   'checkout.title': 'Cobrar',
   'checkout.grandTotal': 'Total general',
   'checkout.remaining': 'Restante',

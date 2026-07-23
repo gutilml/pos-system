@@ -1,5 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { searchCustomers, type CustomerSearchResult } from '@/api/customers'
+import { translate } from '@/i18n/messages'
+import { useLocale, useT } from '@/i18n/useT'
 import { formatMoney, roundMoney } from '@/lib/money'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import type { AssignedCustomer } from '@/store/useCartStore'
@@ -26,6 +28,8 @@ function availableCredit(customer: CustomerSearchResult): number {
 }
 
 export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchProps) {
+  const t = useT()
+  const locale = useLocale()
   const inputId = useId()
   const storeId = useAuthStore(selectStoreId)
   const [query, setQuery] = useState('')
@@ -54,7 +58,9 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
         .catch((err: unknown) => {
           if (cancelled) return
           setResults([])
-          setError(err instanceof Error ? err.message : 'Customer search failed')
+          setError(
+            err instanceof Error ? err.message : translate('customer.searchFailed', locale),
+          )
         })
         .finally(() => {
           if (!cancelled) setLoading(false)
@@ -65,12 +71,12 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [query, storeId])
+  }, [query, storeId, locale])
 
   return (
     <div className="space-y-2" data-testid="customer-search">
       <label htmlFor={inputId} className="block text-sm font-medium text-slate-700">
-        Find customer
+        {t('customer.find')}
       </label>
       <input
         id={inputId}
@@ -78,13 +84,13 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
         autoFocus={autoFocus}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Name or phone"
+        placeholder={t('customer.placeholder')}
         className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:ring-2"
       />
 
       {loading ? (
         <p className="text-sm text-slate-500" role="status">
-          Searching…
+          {t('customer.searching')}
         </p>
       ) : null}
 
@@ -106,7 +112,7 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
                 <span className="font-medium text-slate-900">{customer.name}</span>
                 <span className="text-xs text-slate-500">
                   {customer.phone ? `${customer.phone} · ` : ''}
-                  Available credit {formatMoney(availableCredit(customer))}
+                  {t('customer.availableCredit')} {formatMoney(availableCredit(customer))}
                 </span>
               </button>
             </li>
@@ -115,7 +121,7 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
       ) : null}
 
       {!loading && !error && query.trim().length > 0 && results.length === 0 ? (
-        <p className="text-sm text-slate-500">No customers found.</p>
+        <p className="text-sm text-slate-500">{t('customer.noneFound')}</p>
       ) : null}
     </div>
   )

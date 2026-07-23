@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
+import { useAuthStore } from '@/store/useAuthStore'
 import { resetCartForTests, selectActiveCustomer, useCartStore } from '@/store/useCartStore'
 
 vi.mock('@/api/customers', () => ({
@@ -15,6 +16,19 @@ describe('AssignCustomerControl', () => {
     vi.clearAllMocks()
     resetCartForTests()
     useCartStore.getState().setCustomer(null)
+    useAuthStore.setState({
+      user: {
+        id: 'u1',
+        username: 'cashier',
+        role: 'CASHIER',
+        storeId: 'store-1',
+        storeName: 'Demo',
+        active: true,
+        uiLocale: 'en',
+      },
+      status: 'authenticated',
+      error: null,
+    })
   })
 
   it('assigns a customer from the selling screen without opening Pay', async () => {
@@ -63,5 +77,29 @@ describe('AssignCustomerControl', () => {
 
     expect(selectActiveCustomer(useCartStore.getState())).toBeNull()
     expect(screen.queryByTestId('assign-customer-modal')).not.toBeInTheDocument()
+  })
+
+  it('renders Spanish customer chrome when locale is es', async () => {
+    const user = userEvent.setup()
+    useAuthStore.setState({
+      user: {
+        id: 'u1',
+        username: 'cashier',
+        role: 'CASHIER',
+        storeId: 'store-1',
+        storeName: 'Demo',
+        active: true,
+        uiLocale: 'es',
+      },
+      status: 'authenticated',
+      error: null,
+    })
+
+    render(<AssignCustomerControl />)
+    expect(screen.getByTestId('open-assign-customer')).toHaveTextContent('Cliente')
+
+    await user.click(screen.getByTestId('open-assign-customer'))
+    expect(screen.getByRole('heading', { name: 'Asignar cliente' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Buscar cliente')).toBeInTheDocument()
   })
 })

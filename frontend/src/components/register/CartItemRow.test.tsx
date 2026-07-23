@@ -79,10 +79,10 @@ describe('CartItemRow', () => {
     expect(header).not.toHaveTextContent('Stock')
   })
 
-  it('inserts Stock header between Qty and Discount when inventory is on', () => {
+  it('inserts Inv header between Qty and Discount when inventory is on', () => {
     render(<CartListHeader showStock />)
     const header = screen.getByTestId('cart-list-header')
-    expect(header.textContent).toMatch(/Product.*Qty.*Stock.*Discount.*Subtotal/)
+    expect(header.textContent).toMatch(/Product.*Qty.*Inv.*Discount.*Subtotal/)
   })
 
   it('shows remaining stock as currentStock minus quantity for tracked products', async () => {

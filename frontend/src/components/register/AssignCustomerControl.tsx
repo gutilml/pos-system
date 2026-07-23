@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { CustomerSearch } from '@/components/checkout/CustomerSearch'
+import { useT } from '@/i18n/useT'
 import { formatMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import {
@@ -9,6 +10,7 @@ import {
 } from '@/store/useCartStore'
 
 export function AssignCustomerControl() {
+  const t = useT()
   const customer = useCartStore(selectActiveCustomer)
   const setCustomer = useCartStore((s) => s.setCustomer)
   const [open, setOpen] = useState(false)
@@ -32,7 +34,7 @@ export function AssignCustomerControl() {
           onClick={() => setOpen(true)}
           className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
         >
-          {customer ? 'Change customer' : 'Customer'}
+          {customer ? t('customer.change') : t('footer.customer')}
         </button>
       </div>
 
@@ -46,11 +48,9 @@ export function AssignCustomerControl() {
         >
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl">
             <h2 id="assign-customer-title" className="text-lg font-semibold text-slate-900">
-              Assign customer
+              {t('customer.assignTitle')}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Attach a store-credit customer to this ticket before Pay.
-            </p>
+            <p className="mt-1 text-sm text-slate-600">{t('customer.assignHint')}</p>
 
             {customer ? (
               <div
@@ -60,7 +60,7 @@ export function AssignCustomerControl() {
                 <div>
                   <p className="font-medium text-emerald-950">{customer.name}</p>
                   <p className="text-xs text-emerald-800">
-                    Available credit {formatMoney(selectAvailableCredit(customer))}
+                    {t('customer.availableCredit')} {formatMoney(selectAvailableCredit(customer))}
                   </p>
                 </div>
                 <button
@@ -72,7 +72,7 @@ export function AssignCustomerControl() {
                   }}
                   className="text-xs font-medium text-emerald-900 underline"
                 >
-                  Clear
+                  {t('footer.clear')}
                 </button>
               </div>
             ) : null}
@@ -92,7 +92,7 @@ export function AssignCustomerControl() {
               onClick={close}
               className="mt-4 w-full rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
             >
-              Cancel
+              {t('footer.cancel')}
             </button>
           </div>
         </div>

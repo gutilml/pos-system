@@ -2,12 +2,26 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { TicketTabs } from '@/components/register/TicketTabs'
+import { useAuthStore } from '@/store/useAuthStore'
 import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 describe('TicketTabs', () => {
   beforeEach(() => {
     localStorage.clear()
     resetCartForTests()
+    useAuthStore.setState({
+      user: {
+        id: 'u1',
+        username: 'cashier',
+        role: 'CASHIER',
+        storeId: 'store-1',
+        storeName: 'Demo',
+        active: true,
+        uiLocale: 'en',
+      },
+      status: 'authenticated',
+      error: null,
+    })
   })
 
   it('creates a new ticket and switches the active cart', async () => {
@@ -52,5 +66,26 @@ describe('TicketTabs', () => {
 
     expect(useCartStore.getState().activeTicketId).toBe(firstId)
     expect(selectActiveItems(useCartStore.getState())[0].sku).toBe('1001')
+  })
+
+  it('shows Ticket nuevo when UI locale is Spanish', () => {
+    useAuthStore.setState({
+      user: {
+        id: 'u1',
+        username: 'cashier',
+        role: 'CASHIER',
+        storeId: 'store-1',
+        storeName: 'Demo',
+        active: true,
+        uiLocale: 'es',
+      },
+      status: 'authenticated',
+      error: null,
+    })
+
+    render(<TicketTabs />)
+    expect(screen.getByRole('button', { name: 'Ticket nuevo' })).toHaveTextContent(
+      '+ Ticket nuevo',
+    )
   })
 })

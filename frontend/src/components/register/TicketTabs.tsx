@@ -1,3 +1,4 @@
+import { useT } from '@/i18n/useT'
 import {
   selectActiveAmountReceived,
   selectActiveItems,
@@ -5,6 +6,7 @@ import {
 } from '@/store/useCartStore'
 
 export function TicketTabs() {
+  const t = useT()
   const ticketOrder = useCartStore((s) => s.ticketOrder)
   const tickets = useCartStore((s) => s.tickets)
   const activeTicketId = useCartStore((s) => s.activeTicketId)
@@ -16,7 +18,7 @@ export function TicketTabs() {
     <div
       className="flex shrink-0 items-stretch gap-1 overflow-x-auto border-b border-slate-200 bg-slate-200/80 px-2 pt-2"
       role="tablist"
-      aria-label="Open tickets"
+      aria-label={t('tickets.openList')}
     >
       {ticketOrder.map((id) => {
         const ticket = tickets[id]
@@ -65,9 +67,9 @@ export function TicketTabs() {
         type="button"
         onClick={() => createNewTicket()}
         className="mb-0 shrink-0 rounded-t-lg px-3 py-2 text-sm font-semibold text-emerald-800 hover:bg-white/80"
-        aria-label="New ticket"
+        aria-label={t('tickets.newAria')}
       >
-        + New Ticket
+        {t('tickets.new')}
       </button>
     </div>
   )
