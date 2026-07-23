@@ -43,6 +43,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Auth / RBAC / users** | [025](features/025-backend-auth-v1/README.md), [026](features/026-frontend-auth-v1/README.md) | BE + FE Auth v1 done. User CRUD / role policies / multi-store deferred. |
 | **Multi SKU / barcode (1→N)** | [027](features/027-backend-multi-sku/README.md), [028](features/028-frontend-multi-sku/README.md) | BE + FE done. Admin SKU UI deferred. |
 | **Expected cash / close ticket tenders** | [029](features/029-backend-expected-cash-tenders/README.md), [030](features/030-frontend-shift-close-ticket-tenders/README.md) | BE **029** + FE **030** done. |
+| **Cash drawer pay-in / pay-out UI** | [031](features/031-frontend-cash-drawer-pay-in-out/README.md) | FE **031** done (Feature 007 events API). |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -82,6 +83,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 028 | FE | Done | [README](features/028-frontend-multi-sku/README.md) | [spec](features/028-frontend-multi-sku/spec.md) · [plan](features/028-frontend-multi-sku/plan.md) · [tasks](features/028-frontend-multi-sku/tasks.md) |
 | 029 | BE | Done | [README](features/029-backend-expected-cash-tenders/README.md) | [spec](features/029-backend-expected-cash-tenders/spec.md) · [plan](features/029-backend-expected-cash-tenders/plan.md) · [tasks](features/029-backend-expected-cash-tenders/tasks.md) |
 | 030 | FE | Done | [README](features/030-frontend-shift-close-ticket-tenders/README.md) | [spec](features/030-frontend-shift-close-ticket-tenders/spec.md) · [plan](features/030-frontend-shift-close-ticket-tenders/plan.md) · [tasks](features/030-frontend-shift-close-ticket-tenders/tasks.md) |
+| 031 | FE | Done | [README](features/031-frontend-cash-drawer-pay-in-out/README.md) | [spec](features/031-frontend-cash-drawer-pay-in-out/spec.md) · [plan](features/031-frontend-cash-drawer-pay-in-out/plan.md) · [tasks](features/031-frontend-cash-drawer-pay-in-out/tasks.md) |
 
 ---
 

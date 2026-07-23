@@ -8,9 +8,11 @@ vi.mock('@/api/shifts', () => ({
   fetchCurrentShift: vi.fn(),
   openShiftRequest: vi.fn(),
   closeShiftRequest: vi.fn(),
+  addDrawerEventRequest: vi.fn(),
 }))
 
 import {
+  addDrawerEventRequest,
   closeShiftRequest,
   fetchCurrentShift,
   openShiftRequest,
@@ -128,5 +130,31 @@ describe('useShiftStore', () => {
     useShiftStore.setState({ lastClosedShift: closedShift })
     useShiftStore.getState().clearLastClosedShift()
     expect(useShiftStore.getState().lastClosedShift).toBeNull()
+  })
+
+  it('addDrawerEvent posts against the open shift id', async () => {
+    useShiftStore.setState({ currentShift: openShift })
+    vi.mocked(addDrawerEventRequest).mockResolvedValue({
+      id: 'evt-1',
+      shiftId: 'shift-1',
+      type: 'PAY_OUT',
+      amount: 25,
+      reason: 'Safe drop',
+      createdAt: '2026-07-16T14:00:00Z',
+    })
+
+    const event = await useShiftStore.getState().addDrawerEvent({
+      type: 'PAY_OUT',
+      amount: 25,
+      reason: 'Safe drop',
+    })
+
+    expect(addDrawerEventRequest).toHaveBeenCalledWith('shift-1', {
+      type: 'PAY_OUT',
+      amount: 25,
+      reason: 'Safe drop',
+    })
+    expect(event.id).toBe('evt-1')
+    expect(useShiftStore.getState().currentShift?.status).toBe('OPEN')
   })
 })

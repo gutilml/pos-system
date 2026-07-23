@@ -10,6 +10,7 @@ vi.mock('@/api/shifts', () => ({
   fetchCurrentShift: vi.fn(),
   openShiftRequest: vi.fn(),
   closeShiftRequest: vi.fn(),
+  addDrawerEventRequest: vi.fn(),
 }))
 
 import { closeShiftRequest } from '@/api/shifts'

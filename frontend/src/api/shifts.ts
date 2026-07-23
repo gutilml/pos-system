@@ -62,3 +62,32 @@ export async function closeShiftRequest(
   })
   return parseJson<Shift>(response)
 }
+
+export type CashDrawerEventType = 'PAY_IN' | 'PAY_OUT'
+
+export type CashDrawerEvent = {
+  id: string
+  shiftId: string
+  type: CashDrawerEventType
+  amount: number
+  reason: string
+  createdAt: string | null
+}
+
+export type CashDrawerEventRequest = {
+  type: CashDrawerEventType
+  amount: number
+  reason: string
+}
+
+export async function addDrawerEventRequest(
+  shiftId: string,
+  body: CashDrawerEventRequest,
+): Promise<CashDrawerEvent> {
+  const response = await apiFetch(`${API_BASE}/shifts/${shiftId}/events`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return parseJson<CashDrawerEvent>(response)
+}

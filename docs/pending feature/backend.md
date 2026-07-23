@@ -2,7 +2,15 @@
 
 Discussion list. Not scheduled work — capture gaps and follow-ups to decide later.
 
-**Maintenance:** Update this file whenever backend work is shipped or a new backend gap is found. Mark done items `[x]`, note partials, and append newly discovered follow-ups.
+**Maintenance:** Update this file whenever backend work is shipped or a new backend gap is found.
+
+**Done pattern (easy scan):** When an item is fully complete, use `[x]` **and** wrap the item text in markdown strikethrough:
+
+```markdown
+- [x] ~~**Short title** — Feature NNN: brief note.~~
+```
+
+Open / deferred / on-hold items stay `[ ]` with **no** strikethrough. Partials stay `[ ]` with a one-line note of what remains. Promoted-but-not-shipped items stay `[ ]` with a triad path note.
 
 ## Phase A — live register wire-up (planned triads)
 
@@ -10,9 +18,9 @@ Backend slice of Phase A (small features, FE/BE separated). Implement in number 
 
 | # | Feature folder | Status |
 |---|----------------|--------|
-| 017 | `docs/features/017-backend-shift-current/` | **Done** — `GET /api/v1/shifts/current?storeId=` |
-| 019 | `docs/features/019-backend-customer-search/` | **Done** — `GET /api/v1/customers/search?storeId=&q=` |
-| 021 | `docs/features/021-backend-product-search/` | **Done** — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`) |
+| 017 | `docs/features/017-backend-shift-current/` | ~~**Done** — `GET /api/v1/shifts/current?storeId=`~~ |
+| 019 | `docs/features/019-backend-customer-search/` | ~~**Done** — `GET /api/v1/customers/search?storeId=&q=`~~ |
+| 021 | `docs/features/021-backend-product-search/` | ~~**Done** — `GET /api/v1/products/search?q=` (+ register fields on `ProductDTO`)~~ |
 
 Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.md`).
 
@@ -20,35 +28,35 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 ## Shift & cash drawer
 
-- [x] **`GET /api/v1/shifts/current`** — Feature 017: store-scoped open shift or 404 via `ShiftService.getCurrentOpenShift`. Unblocks frontend Feature 018.
+- [x] ~~**`GET /api/v1/shifts/current`** — Feature 017: store-scoped open shift or 404 via `ShiftService.getCurrentOpenShift`. Unblocks frontend Feature 018.~~
 - [ ] **Shift history / lookup** — e.g. `GET /api/v1/shifts/{id}` and/or list closed shifts for reconciliation reports.
 - [ ] **Cashier / user on shifts** — Today shifts are store-only (`shifts` has no user columns). **Decision (2026-07-22): Option C — defer.** Auth v1 ships login/JWT/CSRF without changing shift schema or open/current/close rules (still one OPEN shift per store). Follow-up later: prefer **A** (audit `opened_by` / `closed_by`) before **B** (one open shift per user).
-- [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize).
-- [x] **Expected cash = CASH tenders only** — Feature 029: starting + CASH payments − change_given + pay-ins − pay-outs. CARD/CREDIT on closed `ShiftDTO` for FE **030**.
+- [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize). FE UI promoted as Feature **031** (uses current API as-is).
+- [x] ~~**Expected cash = CASH tenders only** — Feature 029: starting + CASH payments − change_given + pay-ins − pay-outs. CARD/CREDIT on closed `ShiftDTO` for FE **030**.~~
 
 ## Catalog & checkout APIs
 
-- [x] **Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.
-- [x] **Multi SKU/barcode per product (1→N)** — Feature 027: `product_skus`; drop `products.sku`; zero codes OK; hard-delete; `PUT /api/v1/products/{id}/skus`. Paired FE: **028**.
+- [x] ~~**Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.~~
+- [x] ~~**Multi SKU/barcode per product (1→N)** — Feature 027: `product_skus`; drop `products.sku`; zero codes OK; hard-delete; `PUT /api/v1/products/{id}/skus`. Paired FE: **028**.~~
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.
 - [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.)
 - [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions.
-- [x] **Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.
+- [x] ~~**Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.~~
 
 ## Payments
 
-- [x] **Stripe Checkout + webhook** — Feature 010: MXN Checkout Sessions, cents conversion, signature-verified `/api/v1/payments/webhook` completing local transactions.
+- [x] ~~**Stripe Checkout + webhook** — Feature 010: MXN Checkout Sessions, cents conversion, signature-verified `/api/v1/payments/webhook` completing local transactions.~~
 - [ ] **Stripe checkout for split-payment CARD portions** — **ON HOLD (2026-07-17).** Target merchants use a **separate physical card terminal**; POS will not drive Stripe Checkout for CARD tenders for now. **Keep all existing Stripe APIs/code** (Feature 010/011) in the codebase for a later opt-in path — do not delete. When CARD is selected in checkout, treat it like any other tender: on **Pay / Complete Transaction**, persist the sale as paid (`COMPLETED` with `payments[]` including CARD). No Stripe session, no QR modal required for that path.
 - [ ] **Create IN_PROGRESS transactions for card sales** — **Deferred with Stripe hold.** Cash/complete path persists `COMPLETED` immediately; revive IN_PROGRESS + Checkout Session when Stripe card-in-POS is re-enabled.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Still useful for Feature 011 QR polling when Stripe resumes; **not blocking** the external-terminal CARD flow. Keep on backlog after Phase A live wire-up unless needed sooner.
 
 ## Opt-in modules (vision / schema)
 
-- [x] **Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.
+- [x] ~~**Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.~~
 - [ ] **Customer credit UI** — Feature 014 shipped register CREDIT assignment at checkout; dedicated tab pay-down screens still pending (see frontend).
-- [x] **Customer search API** — Feature 019: store-scoped name/phone search (`enable_customer_credit` gated), max 20 results as `CustomerDTO[]`.
+- [x] ~~**Customer search API** — Feature 019: store-scoped name/phone search (`enable_customer_credit` gated), max 20 results as `CustomerDTO[]`.~~
 - [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.
 - [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled).
 
@@ -64,14 +72,14 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - **User provisioning (v1):** Seed and/or SQL only — **no** user CRUD API yet (deferred below).
 - **Shift ↔ user:** **Deferred (Option C, 2026-07-22).** Auth v1 does not change shift open/current/close; still one open shift per store. Later: audit stamps (A), then optional per-user shifts (B).
 
-- [x] **AuthN/AuthZ (v1)** — Feature 025: Spring Security + JWT HttpOnly cookie (`POS_TOKEN`) + CSRF + strict CORS; roles ADMIN/CASHIER (equal permissions).
-- [x] **System users table (v1)** — Feature 025: `users` table + seed `admin`/`admin` and `cashier`/`cashier`.
-- [x] **Login / logout / me APIs (v1)** — Feature 025: `GET /auth/csrf`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.
+- [x] ~~**AuthN/AuthZ (v1)** — Feature 025: Spring Security + JWT HttpOnly cookie (`POS_TOKEN`) + CSRF + strict CORS; roles ADMIN/CASHIER (equal permissions).~~
+- [x] ~~**System users table (v1)** — Feature 025: `users` table + seed `admin`/`admin` and `cashier`/`cashier`.~~
+- [x] ~~**Login / logout / me APIs (v1)** — Feature 025: `GET /auth/csrf`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.~~
 - [ ] **User management API** — Create / update / deactivate / list users (ADMIN). **Deferred** after Auth v1 login works. Pair with FE user-mgmt screen.
 - [ ] **Role-based authorization policies** — Deferred: when ADMIN vs CASHIER should differ (drawer rules, catalog admin, etc.). v1: both allowed everywhere once authenticated.
 - [ ] **Multi-organization / multi-store tenancy** — Future model: organizations (e.g. Oxxo, Walmart) → many stores under an org; same platform serving multiple orgs. Not in Auth v1. Needs org tables, store membership, and picker UX later.
 - [ ] **CORS / API versioning conventions** — Partially decided (strict React origin for Auth v1); confirm for SPA + Fargate deployment hosts/env.
-- [x] **Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers, admin + cashier users. Re-runnable.
+- [x] ~~**Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers, admin + cashier users. Re-runnable.~~
 
 ---
 
