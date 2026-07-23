@@ -18,6 +18,8 @@ export type ProductApi = {
   sellByWeight?: boolean
   unitOfMeasure?: string | null
   excludeFromGlobalDiscounts?: boolean
+  trackInventory?: boolean
+  currentStock?: number
 }
 
 export function toCartProduct(dto: ProductApi): CartProduct {
@@ -29,6 +31,8 @@ export function toCartProduct(dto: ProductApi): CartProduct {
     sellByWeight: dto.sellByWeight === true,
     unitOfMeasure: dto.unitOfMeasure ?? undefined,
     excludeFromGlobalDiscounts: dto.excludeFromGlobalDiscounts === true,
+    trackInventory: dto.trackInventory === true,
+    currentStock: Number.isFinite(Number(dto.currentStock)) ? Number(dto.currentStock) : 0,
   }
 }
 

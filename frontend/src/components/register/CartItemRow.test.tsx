@@ -79,6 +79,72 @@ describe('CartItemRow', () => {
     expect(header).not.toHaveTextContent('Stock')
   })
 
+  it('inserts Stock header between Qty and Discount when inventory is on', () => {
+    render(<CartListHeader showStock />)
+    const header = screen.getByTestId('cart-list-header')
+    expect(header.textContent).toMatch(/Product.*Qty.*Stock.*Discount.*Subtotal/)
+  })
+
+  it('shows remaining stock as currentStock minus quantity for tracked products', async () => {
+    const user = userEvent.setup()
+    resetCartForTests({
+      items: [
+        {
+          productId: 'p-cola',
+          sku: '1001',
+          name: 'Cola 12oz',
+          unitPrice: 1.99,
+          quantity: 2,
+          trackInventory: true,
+          currentStock: 12,
+        },
+      ],
+    })
+
+    const { rerender } = render(
+      <ul>
+        <CartItemRow
+          showStock
+          item={selectActiveItems(useCartStore.getState())[0]}
+        />
+      </ul>,
+    )
+
+    expect(screen.getByTestId('cart-stock-p-cola')).toHaveTextContent('10')
+
+    await user.click(screen.getByRole('button', { name: 'Increase quantity of Cola 12oz' }))
+    rerender(
+      <ul>
+        <CartItemRow
+          showStock
+          item={selectActiveItems(useCartStore.getState())[0]}
+        />
+      </ul>,
+    )
+    expect(screen.getByTestId('cart-stock-p-cola')).toHaveTextContent('9')
+  })
+
+  it('shows em dash for non-tracked products when Stock column is visible', () => {
+    render(
+      <ul>
+        <CartItemRow
+          showStock
+          item={{
+            productId: 'p-svc',
+            sku: '',
+            name: 'Service Fee',
+            unitPrice: 10,
+            quantity: 1,
+            trackInventory: false,
+            currentStock: 0,
+          }}
+        />
+      </ul>,
+    )
+
+    expect(screen.getByTestId('cart-stock-p-svc')).toHaveTextContent('—')
+  })
+
   it('updates item discount percentage on blur from the Discount column', async () => {
     const user = userEvent.setup()
     render(

@@ -25,7 +25,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Data model / JPA** | [002](features/002-backend-data-layer/README.md) | Entities + repositories from schema |
 | **Core catalog + checkout API** | [003](features/003-backend-core-api/README.md) | Products, transactions, DTOs/services |
 | **Register UI shell** | [004](features/004-frontend-register-ui/README.md) | Search, cart, footer layout |
-| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields done; **043** cart Stock column |
+| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields done; **043** cart Stock column done |
 | **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md) | Weight modal + optional scale |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md) | Open / events / close; **017** = `GET …/current` (planned) |
 | **Shift gate UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md) | Gate + persist; **018** = no fail-open (planned) |
@@ -55,7 +55,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Global discount footer button** | [040](features/040-frontend-global-discount-footer-button/README.md) | FE **040** done. |
 | **Pay modal layout polish** | [041](features/041-frontend-pay-modal-layout-polish/README.md) | FE **041** done. |
 | **Product stock + inventory flag (API)** | [042](features/042-backend-product-stock-inventory-flag/README.md) | BE **042** done. |
-| **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** planned — Stock between Qty/Discount when inventory on. |
+| **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** done. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -107,7 +107,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 040 | FE | Done | [README](features/040-frontend-global-discount-footer-button/README.md) | [spec](features/040-frontend-global-discount-footer-button/spec.md) · [plan](features/040-frontend-global-discount-footer-button/plan.md) · [tasks](features/040-frontend-global-discount-footer-button/tasks.md) |
 | 041 | FE | Done | [README](features/041-frontend-pay-modal-layout-polish/README.md) | [spec](features/041-frontend-pay-modal-layout-polish/spec.md) · [plan](features/041-frontend-pay-modal-layout-polish/plan.md) · [tasks](features/041-frontend-pay-modal-layout-polish/tasks.md) |
 | 042 | BE | Done | [README](features/042-backend-product-stock-inventory-flag/README.md) | [spec](features/042-backend-product-stock-inventory-flag/spec.md) · [plan](features/042-backend-product-stock-inventory-flag/plan.md) · [tasks](features/042-backend-product-stock-inventory-flag/tasks.md) |
-| 043 | FE | Planned | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
+| 043 | FE | Done | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
 
 ---
 
@@ -126,7 +126,7 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 9. [040](features/040-frontend-global-discount-footer-button/README.md) — global discount as footer button
 10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish ~~(done)~~
 11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` ~~(done)~~
-12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled (after 038 + 042)
+12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled ~~(done)~~
 
 ---
 

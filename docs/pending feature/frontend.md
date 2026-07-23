@@ -60,7 +60,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Footer totals: Total only** — Feature 039: remove Subtotal/Tax from footer; keep Total (+ Discount saved when useful).~~
 - [x] ~~**Global discount as footer button** — Feature 040: Discount between Clear and Pay opens global % entry.~~
 - [x] ~~**Pay modal layout (split tenders)** — Feature 041: amount left + method stack; Remaining emphasized; PAY when Remaining = 0 (036 math unchanged).~~
-- [ ] **Cart Stock column** — Feature [043](../features/043-frontend-cart-stock-column/): when `enableInventory`, insert Stock between Qty and Discount; `displayStock = currentStock − line qty` (one line per `productId`); "—" if product not tracking; hide column+header when inventory off. Depends on BE [042](../features/042-backend-product-stock-inventory-flag/) + layout [038](../features/038-frontend-cart-line-chrome/).
+- [x] ~~**Cart Stock column** — Feature 043: when `enableInventory`, Stock between Qty and Discount; `displayStock = currentStock − line qty`; "—" if not tracking; hide when inventory off.~~
 
 ## Shift UX polish
 
@@ -98,7 +98,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 ## Opt-in module UIs
 
-- [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true. Register cart Stock column promoted separately as Feature [043](../features/043-frontend-cart-stock-column/) (needs BE [042](../features/042-backend-product-stock-inventory-flag/)).
+- [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true. Register cart Stock column shipped as Feature [043](../features/043-frontend-cart-stock-column/).
 - [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Assign-from-register shipped as Feature **037**. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD).
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 

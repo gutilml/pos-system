@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
-import { formatMoney } from '@/lib/money'
+import { formatMoney, roundMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import {
   selectActiveGlobalDiscountPercentage,
@@ -12,6 +12,11 @@ import type { CartItem } from '@/types/cart'
 /** Shared cart columns (Feature 038). Feature 043 may insert Stock between Qty and Discount. */
 export const CART_ROW_GRID =
   'grid grid-cols-[minmax(0,1fr)_auto_5.5rem_6.5rem_auto] items-center gap-x-3 gap-y-1'
+
+export function formatCartStockDisplay(item: CartItem): string {
+  if (item.trackInventory !== true) return '—'
+  return String(roundMoney((item.currentStock ?? 0) - item.quantity))
+}
 
 type CartItemRowProps = {
   item: CartItem
@@ -29,6 +34,7 @@ export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemR
   const priced = selectItemPricedLine(item, globalDiscount)
   const hasDiscount = priced.lineDiscountAmount > 0
   const originalLineTotal = formatMoney(priced.originalUnitPrice * item.quantity)
+  const resolvedStock = stockDisplay ?? formatCartStockDisplay(item)
 
   const [draftPct, setDraftPct] = useState<string | null>(null)
   const displayPct =
@@ -93,7 +99,7 @@ export function CartItemRow({ item, showStock = false, stockDisplay }: CartItemR
           className="justify-self-end text-sm tabular-nums text-slate-700"
           data-testid={`cart-stock-${item.productId}`}
         >
-          {stockDisplay ?? '—'}
+          {resolvedStock}
         </p>
       ) : null}
 

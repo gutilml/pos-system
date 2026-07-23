@@ -6,6 +6,8 @@ export type CartProduct = {
   sellByWeight?: boolean
   unitOfMeasure?: string
   excludeFromGlobalDiscounts?: boolean
+  trackInventory?: boolean
+  currentStock?: number
 }
 
 export type CartItem = {
@@ -17,4 +19,7 @@ export type CartItem = {
   /** Decimal fraction (0.10 = 10% off this line). */
   itemDiscountPercentage?: number
   excludeFromGlobalDiscounts?: boolean
+  /** Snapshot from product at first add (Feature 043). */
+  trackInventory?: boolean
+  currentStock?: number
 }

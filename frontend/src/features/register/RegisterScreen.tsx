@@ -9,11 +9,13 @@ import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
+import { useAuthStore } from '@/store/useAuthStore'
 import { selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 export function RegisterScreen() {
   const items = useCartStore(selectActiveItems)
   const pendingWeight = useCartStore((s) => s.pendingWeightProduct)
+  const showStock = useAuthStore((s) => s.user?.enableInventory === true)
 
   useEffect(() => {
     if (!pendingWeight) {
@@ -43,10 +45,10 @@ export function RegisterScreen() {
               </p>
             ) : (
               <>
-                <CartListHeader />
+                <CartListHeader showStock={showStock} />
                 <ul>
                   {items.map((item) => (
-                    <CartItemRow key={item.productId} item={item} />
+                    <CartItemRow key={item.productId} item={item} showStock={showStock} />
                   ))}
                 </ul>
               </>

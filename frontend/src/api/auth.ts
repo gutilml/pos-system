@@ -11,6 +11,8 @@ export type AuthUser = {
   storeId: string | null
   storeName: string | null
   active: boolean
+  /** Store `features.enable_inventory` from Feature 042. */
+  enableInventory?: boolean
 }
 
 export async function fetchCsrf(): Promise<string> {

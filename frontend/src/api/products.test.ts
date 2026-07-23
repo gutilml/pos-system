@@ -13,6 +13,8 @@ describe('toCartProduct', () => {
       sellByWeight: true,
       unitOfMeasure: 'lb',
       excludeFromGlobalDiscounts: false,
+      trackInventory: true,
+      currentStock: 4.5,
     })
 
     expect(product).toEqual({
@@ -23,6 +25,8 @@ describe('toCartProduct', () => {
       sellByWeight: true,
       unitOfMeasure: 'lb',
       excludeFromGlobalDiscounts: false,
+      trackInventory: true,
+      currentStock: 4.5,
     })
   })
 
@@ -50,5 +54,7 @@ describe('toCartProduct', () => {
     })
 
     expect(product.sku).toBe('')
+    expect(product.trackInventory).toBe(false)
+    expect(product.currentStock).toBe(0)
   })
 })
