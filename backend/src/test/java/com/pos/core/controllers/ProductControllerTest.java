@@ -2,6 +2,8 @@ package com.pos.core.controllers;
 
 import com.pos.core.dtos.ProductDTO;
 import com.pos.core.dtos.ProductRequestDTO;
+import com.pos.core.dtos.ProductSkusUpdateDTO;
+import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.GlobalExceptionHandler;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.services.ProductService;
@@ -22,6 +24,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -39,6 +42,8 @@ class ProductControllerTest {
         return new ProductDTO(
                 id,
                 "SKU-1",
+                "SKU-1",
+                List.of("SKU-1", "SKU-ALT"),
                 "Cola",
                 null,
                 new BigDecimal("1.0000"),
@@ -59,6 +64,9 @@ class ProductControllerTest {
         mockMvc.perform(get("/api/v1/products"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].sku").value("SKU-1"))
+                .andExpect(jsonPath("$[0].primarySku").value("SKU-1"))
+                .andExpect(jsonPath("$[0].skus[0]").value("SKU-1"))
+                .andExpect(jsonPath("$[0].skus[1]").value("SKU-ALT"))
                 .andExpect(jsonPath("$[0].sellingPrice").value(1.9900))
                 .andExpect(jsonPath("$[0].sellByWeight").value(false))
                 .andExpect(jsonPath("$[0].excludeFromGlobalDiscounts").value(false));
@@ -92,7 +100,7 @@ class ProductControllerTest {
 
         String body = """
                 {
-                  "sku": "SKU-1",
+                  "skus": ["SKU-1", "SKU-ALT"],
                   "name": "Cola",
                   "costPrice": 1.0000,
                   "sellingPrice": 1.9900
@@ -104,7 +112,38 @@ class ProductControllerTest {
                         .content(body))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(id.toString()))
-                .andExpect(jsonPath("$.sku").value("SKU-1"));
+                .andExpect(jsonPath("$.sku").value("SKU-1"))
+                .andExpect(jsonPath("$.primarySku").value("SKU-1"));
+    }
+
+    @Test
+    void replaceSkus_returnsUpdatedProduct() throws Exception {
+        UUID id = UUID.fromString("55555555-5555-5555-5555-555555555555");
+        when(productService.replaceSkus(eq(id), any(ProductSkusUpdateDTO.class))).thenReturn(sampleProduct(id));
+
+        String body = """
+                {
+                  "skus": ["SKU-1", "SKU-ALT"]
+                }
+                """;
+
+        mockMvc.perform(put("/api/v1/products/" + id + "/skus")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(body))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.skus[1]").value("SKU-ALT"));
+    }
+
+    @Test
+    void replaceSkus_returns400OnBusinessRule() throws Exception {
+        UUID id = UUID.fromString("55555555-5555-5555-5555-555555555555");
+        when(productService.replaceSkus(eq(id), any(ProductSkusUpdateDTO.class)))
+                .thenThrow(new BusinessRuleException("SKU already in use: X"));
+
+        mockMvc.perform(put("/api/v1/products/" + id + "/skus")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"skus\":[\"X\"]}"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

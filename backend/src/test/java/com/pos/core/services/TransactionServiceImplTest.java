@@ -74,19 +74,16 @@ class TransactionServiceImplTest {
     void setUp() {
         cola = new Product();
         cola.setId(UUID.fromString("11111111-1111-1111-1111-111111111111"));
-        cola.setSku("COLA");
         cola.setName("Cola");
         cola.setSellingPrice(new BigDecimal("1.9900"));
 
         chips = new Product();
         chips.setId(UUID.fromString("22222222-2222-2222-2222-222222222222"));
-        chips.setSku("CHIPS");
         chips.setName("Chips");
         chips.setSellingPrice(new BigDecimal("2.5000"));
 
         specialPrice = new Product();
         specialPrice.setId(UUID.fromString("44444444-4444-4444-4444-444444444444"));
-        specialPrice.setSku("SPECIAL");
         specialPrice.setName("Special Price Item");
         specialPrice.setSellingPrice(new BigDecimal("2.5000"));
         specialPrice.setExcludeFromGlobalDiscounts(true);
@@ -208,7 +205,6 @@ class TransactionServiceImplTest {
     void create_itemDiscountExcludesLineFromGlobalDiscount() {
         Product premium = new Product();
         premium.setId(UUID.fromString("55555555-5555-5555-5555-555555555555"));
-        premium.setSku("PREMIUM");
         premium.setName("Premium");
         premium.setSellingPrice(new BigDecimal("100.0000"));
 

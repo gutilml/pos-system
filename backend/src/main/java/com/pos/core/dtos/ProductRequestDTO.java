@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 public record ProductRequestDTO(
-        @NotBlank String sku,
+        List<String> skus,
+        String primarySku,
         @NotBlank String name,
         String description,
         BigDecimal costPrice,

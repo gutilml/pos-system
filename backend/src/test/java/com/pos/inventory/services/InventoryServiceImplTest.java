@@ -57,14 +57,12 @@ class InventoryServiceImplTest {
     void deductStock_individualUnit_deductsFractionalYieldFromParent() {
         Product parent = new Product();
         parent.setId(parentId);
-        parent.setSku("CASE-24");
         parent.setName("Cola Case");
         parent.setSellingPrice(new BigDecimal("40.0000"));
         parent.setCurrentStock(new BigDecimal("10.0000"));
 
         Product child = new Product();
         child.setId(childId);
-        child.setSku("CAN-1");
         child.setName("Cola Can");
         child.setSellingPrice(new BigDecimal("1.9900"));
         child.setIndividualUnit(true);
@@ -94,7 +92,6 @@ class InventoryServiceImplTest {
     void deductStock_weightBasedItem_deductsExactQuantity() {
         Product deli = new Product();
         deli.setId(weightId);
-        deli.setSku("DELI-HAM");
         deli.setName("Deli Ham");
         deli.setSellingPrice(new BigDecimal("8.9900"));
         deli.setSellByWeight(true);
@@ -118,7 +115,6 @@ class InventoryServiceImplTest {
     void deductStock_standardIntegerQuantity_deductsWholeUnits() {
         Product chips = new Product();
         chips.setId(weightId);
-        chips.setSku("CHIPS");
         chips.setName("Chips");
         chips.setSellingPrice(new BigDecimal("2.5000"));
         chips.setCurrentStock(new BigDecimal("20.0000"));

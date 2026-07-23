@@ -41,6 +41,7 @@ Use this table when you know the *subject*, not the feature number.
 | **CARD = external terminal** | [023](features/023-frontend-external-terminal-card/README.md) | Mark paid on Pay; no Stripe QR (planned) |
 | **Close shift discrepancy print** | [024](features/024-frontend-shift-discrepancy-ticket/README.md) | No manager auth; browser print ticket after blind close |
 | **Auth / RBAC / users** | [025](features/025-backend-auth-v1/README.md), [026](features/026-frontend-auth-v1/README.md) | BE + FE Auth v1 done. User CRUD / role policies / multi-store deferred. |
+| **Multi SKU / barcode (1→N)** | [027](features/027-backend-multi-sku/README.md), [028](features/028-frontend-multi-sku/README.md) | BE **027** done. FE register consume = **028** (planned). |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -76,6 +77,8 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 024 | FE | Done | [README](features/024-frontend-shift-discrepancy-ticket/README.md) | [spec](features/024-frontend-shift-discrepancy-ticket/spec.md) · [plan](features/024-frontend-shift-discrepancy-ticket/plan.md) · [tasks](features/024-frontend-shift-discrepancy-ticket/tasks.md) |
 | 025 | BE | Done | [README](features/025-backend-auth-v1/README.md) | [spec](features/025-backend-auth-v1/spec.md) · [plan](features/025-backend-auth-v1/plan.md) · [tasks](features/025-backend-auth-v1/tasks.md) |
 | 026 | FE | Done | [README](features/026-frontend-auth-v1/README.md) | [spec](features/026-frontend-auth-v1/spec.md) · [plan](features/026-frontend-auth-v1/plan.md) · [tasks](features/026-frontend-auth-v1/tasks.md) |
+| 027 | BE | Done | [README](features/027-backend-multi-sku/README.md) | [spec](features/027-backend-multi-sku/spec.md) · [plan](features/027-backend-multi-sku/plan.md) · [tasks](features/027-backend-multi-sku/tasks.md) |
+| 028 | FE | Planned | [README](features/028-frontend-multi-sku/README.md) | [spec](features/028-frontend-multi-sku/spec.md) · [plan](features/028-frontend-multi-sku/plan.md) · [tasks](features/028-frontend-multi-sku/tasks.md) |
 
 ---
 

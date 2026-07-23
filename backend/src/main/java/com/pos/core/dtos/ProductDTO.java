@@ -7,6 +7,8 @@ import java.util.UUID;
 public record ProductDTO(
         UUID id,
         String sku,
+        String primarySku,
+        List<String> skus,
         String name,
         String description,
         BigDecimal costPrice,
@@ -17,4 +19,7 @@ public record ProductDTO(
         String unitOfMeasure,
         Boolean excludeFromGlobalDiscounts
 ) {
+    /**
+     * {@code sku} is a transitional alias of {@code primarySku} (nullable when the product has no codes).
+     */
 }

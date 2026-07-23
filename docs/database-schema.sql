@@ -19,9 +19,9 @@ CREATE TABLE categories (
 );
 
 -- 4. PRODUCTS (The Core Catalog)
+-- Scannable codes live in product_skus (1 product → N codes). Product identity is id only.
 CREATE TABLE products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    sku VARCHAR(100) UNIQUE NOT NULL, -- Barcode
     name VARCHAR(255) NOT NULL,
     description TEXT,
     
@@ -47,6 +47,19 @@ CREATE TABLE products (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 4b. PRODUCT_SKUS (scannable SKU / barcode codes; zero or more per product)
+CREATE TABLE product_skus (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    code VARCHAR(100) NOT NULL,
+    is_primary BOOLEAN NOT NULL DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE UNIQUE INDEX uq_product_skus_code_ci ON product_skus (LOWER(code));
+CREATE INDEX idx_product_skus_product_id ON product_skus (product_id);
+CREATE UNIQUE INDEX uq_product_skus_one_primary ON product_skus (product_id) WHERE is_primary = true;
 
 -- 5. PRODUCT_CATEGORY (Junction Table for Multi-Category Margin Selection)
 CREATE TABLE product_category (

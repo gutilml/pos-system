@@ -2,22 +2,27 @@ package com.pos.core.services;
 
 import com.pos.core.dtos.ProductDTO;
 import com.pos.core.dtos.ProductRequestDTO;
+import com.pos.core.dtos.ProductSkusUpdateDTO;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.Category;
 import com.pos.core.models.Product;
+import com.pos.core.models.ProductSku;
 import com.pos.core.repositories.CategoryRepository;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.core.repositories.ProductSkuRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -31,10 +36,16 @@ public class ProductServiceImpl implements ProductService {
     public static final int SEARCH_LIMIT = 25;
 
     private final ProductRepository productRepository;
+    private final ProductSkuRepository productSkuRepository;
     private final CategoryRepository categoryRepository;
 
-    public ProductServiceImpl(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public ProductServiceImpl(
+            ProductRepository productRepository,
+            ProductSkuRepository productSkuRepository,
+            CategoryRepository categoryRepository
+    ) {
         this.productRepository = productRepository;
+        this.productSkuRepository = productSkuRepository;
         this.categoryRepository = categoryRepository;
     }
 
@@ -60,10 +71,10 @@ public class ProductServiceImpl implements ProductService {
             return Collections.emptyList();
         }
 
-        return productRepository.findBySkuIgnoreCaseAndActiveTrue(trimmed)
+        return productRepository.findActiveByCodeIgnoreCase(trimmed)
                 .map(product -> List.of(toDto(product)))
                 .orElseGet(() -> productRepository
-                        .searchActiveByNameOrSku(trimmed, PageRequest.of(0, SEARCH_LIMIT))
+                        .searchActiveByNameOrCode(trimmed, PageRequest.of(0, SEARCH_LIMIT))
                         .stream()
                         .map(this::toDto)
                         .toList());
@@ -81,13 +92,21 @@ public class ProductServiceImpl implements ProductService {
         BigDecimal sellingPrice = resolveSellingPrice(request.sellingPrice(), costPrice, request.categoryId(), categories);
 
         Product product = new Product();
-        product.setSku(request.sku());
         product.setName(request.name());
         product.setDescription(request.description());
         product.setCostPrice(costPrice);
         product.setSellingPrice(sellingPrice);
         product.setCategories(categories);
 
+        applySkus(product, request.skus(), request.primarySku());
+
+        return toDto(productRepository.save(product));
+    }
+
+    @Override
+    public ProductDTO replaceSkus(UUID productId, ProductSkusUpdateDTO request) {
+        Product product = getProduct(productId);
+        applySkus(product, request.skus(), request.primarySku());
         return toDto(productRepository.save(product));
     }
 
@@ -115,6 +134,79 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return costPrice.divide(divisor, MONEY_SCALE, MONEY_ROUNDING);
+    }
+
+    private void applySkus(Product product, List<String> rawSkus, String rawPrimary) {
+        List<String> codes = normalizeSkuList(rawSkus);
+        String primary = resolvePrimaryCode(codes, rawPrimary);
+
+        product.getSkus().clear();
+        productRepository.flush();
+
+        for (String code : codes) {
+            assertCodeAvailable(code, product.getId());
+            ProductSku sku = new ProductSku();
+            sku.setProduct(product);
+            sku.setCode(code);
+            sku.setIsPrimary(code.equalsIgnoreCase(primary));
+            product.getSkus().add(sku);
+        }
+    }
+
+    private void assertCodeAvailable(String code, UUID productId) {
+        boolean taken = productId == null
+                ? productSkuRepository.existsByCodeIgnoreCase(code)
+                : productSkuRepository.existsByCodeIgnoreCaseAndProductIdNot(code, productId);
+        if (taken) {
+            throw new BusinessRuleException("SKU already in use: " + code);
+        }
+    }
+
+    private static List<String> normalizeSkuList(List<String> rawSkus) {
+        if (rawSkus == null || rawSkus.isEmpty()) {
+            return List.of();
+        }
+
+        List<String> normalized = new ArrayList<>();
+        Set<String> seen = new HashSet<>();
+        for (String raw : rawSkus) {
+            if (raw == null) {
+                throw new BusinessRuleException("SKU codes cannot be blank");
+            }
+            String code = raw.trim();
+            if (code.isEmpty()) {
+                throw new BusinessRuleException("SKU codes cannot be blank");
+            }
+            String key = code.toLowerCase(Locale.ROOT);
+            if (!seen.add(key)) {
+                throw new BusinessRuleException("Duplicate SKU in request: " + code);
+            }
+            normalized.add(code);
+        }
+        return normalized;
+    }
+
+    private static String resolvePrimaryCode(List<String> codes, String rawPrimary) {
+        if (codes.isEmpty()) {
+            if (rawPrimary != null && !rawPrimary.trim().isEmpty()) {
+                throw new BusinessRuleException("primarySku requires at least one code in skus");
+            }
+            return null;
+        }
+
+        if (rawPrimary == null || rawPrimary.trim().isEmpty()) {
+            return codes.get(0);
+        }
+
+        String primary = rawPrimary.trim();
+        boolean present = codes.stream().anyMatch(c -> c.equalsIgnoreCase(primary));
+        if (!present) {
+            throw new BusinessRuleException("primarySku must be one of the provided skus");
+        }
+        return codes.stream()
+                .filter(c -> c.equalsIgnoreCase(primary))
+                .findFirst()
+                .orElse(primary);
     }
 
     private BigDecimal resolveSellingPrice(
@@ -177,9 +269,14 @@ public class ProductServiceImpl implements ProductService {
                 .sorted()
                 .toList();
 
+        String primarySku = product.resolvePrimarySku();
+        List<String> skus = orderedSkuCodes(product);
+
         return new ProductDTO(
                 product.getId(),
-                product.getSku(),
+                primarySku,
+                primarySku,
+                skus,
                 product.getName(),
                 product.getDescription(),
                 product.getCostPrice(),
@@ -190,6 +287,20 @@ public class ProductServiceImpl implements ProductService {
                 product.getUnitOfMeasure(),
                 Boolean.TRUE.equals(product.getExcludeFromGlobalDiscounts())
         );
+    }
+
+    private static List<String> orderedSkuCodes(Product product) {
+        String primary = product.resolvePrimarySku();
+        List<String> codes = new ArrayList<>();
+        if (primary != null) {
+            codes.add(primary);
+        }
+        for (ProductSku sku : product.getSkus()) {
+            if (primary == null || !sku.getCode().equalsIgnoreCase(primary)) {
+                codes.add(sku.getCode());
+            }
+        }
+        return codes;
     }
 
     private static BigDecimal scaleMoney(BigDecimal value) {

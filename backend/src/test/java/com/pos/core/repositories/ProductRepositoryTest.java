@@ -35,7 +35,6 @@ class ProductRepositoryTest {
         categoryRepository.save(high);
 
         Product product = new Product();
-        product.setSku("SKU-001");
         product.setName("Cola 12oz");
         product.setSellingPrice(new BigDecimal("1.9900"));
         product.setCostPrice(new BigDecimal("1.0333"));
@@ -54,7 +53,6 @@ class ProductRepositoryTest {
     @Test
     void saveAndLoad_preservesBigDecimalPrecision() {
         Product product = new Product();
-        product.setSku("SKU-PREC");
         product.setName("Weighted Item");
         product.setSellingPrice(new BigDecimal("12.3456"));
         product.setCostPrice(new BigDecimal("1.0333"));

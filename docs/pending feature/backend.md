@@ -29,37 +29,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 ## Catalog & checkout APIs
 
 - [x] **Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.
-- [ ] **Multi-barcode per product** — Today `products.sku` is UNIQUE and treated as *the* barcode (Feature 021 scan path). Real catalogs often need **one product → many scannable codes** (supplier UPC + store PLU, multipack vs unit, regional packs, legacy codes after rebrand).
-
-  **Problem with current schema**
-  - One column cannot hold multiple codes without denormalizing (comma lists) or inventing fake “extra products.”
-  - SKU and barcode are conflated: internal stock-keeping identity vs scannable identifiers.
-
-  **Proposed schema direction (to decide when promoted)**
-  1. Keep `products.sku` as the **internal catalog code** (still UNIQUE) — may or may not equal a barcode.
-  2. Add child table, e.g. `product_barcodes`:
-     - `id UUID PK`
-     - `product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE`
-     - `barcode VARCHAR(100) NOT NULL` — scannable value (EAN/UPC/PLU/etc.)
-     - `is_primary BOOLEAN NOT NULL DEFAULT false` — optional convenience for labels/admin
-     - `created_at TIMESTAMPTZ`
-     - **UNIQUE (`barcode`)** globally (one code → at most one product)
-     - Index on `product_id`; optional partial unique so at most one `is_primary` per product
-  3. **Migration:** for each existing product, insert one `product_barcodes` row with `barcode = products.sku` (and `is_primary = true`) so register scans keep working.
-  4. Do **not** remove `sku` in v1 of this change — avoid breaking create/search DTOs and seed data; clarify in docs that SKU ≠ barcode list.
-
-  **API / search impact**
-  - Feature 021 exact match must resolve `q` against **any** barcode (and optionally still against `sku`).
-  - Create/update product payloads: accept `barcodes: string[]` (or structured list); validate uniqueness + non-empty if scan-required.
-  - `ProductDTO`: expose `barcodes` (and maybe `primaryBarcode`) for admin; register search can keep returning product identity + price (scan only needs resolve → product).
-
-  **Open decisions before a triad**
-  - Must every product have ≥1 barcode, or can some be name-search-only?
-  - Can `sku` stay equal to primary barcode for simplicity, or force SKU as a separate human code?
-  - Soft-retire old barcodes (keep history) vs hard delete when codes change?
-  - Parent/child pack products: shared barcodes forbidden (UNIQUE already enforces) — confirm no “scan pack adds child” special case here.
-
-  Pair with frontend catalog admin + register scan (see frontend pending). Promote to `docs/features/00N-*` when scheduled.
+- [x] **Multi SKU/barcode per product (1→N)** — Feature 027: `product_skus`; drop `products.sku`; zero codes OK; hard-delete; `PUT /api/v1/products/{id}/skus`. Paired FE: **028**.
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.

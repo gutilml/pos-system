@@ -1,7 +1,7 @@
 -- Local/dev demo fixtures for the POS register.
 -- Prerequisites: schema applied (docs/database-schema.sql).
--- Store id matches frontend DEFAULT_STORE_ID until auth/store picker exists.
--- Safe to re-run: deletes prior seed rows by fixed UUIDs / SKUs, then re-inserts.
+-- Store id matches frontend DEFAULT_STORE_ID / auth /me storeId.
+-- Safe to re-run: deletes prior seed rows by fixed UUIDs / codes, then re-inserts.
 
 BEGIN;
 
@@ -18,6 +18,33 @@ WHERE id IN (
     '00000000-0000-0000-0000-000000000402'
 )
    OR username IN ('admin', 'cashier');
+
+DELETE FROM product_skus
+WHERE product_id IN (
+    '00000000-0000-0000-0000-000000000201',
+    '00000000-0000-0000-0000-000000000202',
+    '00000000-0000-0000-0000-000000000203',
+    '00000000-0000-0000-0000-000000000204',
+    '00000000-0000-0000-0000-000000000205',
+    '00000000-0000-0000-0000-000000000206',
+    '00000000-0000-0000-0000-000000000207',
+    '00000000-0000-0000-0000-000000000208',
+    '00000000-0000-0000-0000-000000000209',
+    '00000000-0000-0000-0000-000000000210'
+)
+   OR LOWER(code) IN (
+    LOWER('7501000000011'),
+    LOWER('7501000000028'),
+    LOWER('7501000001025'),
+    LOWER('7501000000035'),
+    LOWER('7501000000042'),
+    LOWER('7501000000059'),
+    LOWER('7501000000066'),
+    LOWER('7501000000073'),
+    LOWER('7501000000080'),
+    LOWER('7501000000097'),
+    LOWER('7501000000103')
+);
 
 DELETE FROM product_category
 WHERE product_id IN (
@@ -45,18 +72,6 @@ WHERE id IN (
     '00000000-0000-0000-0000-000000000208',
     '00000000-0000-0000-0000-000000000209',
     '00000000-0000-0000-0000-000000000210'
-)
-   OR sku IN (
-    '7501000000011',
-    '7501000000028',
-    '7501000000035',
-    '7501000000042',
-    '7501000000059',
-    '7501000000066',
-    '7501000000073',
-    '7501000000080',
-    '7501000000097',
-    '7501000000103'
 );
 
 DELETE FROM customers
@@ -88,7 +103,7 @@ INSERT INTO categories (id, name, target_margin) VALUES
     ('00000000-0000-0000-0000-000000000103', 'Bulk / Produce', 0.3500);
 
 INSERT INTO products (
-    id, sku, name, description,
+    id, name, description,
     cost_price, selling_price,
     track_inventory, current_stock, low_stock_threshold,
     sell_by_weight, unit_of_measure,
@@ -96,7 +111,6 @@ INSERT INTO products (
 ) VALUES
     (
         '00000000-0000-0000-0000-000000000201',
-        '7501000000011',
         'Bottled Water 500ml',
         'Still water, single bottle',
         3.5000, 8.0000,
@@ -106,7 +120,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000202',
-        '7501000000028',
         'Cola 355ml',
         'Soft drink can',
         6.0000, 14.0000,
@@ -116,7 +129,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000203',
-        '7501000000035',
         'White Bread Loaf',
         'Packaged sliced bread',
         18.0000, 32.0000,
@@ -126,7 +138,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000204',
-        '7501000000042',
         'Milk 1L',
         'Whole milk carton',
         16.0000, 28.0000,
@@ -136,7 +147,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000205',
-        '7501000000059',
         'Eggs Dozen',
         'Grade A large eggs',
         35.0000, 55.0000,
@@ -146,7 +156,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000206',
-        '7501000000066',
         'Instant Coffee 200g',
         'Jarred instant coffee',
         55.0000, 95.0000,
@@ -156,7 +165,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000207',
-        '7501000000073',
         'Dish Soap 750ml',
         'Liquid dish detergent',
         22.0000, 42.0000,
@@ -166,7 +174,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000208',
-        '7501000000080',
         'Tomatoes (bulk)',
         'Sold by weight at the scale',
         18.0000, 35.0000,
@@ -176,7 +183,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000209',
-        '7501000000097',
         'Rice (bulk)',
         'Loose rice sold by weight',
         12.0000, 22.0000,
@@ -186,7 +192,6 @@ INSERT INTO products (
     ),
     (
         '00000000-0000-0000-0000-000000000210',
-        '7501000000103',
         'Prepaid Phone Top-up 100',
         'Excluded from store-wide % discounts',
         95.0000, 100.0000,
@@ -194,6 +199,20 @@ INSERT INTO products (
         false, 'unit',
         false, true, true
     );
+
+-- One primary code per product; Cola also has a secondary supplier barcode for scan demos.
+INSERT INTO product_skus (id, product_id, code, is_primary) VALUES
+    ('00000000-0000-0000-0000-000000000501', '00000000-0000-0000-0000-000000000201', '7501000000011', true),
+    ('00000000-0000-0000-0000-000000000502', '00000000-0000-0000-0000-000000000202', '7501000000028', true),
+    ('00000000-0000-0000-0000-000000000512', '00000000-0000-0000-0000-000000000202', '7501000001025', false),
+    ('00000000-0000-0000-0000-000000000503', '00000000-0000-0000-0000-000000000203', '7501000000035', true),
+    ('00000000-0000-0000-0000-000000000504', '00000000-0000-0000-0000-000000000204', '7501000000042', true),
+    ('00000000-0000-0000-0000-000000000505', '00000000-0000-0000-0000-000000000205', '7501000000059', true),
+    ('00000000-0000-0000-0000-000000000506', '00000000-0000-0000-0000-000000000206', '7501000000066', true),
+    ('00000000-0000-0000-0000-000000000507', '00000000-0000-0000-0000-000000000207', '7501000000073', true),
+    ('00000000-0000-0000-0000-000000000508', '00000000-0000-0000-0000-000000000208', '7501000000080', true),
+    ('00000000-0000-0000-0000-000000000509', '00000000-0000-0000-0000-000000000209', '7501000000097', true),
+    ('00000000-0000-0000-0000-000000000510', '00000000-0000-0000-0000-000000000210', '7501000000103', true);
 
 INSERT INTO product_category (product_id, category_id) VALUES
     ('00000000-0000-0000-0000-000000000201', '00000000-0000-0000-0000-000000000102'),

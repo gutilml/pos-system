@@ -71,7 +71,6 @@ class TransactionInventoryIntegrationTest {
     void setUp() {
         cola = new Product();
         cola.setId(UUID.fromString("11111111-1111-1111-1111-111111111111"));
-        cola.setSku("COLA");
         cola.setName("Cola");
         cola.setSellingPrice(new BigDecimal("1.9900"));
         cola.setCurrentStock(new BigDecimal("50.0000"));

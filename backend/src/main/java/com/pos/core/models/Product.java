@@ -1,5 +1,6 @@
 package com.pos.core.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -10,13 +11,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -27,9 +32,6 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
-    @Column(name = "sku", nullable = false, unique = true, length = 100)
-    private String sku;
 
     @Column(name = "name", nullable = false)
     private String name;
@@ -74,6 +76,10 @@ public class Product {
     @Column(name = "exclude_from_global_discounts", nullable = false)
     private Boolean excludeFromGlobalDiscounts = false;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("isPrimary DESC, code ASC")
+    private List<ProductSku> skus = new ArrayList<>();
+
     @ManyToMany
     @JoinTable(
             name = "product_category",
@@ -96,14 +102,6 @@ public class Product {
 
     public void setId(UUID id) {
         this.id = id;
-    }
-
-    public String getSku() {
-        return sku;
-    }
-
-    public void setSku(String sku) {
-        this.sku = sku;
     }
 
     public String getName() {
@@ -216,6 +214,25 @@ public class Product {
 
     public void setExcludeFromGlobalDiscounts(Boolean excludeFromGlobalDiscounts) {
         this.excludeFromGlobalDiscounts = excludeFromGlobalDiscounts;
+    }
+
+    public List<ProductSku> getSkus() {
+        return skus;
+    }
+
+    public void setSkus(List<ProductSku> skus) {
+        this.skus = skus;
+    }
+
+    /**
+     * Primary code when marked; otherwise first code; null when the product has no codes.
+     */
+    public String resolvePrimarySku() {
+        return skus.stream()
+                .filter(s -> Boolean.TRUE.equals(s.getIsPrimary()))
+                .map(ProductSku::getCode)
+                .findFirst()
+                .orElseGet(() -> skus.stream().map(ProductSku::getCode).findFirst().orElse(null));
     }
 
     public Set<Category> getCategories() {

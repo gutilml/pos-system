@@ -76,7 +76,11 @@ public class StripePaymentServiceImpl implements StripePaymentService {
         for (TransactionItem item : transaction.getItems()) {
             paramsBuilder.putMetadata(
                     "item_" + item.getId(),
-                    item.getProduct() != null ? item.getProduct().getSku() : item.getId().toString()
+                    item.getProduct() != null
+                            ? (item.getProduct().resolvePrimarySku() != null
+                            ? item.getProduct().resolvePrimarySku()
+                            : item.getId().toString())
+                            : item.getId().toString()
             );
         }
 
