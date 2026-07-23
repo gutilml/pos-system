@@ -21,7 +21,7 @@ export function OpenShiftModal() {
 
     const parsed = Number.parseFloat(amount)
     if (!Number.isFinite(parsed) || parsed < 0) {
-      setLocalError('Enter a valid starting cash amount')
+      setLocalError(t('shift.startingCashInvalid'))
       return
     }
 
@@ -46,9 +46,7 @@ export function OpenShiftModal() {
         <h2 id="open-shift-title" className="text-xl font-semibold text-slate-900">
           {t('shift.openTitle')}
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Enter the starting cash float before using the register.
-        </p>
+        <p className="mt-2 text-sm text-slate-600">{t('shift.openHint')}</p>
 
         <label htmlFor="starting-cash" className="mt-5 mb-1 block text-sm font-medium text-slate-700">
           {t('shift.startingCash')}

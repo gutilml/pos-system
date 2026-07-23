@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { useT } from '@/i18n/useT'
 import { useShiftStore } from '@/store/useShiftStore'
 
 type CloseShiftModalProps = {
@@ -7,6 +8,7 @@ type CloseShiftModalProps = {
 }
 
 export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
+  const t = useT()
   const closeShift = useShiftStore((s) => s.closeShift)
   const isLoading = useShiftStore((s) => s.isLoading)
   const error = useShiftStore((s) => s.error)
@@ -26,7 +28,7 @@ export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
 
     const parsed = Number.parseFloat(amount)
     if (!Number.isFinite(parsed) || parsed < 0) {
-      setLocalError('Enter the counted cash amount')
+      setLocalError(t('shift.actualCashInvalid'))
       return
     }
 
@@ -52,14 +54,12 @@ export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
       >
         <h2 id="close-shift-title" className="text-xl font-semibold text-slate-900">
-          Close Shift — Blind Count
+          {t('shift.closeTitle')}
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Count the drawer and enter the actual cash total. Do not look at expected totals.
-        </p>
+        <p className="mt-2 text-sm text-slate-600">{t('shift.closeHint')}</p>
 
         <label htmlFor="actual-cash" className="mt-5 mb-1 block text-sm font-medium text-slate-700">
-          Actual Cash
+          {t('shift.actualCash')}
         </label>
         <input
           id="actual-cash"
@@ -87,14 +87,14 @@ export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
             }}
             className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
           >
-            Cancel
+            {t('footer.cancel')}
           </button>
           <button
             type="submit"
             disabled={isLoading}
             className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
           >
-            {isLoading ? 'Closing…' : 'Close Shift'}
+            {isLoading ? t('shift.closing') : t('cashier.closeShift')}
           </button>
         </div>
       </form>

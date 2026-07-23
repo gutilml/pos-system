@@ -60,6 +60,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Store preferences / UI locale** | [045](features/045-backend-store-preferences/README.md), [046](features/046-frontend-ui-locale/README.md) | BE **045** + FE **046** done — DB `preferences` + EN/ES UI. |
 | **Pay three amount fields** | [047](features/047-frontend-pay-three-amount-fields/README.md) | FE **047** done — CASH/CARD/CREDIT fields; no Add tender. |
 | **UI locale coverage polish** | [048](features/048-frontend-ui-locale-coverage/README.md) | FE **048** done — Customer popup, New Ticket, Stock→Inv. |
+| **UI locale remaining chrome** | [049](features/049-frontend-ui-locale-remaining-chrome/README.md) | FE **049** done — Pay/shift/drawer/weight/tickets/gates EN/ES. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -117,6 +118,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 046 | FE | Done | [README](features/046-frontend-ui-locale/README.md) | [spec](features/046-frontend-ui-locale/spec.md) · [plan](features/046-frontend-ui-locale/plan.md) · [tasks](features/046-frontend-ui-locale/tasks.md) |
 | 047 | FE | Done | [README](features/047-frontend-pay-three-amount-fields/README.md) | [spec](features/047-frontend-pay-three-amount-fields/spec.md) · [plan](features/047-frontend-pay-three-amount-fields/plan.md) · [tasks](features/047-frontend-pay-three-amount-fields/tasks.md) |
 | 048 | FE | Done | [README](features/048-frontend-ui-locale-coverage/README.md) | [spec](features/048-frontend-ui-locale-coverage/spec.md) · [plan](features/048-frontend-ui-locale-coverage/plan.md) · [tasks](features/048-frontend-ui-locale-coverage/tasks.md) |
+| 049 | FE | Done | [README](features/049-frontend-ui-locale-remaining-chrome/README.md) | [spec](features/049-frontend-ui-locale-remaining-chrome/spec.md) · [plan](features/049-frontend-ui-locale-remaining-chrome/plan.md) · [tasks](features/049-frontend-ui-locale-remaining-chrome/tasks.md) |
 
 ---
 
@@ -139,6 +141,7 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 13. [044](features/044-frontend-cart-header-column-alignment/README.md) — cart header/column alignment ~~(done)~~
 14. [047](features/047-frontend-pay-three-amount-fields/README.md) — Pay three amount fields (Option A) ~~(done)~~
 15. [048](features/048-frontend-ui-locale-coverage/README.md) — UI locale coverage polish ~~(done)~~
+16. [049](features/049-frontend-ui-locale-remaining-chrome/README.md) — UI locale remaining chrome ~~(done)~~
 
 ---
 

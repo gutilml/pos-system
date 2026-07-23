@@ -1,5 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import type { CashDrawerEventType } from '@/api/shifts'
+import { useT } from '@/i18n/useT'
 import { useShiftStore } from '@/store/useShiftStore'
 
 type DrawerEventModalProps = {
@@ -14,6 +15,7 @@ export function DrawerEventModal({
   onClose,
   initialType = 'PAY_IN',
 }: DrawerEventModalProps) {
+  const t = useT()
   const addDrawerEvent = useShiftStore((s) => s.addDrawerEvent)
   const isLoading = useShiftStore((s) => s.isLoading)
   const error = useShiftStore((s) => s.error)
@@ -44,13 +46,13 @@ export function DrawerEventModal({
 
     const parsed = Number.parseFloat(amount)
     if (!Number.isFinite(parsed) || parsed <= 0) {
-      setLocalError('Enter an amount greater than zero')
+      setLocalError(t('drawer.amountInvalid'))
       return
     }
 
     const trimmedReason = reason.trim()
     if (!trimmedReason) {
-      setLocalError('Enter a reason')
+      setLocalError(t('drawer.reasonRequired'))
       return
     }
 
@@ -77,14 +79,12 @@ export function DrawerEventModal({
         className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
       >
         <h2 id="drawer-event-title" className="text-xl font-semibold text-slate-900">
-          Cash Drawer
+          {t('drawer.title')}
         </h2>
-        <p className="mt-2 text-sm text-slate-600">
-          Record cash added to or removed from the till. This updates expected cash at close.
-        </p>
+        <p className="mt-2 text-sm text-slate-600">{t('drawer.hint')}</p>
 
         <fieldset className="mt-5">
-          <legend className="mb-2 text-sm font-medium text-slate-700">Type</legend>
+          <legend className="mb-2 text-sm font-medium text-slate-700">{t('drawer.type')}</legend>
           <div className="flex gap-2">
             <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-800 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50">
               <input
@@ -95,7 +95,7 @@ export function DrawerEventModal({
                 onChange={() => setType('PAY_IN')}
                 data-testid="drawer-type-pay-in"
               />
-              Pay in
+              {t('cashier.payIn')}
             </label>
             <label className="flex flex-1 cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-800 has-[:checked]:border-emerald-600 has-[:checked]:bg-emerald-50">
               <input
@@ -106,13 +106,13 @@ export function DrawerEventModal({
                 onChange={() => setType('PAY_OUT')}
                 data-testid="drawer-type-pay-out"
               />
-              Pay out
+              {t('cashier.payOut')}
             </label>
           </div>
         </fieldset>
 
         <label htmlFor="drawer-amount" className="mt-4 mb-1 block text-sm font-medium text-slate-700">
-          Amount
+          {t('drawer.amount')}
         </label>
         <input
           id="drawer-amount"
@@ -126,7 +126,7 @@ export function DrawerEventModal({
         />
 
         <label htmlFor="drawer-reason" className="mt-4 mb-1 block text-sm font-medium text-slate-700">
-          Reason
+          {t('drawer.reason')}
         </label>
         <input
           id="drawer-reason"
@@ -154,7 +154,7 @@ export function DrawerEventModal({
             }}
             className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
           >
-            Cancel
+            {t('footer.cancel')}
           </button>
           <button
             type="submit"
@@ -162,7 +162,7 @@ export function DrawerEventModal({
             data-testid="drawer-event-submit"
             className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
           >
-            {isLoading ? 'Saving…' : 'Save'}
+            {isLoading ? t('drawer.saving') : t('drawer.save')}
           </button>
         </div>
       </form>

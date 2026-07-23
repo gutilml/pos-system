@@ -1,4 +1,6 @@
 import type { Shift } from '@/api/shifts'
+import { useT } from '@/i18n/useT'
+import type { MessageKey } from '@/i18n/messages'
 import { formatMoney } from '@/lib/money'
 import { useShiftStore } from '@/store/useShiftStore'
 
@@ -6,10 +8,10 @@ type ShiftCloseTicketProps = {
   shift: Shift
 }
 
-function discrepancyLabel(discrepancy: number): string {
-  if (discrepancy > 0) return 'Overage'
-  if (discrepancy < 0) return 'Shortage'
-  return 'Balanced'
+function discrepancyKey(discrepancy: number): MessageKey {
+  if (discrepancy > 0) return 'shiftTicket.overage'
+  if (discrepancy < 0) return 'shiftTicket.shortage'
+  return 'shiftTicket.balanced'
 }
 
 function formatTimestamp(value: string | null): string {
@@ -25,6 +27,7 @@ function moneyOrDash(value: number | null | undefined): string {
 }
 
 export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
+  const t = useT()
   const clearLastClosedShift = useShiftStore((s) => s.clearLastClosedShift)
 
   const expected = shift.expectedCash ?? 0
@@ -46,42 +49,42 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
             id="shift-close-ticket-title"
             className="text-xl font-semibold text-slate-900"
           >
-            Shift Close Ticket
+            {t('shiftTicket.title')}
           </h2>
           <p className="mt-1 text-sm text-slate-600">
-            Shift <span className="font-mono tabular-nums">{shortId}</span>
+            {t('shiftTicket.shift')} <span className="font-mono tabular-nums">{shortId}</span>
           </p>
 
           <dl className="mt-5 space-y-2 text-sm text-slate-700">
             <div className="flex justify-between gap-4">
-              <dt>Opened</dt>
+              <dt>{t('shiftTicket.opened')}</dt>
               <dd className="tabular-nums text-slate-900" data-testid="ticket-opened-at">
                 {formatTimestamp(shift.openedAt)}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Closed</dt>
+              <dt>{t('shiftTicket.closed')}</dt>
               <dd className="tabular-nums text-slate-900" data-testid="ticket-closed-at">
                 {formatTimestamp(shift.closedAt)}
               </dd>
             </div>
             <div className="flex justify-between gap-4 border-t border-slate-200 pt-3">
-              <dt>Expected cash</dt>
+              <dt>{t('shiftTicket.expectedCash')}</dt>
               <dd className="tabular-nums font-medium text-slate-900" data-testid="ticket-expected-cash">
                 {formatMoney(expected)}
               </dd>
             </div>
             <div className="flex justify-between gap-4">
-              <dt>Counted cash</dt>
+              <dt>{t('shiftTicket.countedCash')}</dt>
               <dd className="tabular-nums font-medium text-slate-900" data-testid="ticket-actual-cash">
                 {formatMoney(actual)}
               </dd>
             </div>
             <div className="flex justify-between gap-4 text-base font-semibold text-slate-900">
               <dt>
-                Discrepancy
+                {t('shiftTicket.discrepancy')}
                 <span className="ml-2 text-sm font-medium text-slate-600" data-testid="ticket-discrepancy-label">
-                  ({discrepancyLabel(discrepancy)})
+                  ({t(discrepancyKey(discrepancy))})
                 </span>
               </dt>
               <dd className="tabular-nums" data-testid="ticket-discrepancy">
@@ -91,28 +94,28 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
 
             <div className="border-t border-slate-200 pt-3">
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Sales summary
+                {t('shiftTicket.salesSummary')}
               </p>
               <div className="flex justify-between gap-4">
-                <dt>Cash payments</dt>
+                <dt>{t('shiftTicket.cashPayments')}</dt>
                 <dd className="tabular-nums text-slate-900" data-testid="ticket-total-cash">
                   {moneyOrDash(shift.totalCashPayments)}
                 </dd>
               </div>
               <div className="mt-2 flex justify-between gap-4">
-                <dt>Card</dt>
+                <dt>{t('shiftTicket.card')}</dt>
                 <dd className="tabular-nums text-slate-900" data-testid="ticket-total-card">
                   {moneyOrDash(shift.totalCardPayments)}
                 </dd>
               </div>
               <div className="mt-2 flex justify-between gap-4">
-                <dt>Credit (store tab)</dt>
+                <dt>{t('shiftTicket.credit')}</dt>
                 <dd className="tabular-nums text-slate-900" data-testid="ticket-total-credit">
                   {moneyOrDash(shift.totalCreditPayments)}
                 </dd>
               </div>
               <div className="mt-2 flex justify-between gap-4">
-                <dt>Sales grand total</dt>
+                <dt>{t('shiftTicket.salesGrandTotal')}</dt>
                 <dd className="tabular-nums text-slate-900" data-testid="ticket-sales-grand-total">
                   {moneyOrDash(shift.totalSalesGrandTotal)}
                 </dd>
@@ -128,7 +131,7 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
             onClick={() => window.print()}
             className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
           >
-            Print
+            {t('common.print')}
           </button>
           <button
             type="button"
@@ -136,7 +139,7 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
             onClick={() => clearLastClosedShift()}
             className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white active:bg-emerald-800"
           >
-            Done
+            {t('common.done')}
           </button>
         </div>
       </div>

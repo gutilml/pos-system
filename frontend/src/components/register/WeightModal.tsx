@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useT } from '@/i18n/useT'
 import { formatMoney } from '@/lib/money'
 import { useCartStore } from '@/store/useCartStore'
 import { isWebSerialSupported, requestScaleWeight } from '@/utils/serialScaleHelper'
@@ -27,6 +28,7 @@ export function sanitizeWeightInput(raw: string): string {
 }
 
 export function WeightModal() {
+  const t = useT()
   const pending = useCartStore((s) => s.pendingWeightProduct)
   const confirmWeight = useCartStore((s) => s.confirmWeight)
   const clearPendingWeight = useCartStore((s) => s.clearPendingWeight)
@@ -40,7 +42,6 @@ export function WeightModal() {
     if (pending) {
       setWeightInput('')
       setScaleError(null)
-      // Defer so the input exists after the modal mounts.
       requestAnimationFrame(() => inputRef.current?.focus())
     }
   }, [pending])
@@ -101,8 +102,8 @@ export function WeightModal() {
       setWeightInput(String(weight))
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : 'Could not read from scale'
-      setScaleError(`${message}. Enter weight with the keyboard or numpad.`)
+        error instanceof Error ? error.message : t('weight.readFailed')
+      setScaleError(`${message}. ${t('weight.manualFallback')}`)
     } finally {
       setReadingScale(false)
     }
@@ -118,11 +119,11 @@ export function WeightModal() {
       <div className="w-full max-w-md rounded-2xl bg-white shadow-xl">
         <div className="border-b border-slate-200 px-5 py-4">
           <h2 id="weight-modal-title" className="text-xl font-semibold text-slate-900">
-            Enter weight
+            {t('weight.title')}
           </h2>
           <p className="mt-1 text-slate-600">{pending.name}</p>
           <p className="text-sm text-slate-500">
-            Unit: <span className="font-medium text-slate-700">{unit}</span>
+            {t('weight.unit')} <span className="font-medium text-slate-700">{unit}</span>
             {' · '}
             {formatMoney(pending.sellingPrice)} / {unit}
           </p>
@@ -130,7 +131,7 @@ export function WeightModal() {
 
         <div className="px-5 py-4">
           <label htmlFor="weight-input" className="sr-only">
-            Weight in {unit}
+            {t('weight.inputAria')} {unit}
           </label>
           <div className="flex items-baseline gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3">
             <input
@@ -152,7 +153,8 @@ export function WeightModal() {
             <span className="shrink-0 text-lg text-slate-500">{unit}</span>
           </div>
           <p className="mt-2 text-sm text-slate-500">
-            Line total: <span className="font-medium tabular-nums text-slate-800">{estimatedTotal}</span>
+            {t('weight.lineTotal')}{' '}
+            <span className="font-medium tabular-nums text-slate-800">{estimatedTotal}</span>
           </p>
           {scaleError ? (
             <p className="mt-2 text-sm text-amber-700" role="alert">
@@ -168,7 +170,13 @@ export function WeightModal() {
               type="button"
               onClick={() => appendKey(key)}
               className="flex h-14 items-center justify-center rounded-xl border border-slate-300 bg-white text-2xl font-medium text-slate-900 active:bg-slate-100"
-              aria-label={key === '⌫' ? 'Backspace' : key === '.' ? 'Decimal point' : `Digit ${key}`}
+              aria-label={
+                key === '⌫'
+                  ? t('weight.backspace')
+                  : key === '.'
+                    ? t('weight.decimal')
+                    : `Digit ${key}`
+              }
             >
               {key}
             </button>
@@ -182,12 +190,10 @@ export function WeightModal() {
             disabled={readingScale || !isWebSerialSupported()}
             className="rounded-xl border border-emerald-700 px-4 py-3 font-medium text-emerald-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 active:bg-emerald-50"
           >
-            {readingScale ? 'Reading scale…' : 'Read from Scale'}
+            {readingScale ? t('weight.readingScale') : t('weight.readScale')}
           </button>
           {!isWebSerialSupported() ? (
-            <p className="text-xs text-slate-500">
-              Web Serial not available — enter weight with the keyboard or numpad.
-            </p>
+            <p className="text-xs text-slate-500">{t('weight.serialUnavailable')}</p>
           ) : null}
 
           <div className="mt-1 flex gap-2">
@@ -196,7 +202,7 @@ export function WeightModal() {
               onClick={() => clearPendingWeight()}
               className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
             >
-              Cancel
+              {t('weight.cancel')}
             </button>
             <button
               type="button"
@@ -204,7 +210,7 @@ export function WeightModal() {
               disabled={!canConfirm}
               className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
             >
-              Confirm
+              {t('weight.confirm')}
             </button>
           </div>
         </div>

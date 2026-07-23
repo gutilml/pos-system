@@ -141,7 +141,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
         onClose()
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Checkout failed')
+      setError(err instanceof Error ? err.message : t('checkout.failed'))
     } finally {
       setSubmitting(false)
     }
@@ -213,7 +213,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
               <div>
                 <p className="font-medium text-emerald-950">{customer.name}</p>
                 <p className="text-xs text-emerald-800">
-                  Available credit {formatMoney(selectAvailableCredit(customer))}
+                  {t('customer.availableCredit')} {formatMoney(selectAvailableCredit(customer))}
                 </p>
               </div>
               <button
@@ -221,16 +221,14 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
                 onClick={handleClearCustomer}
                 className="text-xs font-medium text-emerald-900 underline"
               >
-                Clear
+                {t('footer.clear')}
               </button>
             </div>
           ) : null}
 
           {requireCustomer ? (
             <div className="rounded-lg border border-amber-300 bg-amber-50 p-3" data-testid="credit-customer-gate">
-              <p className="mb-2 text-sm font-medium text-amber-950">
-                Assign a customer before charging store credit.
-              </p>
+              <p className="mb-2 text-sm font-medium text-amber-950">{t('checkout.creditGate')}</p>
               <CustomerSearch autoFocus onSelect={handleCustomerAssigned} />
               <button
                 type="button"
@@ -238,7 +236,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
                 onClick={abandonCreditPath}
                 className="mt-2 text-sm font-medium text-amber-950 underline"
               >
-                Back — choose another tender
+                {t('checkout.abandonCredit')}
               </button>
             </div>
           ) : null}

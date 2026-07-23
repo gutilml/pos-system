@@ -59,7 +59,7 @@ export function CashierMenu() {
     try {
       await setLocaleAndPersist(next)
     } catch (err) {
-      setLocaleError(err instanceof Error ? err.message : 'Failed to save language')
+      setLocaleError(err instanceof Error ? err.message : t('cashier.languageSaveFailed'))
     } finally {
       setSavingLocale(false)
     }

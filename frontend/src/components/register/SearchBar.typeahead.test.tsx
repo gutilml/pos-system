@@ -34,7 +34,7 @@ describe('SearchBar typeahead', () => {
   it('does not search for typeahead under 3 characters', async () => {
     const user = userEvent.setup()
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), 'ab')
+    await user.type(screen.getByLabelText(/scan or search/i), 'ab')
     expect(searchProducts).not.toHaveBeenCalled()
     expect(screen.queryByTestId('search-suggestions')).not.toBeInTheDocument()
   })
@@ -47,7 +47,7 @@ describe('SearchBar typeahead', () => {
     vi.mocked(searchProducts).mockResolvedValue(many)
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), 'ite')
+    await user.type(screen.getByLabelText(/scan or search/i), 'ite')
 
     await waitFor(() => {
       expect(screen.getByTestId('search-suggestions')).toBeInTheDocument()
@@ -56,7 +56,7 @@ describe('SearchBar typeahead', () => {
 
     await user.click(screen.getByTestId('search-suggestion-p-2'))
     expect(selectActiveItems(useCartStore.getState())[0].productId).toBe('p-2')
-    expect(screen.getByLabelText(/search or scan/i)).toHaveValue('')
+    expect(screen.getByLabelText(/scan or search/i)).toHaveValue('')
   })
 
   it('Enter with highlight adds that suggestion', async () => {
@@ -67,7 +67,7 @@ describe('SearchBar typeahead', () => {
     ])
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), 'alp')
+    await user.type(screen.getByLabelText(/scan or search/i), 'alp')
     await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(2))
     await user.keyboard('{ArrowDown}{ArrowDown}{Enter}')
 
@@ -83,7 +83,7 @@ describe('SearchBar typeahead', () => {
     ])
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), '7501000000028')
+    await user.type(screen.getByLabelText(/scan or search/i), '7501000000028')
     await user.keyboard('{Enter}')
 
     await waitFor(() => {

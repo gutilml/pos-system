@@ -39,13 +39,13 @@ describe('register search focus lock', () => {
     })
     requestRegisterSearchFocus()
     await waitFor(() => {
-      expect(document.activeElement).toBe(screen.getByLabelText(/search or scan/i))
+      expect(document.activeElement).toBe(screen.getByLabelText(/scan or search/i))
     })
   })
 
   it('keeps focus on search when requestRegisterSearchFocus fires with no modal', async () => {
     render(<SearchBar />)
-    const search = screen.getByLabelText(/search or scan/i)
+    const search = screen.getByLabelText(/scan or search/i)
     search.blur()
     requestRegisterSearchFocus()
     await waitFor(() => {

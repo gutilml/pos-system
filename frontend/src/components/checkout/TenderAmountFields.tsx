@@ -106,10 +106,12 @@ export function TenderAmountFields({
     <div className="space-y-3" data-testid="tender-amount-fields">
       {METHODS.map((method) => {
         const inputId = `tender-${method.toLowerCase()}`
+        const label =
+          method === 'CASH' ? t('tender.cash') : method === 'CARD' ? t('tender.card') : t('tender.credit')
         return (
           <div key={method}>
             <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-slate-700">
-              {method}
+              {label}
             </label>
             <input
               id={inputId}

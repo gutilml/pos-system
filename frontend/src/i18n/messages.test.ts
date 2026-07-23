@@ -18,5 +18,8 @@ describe('i18n', () => {
     expect(translate('cart.stock', 'es')).toBe('Inv')
     expect(translate('tickets.new', 'es')).toBe('+ Ticket nuevo')
     expect(translate('customer.find', 'es')).toBe('Buscar cliente')
+    expect(translate('checkout.creditGate', 'es')).toMatch(/crédito/i)
+    expect(translate('shift.closeTitle', 'es')).toMatch(/Cerrar turno/i)
+    expect(translate('tender.cash', 'es')).toBe('EFECTIVO')
   })
 })

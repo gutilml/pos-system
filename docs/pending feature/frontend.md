@@ -65,6 +65,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**UI locale EN/ES (store preference)** — Feature 046: hydrate from `/me.uiLocale`; CashierMenu EN/ES; PATCH store preferences (DB). Depends on BE 045. No localStorage as source of truth.~~
 - [x] ~~**Pay three amount fields (Option A)** — Feature [047](../features/047-frontend-pay-three-amount-fields/README.md): always-visible CASH/CARD/CREDIT amounts; live Remaining; no overpay; no Add tender / tender list; CREDIT blur → customer gate.~~
 - [x] ~~**UI locale coverage polish** — Feature [048](../features/048-frontend-ui-locale-coverage/README.md): (1) `AssignCustomerControl` + `CustomerSearch` EN/ES; (2) TicketTabs “+ New Ticket” → ES “Ticket nuevo”; (3) cart Stock header → **Inv**.~~
+- [x] ~~**UI locale remaining chrome** — Feature [049](../features/049-frontend-ui-locale-remaining-chrome/README.md): Pay credit-gate/tenders, Close Shift, Pay in/out, Weight, sale/close tickets, auth/shift gates.~~
 
 ## Shift UX polish
 

@@ -36,7 +36,7 @@ describe('SearchBar', () => {
     ])
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), '3001')
+    await user.type(screen.getByLabelText(/scan or search/i), '3001')
     await user.keyboard('{Enter}')
 
     await waitFor(() => {
@@ -63,7 +63,7 @@ describe('SearchBar', () => {
     ])
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), '7501000001025')
+    await user.type(screen.getByLabelText(/scan or search/i), '7501000001025')
     await user.keyboard('{Enter}')
 
     await waitFor(() => {
@@ -77,7 +77,7 @@ describe('SearchBar', () => {
     vi.mocked(searchProducts).mockResolvedValue([])
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), 'missing')
+    await user.type(screen.getByLabelText(/scan or search/i), 'missing')
     await user.keyboard('{Enter}')
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/no product found/i)
@@ -89,7 +89,7 @@ describe('SearchBar', () => {
     vi.mocked(searchProducts).mockRejectedValue(new Error('Backend down'))
 
     render(<SearchBar autoFocus={false} />)
-    await user.type(screen.getByLabelText(/search or scan/i), '1001')
+    await user.type(screen.getByLabelText(/scan or search/i), '1001')
     await user.keyboard('{Enter}')
 
     expect(await screen.findByRole('alert')).toHaveTextContent(/backend down/i)

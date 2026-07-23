@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { LoginForm } from '@/components/auth/LoginForm'
+import { useT } from '@/i18n/useT'
 import { useAuthStore } from '@/store/useAuthStore'
 
 type AuthGateProps = {
@@ -7,6 +8,7 @@ type AuthGateProps = {
 }
 
 export function AuthGate({ children }: AuthGateProps) {
+  const t = useT()
   const status = useAuthStore((s) => s.status)
   const bootstrap = useAuthStore((s) => s.bootstrap)
 
@@ -26,7 +28,7 @@ export function AuthGate({ children }: AuthGateProps) {
       >
         <div className="flex flex-col items-center gap-3">
           <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-300 border-t-emerald-700" />
-          <p className="text-sm font-medium">Checking session…</p>
+          <p className="text-sm font-medium">{t('auth.checkingSession')}</p>
         </div>
       </div>
     )
