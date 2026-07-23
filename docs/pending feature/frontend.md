@@ -42,6 +42,15 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [x] ~~**Cash / multi-tender Complete Sale persistence** — Feature 014 Pay → Complete Transaction POSTs and closes the ticket on success.~~
 - [x] ~~**CARD tender = mark paid on Pay (external terminal)** — Feature 023: Card button POSTs `COMPLETED` + CARD tender (no Stripe QR). Pay modal CARD tenders unchanged. Stripe client code kept (ON HOLD).~~
 - [ ] **Split-pay CARD → Stripe session** — **ON HOLD** with Stripe-in-POS; revive when integrated card is re-enabled.
+- [ ] **Pay modal redesign (CASH / CARD / CREDIT split, no over-tender)** — Feature **036** (`docs/features/036-frontend-pay-modal-redesign/`): remove footer Card; Pay only. Split current sale across CASH/CARD/CREDIT; no overpay; CREDIT needs customer; PAY + Print and pay.
+- [ ] **Assign customer from selling screen** — Feature **037** (`docs/features/037-frontend-assign-customer-sell-screen/`): attach customer to open ticket before Pay (after 036).
+
+## Register UX polish (decisions 2026-07-22)
+
+- [ ] **Money display 2 decimals** — Feature **033** (`docs/features/033-frontend-money-display-2dp/`): money UI 2 dp; math/API stay 4; qty may keep 4.
+- [ ] **Search/scan focus lock** — Feature **034** (`docs/features/034-frontend-search-focus-lock/`): focus search when no modal; restore after close / Escape.
+- [ ] **Search typeahead** — Feature **035** (`docs/features/035-frontend-search-typeahead/`): ≥3 chars, each keystroke, max 10; Enter/click adds; barcode Enter exact still instant.
+- [x] ~~**Weight modal keyboard** — Feature 032: weight field accepts physical keyboard (not readOnly).~~
 
 ## Shift UX polish
 
@@ -59,7 +68,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
 - [ ] **Void tickets** — UI for void once backend supports those statuses.
-- [ ] **Receipt / print** — After successful transaction (browser print or receipt printer).
+- [ ] **Receipt / print** — Pay-path browser print covered by Feature **036** Print and pay. Standalone/historical reprint & hardware printers still TBD.
 
 ## Auth & multi-store
 
@@ -80,7 +89,8 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 ## Opt-in module UIs
 
 - [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true.
-- [ ] **Customer credit UI** — Feature 014 shipped checkout assignment + CREDIT tender interception. Still missing dedicated tab pay-down / ledger screens outside checkout.
+- [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD later — not Feature 036). Assign-customer-from-register → Feature **037**.
+- [ ] **Receipt / print on pay** — Feature **036** (`docs/features/036-frontend-pay-modal-redesign/`): Print and pay = complete + print sell ticket + return to ready register.
 
 ## Tooling / quality
 

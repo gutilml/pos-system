@@ -44,6 +44,12 @@ Use this table when you know the *subject*, not the feature number.
 | **Multi SKU / barcode (1→N)** | [027](features/027-backend-multi-sku/README.md), [028](features/028-frontend-multi-sku/README.md) | BE + FE done. Admin SKU UI deferred. |
 | **Expected cash / close ticket tenders** | [029](features/029-backend-expected-cash-tenders/README.md), [030](features/030-frontend-shift-close-ticket-tenders/README.md) | BE **029** + FE **030** done. |
 | **Cash drawer pay-in / pay-out UI** | [031](features/031-frontend-cash-drawer-pay-in-out/README.md) | FE **031** done (Feature 007 events API). |
+| **Weight modal keyboard** | [032](features/032-frontend-weight-modal-keyboard/README.md) | FE **032** done. |
+| **Money UI 2 decimals** | [033](features/033-frontend-money-display-2dp/README.md) | FE **033** planned — display 2 dp; math/API stay 4. |
+| **Search focus lock** | [034](features/034-frontend-search-focus-lock/README.md) | FE **034** planned — refocus search when no modal. |
+| **Search typeahead** | [035](features/035-frontend-search-typeahead/README.md) | FE **035** planned — ≥3 chars, max 10 suggestions. |
+| **Pay redesign / Print and pay** | [036](features/036-frontend-pay-modal-redesign/README.md) | FE **036** planned — split tenders, no overpay, print. |
+| **Assign customer on sell screen** | [037](features/037-frontend-assign-customer-sell-screen/README.md) | FE **037** planned — attach customer before Pay. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -84,6 +90,25 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 029 | BE | Done | [README](features/029-backend-expected-cash-tenders/README.md) | [spec](features/029-backend-expected-cash-tenders/spec.md) · [plan](features/029-backend-expected-cash-tenders/plan.md) · [tasks](features/029-backend-expected-cash-tenders/tasks.md) |
 | 030 | FE | Done | [README](features/030-frontend-shift-close-ticket-tenders/README.md) | [spec](features/030-frontend-shift-close-ticket-tenders/spec.md) · [plan](features/030-frontend-shift-close-ticket-tenders/plan.md) · [tasks](features/030-frontend-shift-close-ticket-tenders/tasks.md) |
 | 031 | FE | Done | [README](features/031-frontend-cash-drawer-pay-in-out/README.md) | [spec](features/031-frontend-cash-drawer-pay-in-out/spec.md) · [plan](features/031-frontend-cash-drawer-pay-in-out/plan.md) · [tasks](features/031-frontend-cash-drawer-pay-in-out/tasks.md) |
+| 032 | FE | Done | [README](features/032-frontend-weight-modal-keyboard/README.md) | [spec](features/032-frontend-weight-modal-keyboard/spec.md) · [plan](features/032-frontend-weight-modal-keyboard/plan.md) · [tasks](features/032-frontend-weight-modal-keyboard/tasks.md) |
+| 033 | FE | Planned | [README](features/033-frontend-money-display-2dp/README.md) | [spec](features/033-frontend-money-display-2dp/spec.md) · [plan](features/033-frontend-money-display-2dp/plan.md) · [tasks](features/033-frontend-money-display-2dp/tasks.md) |
+| 034 | FE | Planned | [README](features/034-frontend-search-focus-lock/README.md) | [spec](features/034-frontend-search-focus-lock/spec.md) · [plan](features/034-frontend-search-focus-lock/plan.md) · [tasks](features/034-frontend-search-focus-lock/tasks.md) |
+| 035 | FE | Planned | [README](features/035-frontend-search-typeahead/README.md) | [spec](features/035-frontend-search-typeahead/spec.md) · [plan](features/035-frontend-search-typeahead/plan.md) · [tasks](features/035-frontend-search-typeahead/tasks.md) |
+| 036 | FE | Planned | [README](features/036-frontend-pay-modal-redesign/README.md) | [spec](features/036-frontend-pay-modal-redesign/spec.md) · [plan](features/036-frontend-pay-modal-redesign/plan.md) · [tasks](features/036-frontend-pay-modal-redesign/tasks.md) |
+| 037 | FE | Planned | [README](features/037-frontend-assign-customer-sell-screen/README.md) | [spec](features/037-frontend-assign-customer-sell-screen/spec.md) · [plan](features/037-frontend-assign-customer-sell-screen/plan.md) · [tasks](features/037-frontend-assign-customer-sell-screen/tasks.md) |
+
+---
+
+## Register UX polish (planned order after Phase A)
+
+Decisions 2026-07-22. All frontend-only; implement in number order:
+
+1. [032](features/032-frontend-weight-modal-keyboard/README.md) — weight field keyboard
+2. [033](features/033-frontend-money-display-2dp/README.md) — money display 2 dp
+3. [034](features/034-frontend-search-focus-lock/README.md) — search focus lock
+4. [035](features/035-frontend-search-typeahead/README.md) — search typeahead
+5. [036](features/036-frontend-pay-modal-redesign/README.md) — Pay redesign + Print and pay
+6. [037](features/037-frontend-assign-customer-sell-screen/README.md) — assign customer from sell screen
 
 ---
 

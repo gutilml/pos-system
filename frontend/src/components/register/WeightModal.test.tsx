@@ -49,6 +49,23 @@ describe('WeightModal', () => {
     expect(items[0].quantity).toBe(250)
   })
 
+  it('keyboard entry enables Confirm and adds the weighted line', async () => {
+    const user = userEvent.setup()
+    useCartStore.setState({ pendingWeightProduct: deliHam })
+    render(<WeightModal />)
+
+    const input = screen.getByLabelText(/weight in gr/i)
+    expect(input).not.toHaveAttribute('readonly')
+    await user.type(input, '12.5')
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+
+    const state = useCartStore.getState()
+    expect(state.pendingWeightProduct).toBeNull()
+    const items = selectActiveItems(state)
+    expect(items).toHaveLength(1)
+    expect(items[0].quantity).toBe(12.5)
+  })
+
   it('cancel clears pending weight without adding to cart', async () => {
     const user = userEvent.setup()
     useCartStore.setState({ pendingWeightProduct: deliHam })

@@ -1,9 +1,30 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { formatMoney } from '@/lib/money'
 import { useCartStore } from '@/store/useCartStore'
 import { isWebSerialSupported, requestScaleWeight } from '@/utils/serialScaleHelper'
 
 const NUMPAD_KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'] as const
+
+/** Keep typed weight aligned with numpad rules: digits + at most one decimal point. */
+export function sanitizeWeightInput(raw: string): string {
+  let result = ''
+  let seenDot = false
+  for (const ch of raw) {
+    if (ch >= '0' && ch <= '9') {
+      if (result === '0' && ch !== '.') {
+        result = ch
+      } else {
+        result += ch
+      }
+      continue
+    }
+    if (ch === '.' && !seenDot) {
+      seenDot = true
+      result = result === '' ? '0.' : `${result}.`
+    }
+  }
+  return result
+}
 
 export function WeightModal() {
   const pending = useCartStore((s) => s.pendingWeightProduct)
@@ -13,11 +34,14 @@ export function WeightModal() {
   const [weightInput, setWeightInput] = useState('')
   const [scaleError, setScaleError] = useState<string | null>(null)
   const [readingScale, setReadingScale] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
     if (pending) {
       setWeightInput('')
       setScaleError(null)
+      // Defer so the input exists after the modal mounts.
+      requestAnimationFrame(() => inputRef.current?.focus())
     }
   }, [pending])
 
@@ -47,6 +71,11 @@ export function WeightModal() {
     })
   }
 
+  function handleTypedChange(value: string) {
+    setScaleError(null)
+    setWeightInput(sanitizeWeightInput(value))
+  }
+
   function handleConfirm() {
     if (!canConfirm) return
     confirmWeight(parsedWeight)
@@ -61,7 +90,7 @@ export function WeightModal() {
     } catch (error) {
       const message =
         error instanceof Error ? error.message : 'Could not read from scale'
-      setScaleError(`${message}. Enter weight on the numpad.`)
+      setScaleError(`${message}. Enter weight with the keyboard or numpad.`)
     } finally {
       setReadingScale(false)
     }
@@ -93,11 +122,18 @@ export function WeightModal() {
           </label>
           <div className="flex items-baseline gap-2 rounded-xl border border-slate-300 bg-slate-50 px-4 py-3">
             <input
+              ref={inputRef}
               id="weight-input"
               type="text"
               inputMode="decimal"
-              readOnly
               value={weightInput}
+              onChange={(e) => handleTypedChange(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && canConfirm) {
+                  e.preventDefault()
+                  handleConfirm()
+                }
+              }}
               placeholder="0.000"
               className="w-full bg-transparent text-3xl font-semibold tabular-nums text-slate-900 outline-none"
             />
@@ -138,7 +174,7 @@ export function WeightModal() {
           </button>
           {!isWebSerialSupported() ? (
             <p className="text-xs text-slate-500">
-              Web Serial not available — use the numpad to enter weight.
+              Web Serial not available — enter weight with the keyboard or numpad.
             </p>
           ) : null}
 
