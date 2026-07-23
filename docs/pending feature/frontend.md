@@ -39,7 +39,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 - [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Store selection or auth-derived store context.
 - [ ] **Cash drawer pay-in / pay-out UI** — Backend `POST /shifts/{id}/events` exists; no cashier UI yet.
-- [ ] **Post-close discrepancy ticket** — Blind count submits `actualCash`; after close, show/print a close ticket with expected cash, counted cash, and discrepancy. **Decision (2026-07-17):** no manager auth to close with variance; printing the discrepancy ticket is the system’s end of responsibility (no override/approval flow).
+- [x] **Post-close discrepancy ticket** — Feature 024: after blind close, `ShiftCloseTicket` shows API expected/actual/discrepancy; Print via `window.print`; Done → Open Shift gate. No manager auth.
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling.
 
 ## Register / cart

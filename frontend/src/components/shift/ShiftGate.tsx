@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react'
 import { OpenShiftModal } from '@/components/shift/OpenShiftModal'
+import { ShiftCloseTicket } from '@/components/shift/ShiftCloseTicket'
 import { useShiftStore } from '@/store/useShiftStore'
 
 type ShiftGateProps = {
@@ -8,6 +9,7 @@ type ShiftGateProps = {
 
 export function ShiftGate({ children }: ShiftGateProps) {
   const currentShift = useShiftStore((s) => s.currentShift)
+  const lastClosedShift = useShiftStore((s) => s.lastClosedShift)
   const isLoading = useShiftStore((s) => s.isLoading)
   const hydrationFailed = useShiftStore((s) => s.hydrationFailed)
   const error = useShiftStore((s) => s.error)
@@ -16,6 +18,10 @@ export function ShiftGate({ children }: ShiftGateProps) {
   useEffect(() => {
     void checkCurrentShift()
   }, [checkCurrentShift])
+
+  if (lastClosedShift) {
+    return <ShiftCloseTicket shift={lastClosedShift} />
+  }
 
   if (isLoading && currentShift === null && !hydrationFailed) {
     return (

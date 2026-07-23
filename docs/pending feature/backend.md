@@ -24,6 +24,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [ ] **Shift history / lookup** — e.g. `GET /api/v1/shifts/{id}` and/or list closed shifts for reconciliation reports.
 - [ ] **Cashier / user on shifts** — Today shifts are store-only. Decide how authenticated cashier identity attaches to open/close and drawer events.
 - [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize).
+- [ ] **Expected cash = CASH tenders only** — Today `calculateExpectedCash` sums all transaction `grandTotal`s for the shift. With CARD/CREDIT/split tenders, drawer expected cash can be overstated. Follow-up: sum CASH `transaction_payments` (+ pay-ins − pay-outs). Surfaces on Feature 024 discrepancy ticket; not part of 024.
 
 ## Catalog & checkout APIs
 

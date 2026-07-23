@@ -31,6 +31,7 @@ describe('ShiftGate', () => {
     vi.clearAllMocks()
     useShiftStore.setState({
       currentShift: null,
+      lastClosedShift: null,
       isLoading: true,
       error: null,
       hydrationFailed: false,
@@ -83,6 +84,32 @@ describe('ShiftGate', () => {
     })
 
     expect(screen.queryByRole('heading', { name: /open shift/i })).not.toBeInTheDocument()
+  })
+
+  it('shows the close ticket instead of Open Shift when lastClosedShift is set', () => {
+    useShiftStore.setState({
+      currentShift: null,
+      lastClosedShift: {
+        ...openShift,
+        status: 'CLOSED',
+        expectedCash: 150,
+        actualCash: 149,
+        discrepancy: -1,
+        closedAt: '2026-07-16T20:00:00Z',
+      },
+      isLoading: false,
+      hydrationFailed: false,
+    })
+
+    render(
+      <ShiftGate>
+        <div>Register Content</div>
+      </ShiftGate>,
+    )
+
+    expect(screen.getByTestId('shift-close-ticket')).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /open shift/i })).not.toBeInTheDocument()
+    expect(screen.queryByText('Register Content')).not.toBeInTheDocument()
   })
 
   it('shows error and Retry on hydration failure instead of Open Shift', async () => {

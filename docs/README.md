@@ -39,7 +39,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Discounts (register UI)** | [016](features/016-frontend-discount-ui/README.md) | Item % / global % / strikethrough |
 | **Product search / barcode** | [021](features/021-backend-product-search/README.md), [022](features/022-frontend-live-product-catalog/README.md) | Live catalog wire-up (planned) |
 | **CARD = external terminal** | [023](features/023-frontend-external-terminal-card/README.md) | Mark paid on Pay; no Stripe QR (planned) |
-| **Close shift discrepancy print** | Pending only (not a triad yet) | See [frontend pending](pending%20feature/frontend.md) / [backend pending](pending%20feature/backend.md) — no manager auth; print ticket |
+| **Close shift discrepancy print** | [024](features/024-frontend-shift-discrepancy-ticket/README.md) | No manager auth; browser print ticket after blind close |
 | **Auth / RBAC / users** | Pending only | Needs clarity — see pending docs |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
@@ -73,6 +73,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 021 | BE | Done | [README](features/021-backend-product-search/README.md) | [spec](features/021-backend-product-search/spec.md) · [plan](features/021-backend-product-search/plan.md) · [tasks](features/021-backend-product-search/tasks.md) |
 | 022 | FE | Done | [README](features/022-frontend-live-product-catalog/README.md) | [spec](features/022-frontend-live-product-catalog/spec.md) · [plan](features/022-frontend-live-product-catalog/plan.md) · [tasks](features/022-frontend-live-product-catalog/tasks.md) |
 | 023 | FE | Done | [README](features/023-frontend-external-terminal-card/README.md) | [spec](features/023-frontend-external-terminal-card/spec.md) · [plan](features/023-frontend-external-terminal-card/plan.md) · [tasks](features/023-frontend-external-terminal-card/tasks.md) |
+| 024 | FE | Done | [README](features/024-frontend-shift-discrepancy-ticket/README.md) | [spec](features/024-frontend-shift-discrepancy-ticket/spec.md) · [plan](features/024-frontend-shift-discrepancy-ticket/plan.md) · [tasks](features/024-frontend-shift-discrepancy-ticket/tasks.md) |
 
 ---
 

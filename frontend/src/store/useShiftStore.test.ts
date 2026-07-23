@@ -28,11 +28,21 @@ const openShift: Shift = {
   closedAt: null,
 }
 
+const closedShift: Shift = {
+  ...openShift,
+  status: 'CLOSED',
+  actualCash: 148.5,
+  expectedCash: 150,
+  discrepancy: -1.5,
+  closedAt: '2026-07-16T20:00:00Z',
+}
+
 describe('useShiftStore', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useShiftStore.setState({
       currentShift: null,
+      lastClosedShift: null,
       isLoading: false,
       error: null,
       hydrationFailed: false,
@@ -91,21 +101,32 @@ describe('useShiftStore', () => {
     expect(useShiftStore.getState().currentShift?.status).toBe('OPEN')
   })
 
-  it('closeShift clears the shift and the cart', async () => {
+  it('openShift clears any previous lastClosedShift', async () => {
+    useShiftStore.setState({ lastClosedShift: closedShift })
+    vi.mocked(openShiftRequest).mockResolvedValue(openShift)
+
+    await useShiftStore.getState().openShift(100)
+
+    expect(useShiftStore.getState().lastClosedShift).toBeNull()
+  })
+
+  it('closeShift clears the open shift, resets cart, and retains closed shift for ticket', async () => {
     useShiftStore.setState({ currentShift: openShift })
-    vi.mocked(closeShiftRequest).mockResolvedValue({
-      ...openShift,
-      status: 'CLOSED',
-      actualCash: 150,
-      expectedCash: 150,
-      discrepancy: 0,
-    })
+    vi.mocked(closeShiftRequest).mockResolvedValue(closedShift)
 
-    await useShiftStore.getState().closeShift(150)
+    const returned = await useShiftStore.getState().closeShift(148.5)
 
-    expect(closeShiftRequest).toHaveBeenCalledWith('shift-1', 150)
+    expect(closeShiftRequest).toHaveBeenCalledWith('shift-1', 148.5)
+    expect(returned).toEqual(closedShift)
     expect(useShiftStore.getState().currentShift).toBeNull()
+    expect(useShiftStore.getState().lastClosedShift).toEqual(closedShift)
     expect(selectActiveItems(useCartStore.getState())).toHaveLength(0)
     expect(useCartStore.getState().ticketOrder).toHaveLength(1)
+  })
+
+  it('clearLastClosedShift dismisses the ticket payload', () => {
+    useShiftStore.setState({ lastClosedShift: closedShift })
+    useShiftStore.getState().clearLastClosedShift()
+    expect(useShiftStore.getState().lastClosedShift).toBeNull()
   })
 })

@@ -45,6 +45,7 @@ export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="close-shift-title"
+      data-testid="close-shift-modal"
     >
       <form
         onSubmit={(e) => void handleSubmit(e)}
