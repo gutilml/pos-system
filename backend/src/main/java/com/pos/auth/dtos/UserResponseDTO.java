@@ -11,6 +11,7 @@ public record UserResponseDTO(
         UUID storeId,
         String storeName,
         boolean active,
-        boolean enableInventory
+        boolean enableInventory,
+        String uiLocale
 ) {
 }

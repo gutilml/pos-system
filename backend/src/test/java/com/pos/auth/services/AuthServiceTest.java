@@ -81,7 +81,21 @@ class AuthServiceTest {
         assertThat(result.role()).isEqualTo(Role.ADMIN);
         assertThat(result.storeId()).isEqualTo(store.getId());
         assertThat(result.enableInventory()).isFalse();
+        assertThat(result.uiLocale()).isEqualTo("en");
         verify(authCookieService).writeJwtCookie(response, "jwt-token");
+    }
+
+    @Test
+    void login_exposesUiLocaleFromPreferences() {
+        store.setPreferences(Map.of("ui_locale", "es"));
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.uiLocale()).isEqualTo("es");
     }
 
     @Test
@@ -161,5 +175,6 @@ class AuthServiceTest {
         assertThat(me.username()).isEqualTo("admin");
         assertThat(me.storeName()).isEqualTo("Demo Corner Store");
         assertThat(me.enableInventory()).isFalse();
+        assertThat(me.uiLocale()).isEqualTo("en");
     }
 }

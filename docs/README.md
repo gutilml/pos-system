@@ -56,6 +56,8 @@ Use this table when you know the *subject*, not the feature number.
 | **Pay modal layout polish** | [041](features/041-frontend-pay-modal-layout-polish/README.md) | FE **041** done. |
 | **Product stock + inventory flag (API)** | [042](features/042-backend-product-stock-inventory-flag/README.md) | BE **042** done. |
 | **Cart Stock column** | [043](features/043-frontend-cart-stock-column/README.md) | FE **043** done. |
+| **Cart header column alignment** | [044](features/044-frontend-cart-header-column-alignment/README.md) | FE **044** done. |
+| **Store preferences / UI locale** | [045](features/045-backend-store-preferences/README.md), [046](features/046-frontend-ui-locale/README.md) | BE **045** done — DB `preferences` + settings API; FE **046** planned — EN/ES via store `uiLocale`. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -108,6 +110,9 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 041 | FE | Done | [README](features/041-frontend-pay-modal-layout-polish/README.md) | [spec](features/041-frontend-pay-modal-layout-polish/spec.md) · [plan](features/041-frontend-pay-modal-layout-polish/plan.md) · [tasks](features/041-frontend-pay-modal-layout-polish/tasks.md) |
 | 042 | BE | Done | [README](features/042-backend-product-stock-inventory-flag/README.md) | [spec](features/042-backend-product-stock-inventory-flag/spec.md) · [plan](features/042-backend-product-stock-inventory-flag/plan.md) · [tasks](features/042-backend-product-stock-inventory-flag/tasks.md) |
 | 043 | FE | Done | [README](features/043-frontend-cart-stock-column/README.md) | [spec](features/043-frontend-cart-stock-column/spec.md) · [plan](features/043-frontend-cart-stock-column/plan.md) · [tasks](features/043-frontend-cart-stock-column/tasks.md) |
+| 044 | FE | Done | [README](features/044-frontend-cart-header-column-alignment/README.md) | [spec](features/044-frontend-cart-header-column-alignment/spec.md) · [plan](features/044-frontend-cart-header-column-alignment/plan.md) · [tasks](features/044-frontend-cart-header-column-alignment/tasks.md) |
+| 045 | BE | Done | [README](features/045-backend-store-preferences/README.md) | [spec](features/045-backend-store-preferences/spec.md) · [plan](features/045-backend-store-preferences/plan.md) · [tasks](features/045-backend-store-preferences/tasks.md) |
+| 046 | FE | Planned | [README](features/046-frontend-ui-locale/README.md) | [spec](features/046-frontend-ui-locale/spec.md) · [plan](features/046-frontend-ui-locale/plan.md) · [tasks](features/046-frontend-ui-locale/tasks.md) |
 
 ---
 
@@ -127,6 +132,7 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish ~~(done)~~
 11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` ~~(done)~~
 12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled ~~(done)~~
+13. [044](features/044-frontend-cart-header-column-alignment/README.md) — cart header/column alignment ~~(done)~~
 
 ---
 

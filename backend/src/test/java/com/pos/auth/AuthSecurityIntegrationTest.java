@@ -102,6 +102,7 @@ class AuthSecurityIntegrationTest {
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andExpect(jsonPath("$.enableInventory").value(true))
+                .andExpect(jsonPath("$.uiLocale").value("en"))
                 .andReturn();
 
         var jwtCookie = loginResult.getResponse().getCookie("POS_TOKEN");
@@ -111,7 +112,8 @@ class AuthSecurityIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.storeId").value(store.getId().toString()))
-                .andExpect(jsonPath("$.enableInventory").value(true));
+                .andExpect(jsonPath("$.enableInventory").value(true))
+                .andExpect(jsonPath("$.uiLocale").value("en"));
 
         mockMvc.perform(get("/api/v1/products").cookie(jwtCookie))
                 .andExpect(status().isOk());

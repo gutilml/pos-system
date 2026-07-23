@@ -7,6 +7,8 @@ CREATE TABLE store_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     store_name VARCHAR(255) NOT NULL,
     features JSONB NOT NULL DEFAULT '{"enable_inventory": false, "enable_customer_credit": false}',
+    -- Non-boolean store config (Feature 045); boolean opt-ins stay in features
+    preferences JSONB NOT NULL DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

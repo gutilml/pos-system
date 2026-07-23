@@ -36,7 +36,21 @@ class StoreSettingsRepositoryTest {
         assertThat(loaded.getFeatures())
                 .containsEntry("enable_inventory", true)
                 .containsEntry("enable_customer_credit", false);
+        assertThat(loaded.getPreferences()).isEmpty();
         assertThat(loaded.getId()).isNotNull();
         assertThat(loaded.getCreatedAt()).isNotNull();
+    }
+
+    @Test
+    void saveAndLoad_persistsPreferencesAsJson() {
+        StoreSettings settings = new StoreSettings();
+        settings.setStoreName("Corner Market");
+        settings.setFeatures(Map.of("enable_inventory", false));
+        settings.setPreferences(Map.of("ui_locale", "es"));
+
+        StoreSettings saved = storeSettingsRepository.saveAndFlush(settings);
+        StoreSettings loaded = storeSettingsRepository.findById(saved.getId()).orElseThrow();
+
+        assertThat(loaded.getPreferences()).containsEntry("ui_locale", "es");
     }
 }

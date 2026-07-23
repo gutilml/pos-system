@@ -40,10 +40,10 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [x] ~~**Multi SKU/barcode per product (1→N)** — Feature 027: `product_skus`; drop `products.sku`; zero codes OK; hard-delete; `PUT /api/v1/products/{id}/skus`. Paired FE: **028**.~~
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
-- [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly. SPA inventory visibility uses Feature [042](../features/042-backend-product-stock-inventory-flag/) (`enableInventory` on `/auth/me`) — full CRUD settings API still pending.
+- [x] ~~**Store settings API** — Feature 045: `preferences` JSONB + GET/PATCH `/stores/{id}/settings` + `uiLocale` on `/me`. Boolean opt-ins stay in `features`. Unlocks FE [046](../features/046-frontend-ui-locale/). Org-level prefs deferred.~~
 - [x] ~~**Product stock + inventory flag for SPA** — Feature 042: `currentStock` + `trackInventory` on `ProductDTO`; `enableInventory` on `/auth/me` (+ login). Unblocks FE [043](../features/043-frontend-cart-stock-column/).~~
 - [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.)
-- [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions.
+- [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions. Candidate for `preferences.default_tax_rate` after Feature [045](../features/045-backend-store-preferences/).
 - [x] ~~**Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.~~
 
 ## Payments
@@ -80,7 +80,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [ ] **Role-based authorization policies** — Deferred: when ADMIN vs CASHIER should differ (drawer rules, catalog admin, etc.). v1: both allowed everywhere once authenticated.
 - [ ] **Multi-organization / multi-store tenancy** — Future model: organizations (e.g. Oxxo, Walmart) → many stores under an org; same platform serving multiple orgs. Not in Auth v1. Needs org tables, store membership, and picker UX later.
 - [ ] **CORS / API versioning conventions** — Partially decided (strict React origin for Auth v1); confirm for SPA + Fargate deployment hosts/env.
-- [x] ~~**Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers, admin + cashier users. Re-runnable.~~
+- [x] ~~**Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID, 3 categories, **18 products** (base + similar-name typeahead set; 2 weight + 1 no-global-discount), 2 credit customers, admin + cashier. Re-runnable (clears demo-store transactions).~~
 
 ---
 

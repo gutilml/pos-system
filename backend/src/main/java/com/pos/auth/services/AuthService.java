@@ -7,6 +7,8 @@ import com.pos.auth.repositories.UserRepository;
 import com.pos.auth.security.AuthCookieService;
 import com.pos.auth.security.JwtService;
 import com.pos.auth.security.PosUserDetails;
+import com.pos.core.models.StoreSettings;
+import com.pos.core.services.StoreSettingsServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -83,11 +85,12 @@ public class AuthService {
                 store == null ? null : store.getId(),
                 store == null ? null : store.getStoreName(),
                 user.isActive(),
-                isInventoryEnabled(store)
+                isInventoryEnabled(store),
+                StoreSettingsServiceImpl.resolveUiLocale(store)
         );
     }
 
-    static boolean isInventoryEnabled(com.pos.core.models.StoreSettings store) {
+    static boolean isInventoryEnabled(StoreSettings store) {
         if (store == null || store.getFeatures() == null) {
             return false;
         }

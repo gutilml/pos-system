@@ -30,6 +30,10 @@ public class StoreSettings {
     @Column(name = "features", columnDefinition = "json", nullable = false)
     private Map<String, Boolean> features = new HashMap<>();
 
+    @Type(JsonType.class)
+    @Column(name = "preferences", columnDefinition = "json", nullable = false)
+    private Map<String, Object> preferences = new HashMap<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -56,6 +60,14 @@ public class StoreSettings {
 
     public void setFeatures(Map<String, Boolean> features) {
         this.features = features;
+    }
+
+    public Map<String, Object> getPreferences() {
+        return preferences;
+    }
+
+    public void setPreferences(Map<String, Object> preferences) {
+        this.preferences = preferences;
     }
 
     public OffsetDateTime getCreatedAt() {
