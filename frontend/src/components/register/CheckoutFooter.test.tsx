@@ -2,19 +2,11 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
-import { resetCartForTests, useCartStore } from '@/store/useCartStore'
+import { resetCartForTests } from '@/store/useCartStore'
 
 vi.mock('@/api/transactions', () => ({
   createTransaction: vi.fn(),
 }))
-
-vi.mock('@/api/paymentApi', () => ({
-  createCheckoutSession: vi.fn(),
-  getTransactionStatus: vi.fn(),
-}))
-
-import { createTransaction } from '@/api/transactions'
-import { createCheckoutSession } from '@/api/paymentApi'
 
 describe('CheckoutFooter', () => {
   beforeEach(() => {
@@ -49,40 +41,13 @@ describe('CheckoutFooter', () => {
     expect(screen.getByTestId('open-checkout')).toBeDisabled()
   })
 
-  it('records an external-terminal CARD sale without Stripe', async () => {
-    const user = userEvent.setup()
-    vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-card-1', status: 'COMPLETED' })
-    const ticketId = useCartStore.getState().activeTicketId
-
+  it('does not show a footer Card shortcut', () => {
     render(<CheckoutFooter />)
-    await user.click(screen.getByTestId('card-payment'))
-
-    await waitFor(() => {
-      expect(createTransaction).toHaveBeenCalledWith(
-        expect.objectContaining({
-          payments: [{ paymentMethod: 'CARD', amount: 1.99 }],
-        }),
-      )
-    })
-    expect(createCheckoutSession).not.toHaveBeenCalled()
-    expect(useCartStore.getState().activeTicketId).not.toBe(ticketId)
+    expect(screen.queryByTestId('card-payment')).not.toBeInTheDocument()
   })
 
   it('shows discount saved and reduced total when global discount applies', async () => {
     const user = userEvent.setup()
-    resetCartForTests({
-      items: [
-        {
-          productId: 'p-cola',
-          sku: '1001',
-          name: 'Cola 12oz',
-          unitPrice: 1.99,
-          quantity: 1,
-        },
-      ],
-      taxRate: 0,
-    })
-
     render(<CheckoutFooter />)
     expect(screen.queryByTestId('discount-saved')).not.toBeInTheDocument()
 

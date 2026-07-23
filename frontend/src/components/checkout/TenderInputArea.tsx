@@ -19,13 +19,16 @@ export function TenderInputArea({
 }: TenderInputAreaProps) {
   const [method, setMethod] = useState<PaymentMethod>('CASH')
   const [draft, setDraft] = useState(() => formatMoney(Math.max(0, remainingBalance)))
+  const [localError, setLocalError] = useState<string | null>(null)
 
   useEffect(() => {
     setDraft(formatMoney(Math.max(0, remainingBalance)))
+    setLocalError(null)
   }, [remainingBalance])
 
   function handleMethodChange(next: PaymentMethod) {
     setMethod(next)
+    setLocalError(null)
     if (next === 'CREDIT') {
       onRequestCredit()
     }
@@ -33,8 +36,18 @@ export function TenderInputArea({
 
   function handleAdd() {
     const parsed = Number.parseFloat(draft)
-    if (!Number.isFinite(parsed) || parsed <= 0) return
-    onAdd(method, roundMoney(parsed))
+    if (!Number.isFinite(parsed) || parsed <= 0) {
+      setLocalError('Enter an amount greater than zero')
+      return
+    }
+    const amount = roundMoney(parsed)
+    const max = roundMoney(Math.max(0, remainingBalance))
+    if (amount > max) {
+      setLocalError('Amount cannot exceed remaining balance')
+      return
+    }
+    setLocalError(null)
+    onAdd(method, amount)
   }
 
   return (
@@ -67,15 +80,23 @@ export function TenderInputArea({
           inputMode="decimal"
           disabled={disabled}
           value={draft}
-          onChange={(e) => setDraft(e.target.value)}
+          onChange={(e) => {
+            setDraft(e.target.value)
+            setLocalError(null)
+          }}
           onFocus={() => setDraft(formatMoney(Math.max(0, remainingBalance)))}
           className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-lg tabular-nums text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
         />
+        {localError ? (
+          <p className="mt-1 text-sm text-red-600" role="alert" data-testid="tender-amount-error">
+            {localError}
+          </p>
+        ) : null}
       </div>
 
       <button
         type="button"
-        disabled={disabled}
+        disabled={disabled || remainingBalance <= 0}
         onClick={handleAdd}
         className="w-full rounded-lg bg-slate-900 px-4 py-2.5 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-slate-800"
       >

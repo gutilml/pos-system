@@ -228,7 +228,9 @@ export function selectCanCompleteSale(
   globalDiscountPercentage = 0,
 ): boolean {
   if (items.length === 0 || payments.length === 0) return false
-  if (selectTotalTendered(payments) < selectGrandTotal(items, taxRate, globalDiscountPercentage)) {
+  const tendered = selectTotalTendered(payments)
+  const total = selectGrandTotal(items, taxRate, globalDiscountPercentage)
+  if (tendered !== total) {
     return false
   }
   const hasCredit = payments.some((payment) => payment.method === 'CREDIT')
@@ -343,11 +345,22 @@ export const useCartStore = create<CartState>()(
         const tenderAmount = roundMoney(amount)
         if (tenderAmount <= 0) return
 
-        set((state) =>
-          updateActiveTicket(state, (ticket) => ({
-            ...ticket,
+        const state = get()
+        const ticket = state.tickets[state.activeTicketId]
+        if (!ticket) return
+        const balanceDue = selectBalanceDue(
+          ticket.items,
+          state.taxRate,
+          ticket.payments,
+          ticket.globalDiscountPercentage,
+        )
+        if (tenderAmount > balanceDue) return
+
+        set((prev) =>
+          updateActiveTicket(prev, (active) => ({
+            ...active,
             payments: [
-              ...ticket.payments,
+              ...active.payments,
               { id: newId('pay'), method, amount: tenderAmount },
             ],
           })),

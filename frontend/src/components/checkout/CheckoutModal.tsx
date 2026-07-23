@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { createTransaction } from '@/api/transactions'
 import { CustomerSearch } from '@/components/checkout/CustomerSearch'
 import { PaymentTenderList } from '@/components/checkout/PaymentTenderList'
+import { SaleTicket, type SaleTicketPayload } from '@/components/checkout/SaleTicket'
 import { TenderInputArea } from '@/components/checkout/TenderInputArea'
 import { formatMoney } from '@/lib/money'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
@@ -14,7 +15,7 @@ import {
   selectBalanceDue,
   selectCanCompleteSale,
   selectGrandTotal,
-  selectTenderChangeDue,
+  selectItemPricedLine,
   selectTotalTendered,
   useCartStore,
   type AssignedCustomer,
@@ -45,11 +46,11 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const [pendingCreditAmount, setPendingCreditAmount] = useState<number | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [saleReceipt, setSaleReceipt] = useState<SaleTicketPayload | null>(null)
 
   const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
   const totalTendered = selectTotalTendered(payments)
   const balanceDue = selectBalanceDue(items, taxRate, payments, globalDiscount)
-  const changeDue = selectTenderChangeDue(items, taxRate, payments, globalDiscount)
   const canComplete = selectCanCompleteSale(items, taxRate, payments, customer, globalDiscount)
 
   useEffect(() => {
@@ -58,10 +59,11 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       setPendingCreditAmount(null)
       setSubmitting(false)
       setError(null)
+      setSaleReceipt(null)
     }
   }, [open])
 
-  if (!open) return null
+  if (!open && !saleReceipt) return null
 
   function requestCreditGate(amount?: number) {
     if (customer) return false
@@ -70,6 +72,12 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       setPendingCreditAmount(amount)
     }
     return true
+  }
+
+  function abandonCreditPath() {
+    setRequireCustomer(false)
+    setPendingCreditAmount(null)
+    setError(null)
   }
 
   function handleAddTender(method: PaymentMethod, amount: number) {
@@ -89,10 +97,28 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
     }
   }
 
-  async function handleComplete() {
+  function buildReceiptSnapshot(): SaleTicketPayload {
+    return {
+      grandTotal,
+      customerName: customer?.name ?? null,
+      items: items.map((item) => ({
+        name: item.name,
+        quantity: item.quantity,
+        lineTotal: selectItemPricedLine(item, globalDiscount).lineTotal,
+      })),
+      payments: payments.map((payment) => ({
+        method: payment.method,
+        amount: payment.amount,
+      })),
+    }
+  }
+
+  async function completeSale(options: { print: boolean }) {
     if (!canComplete || submitting) return
     setSubmitting(true)
     setError(null)
+
+    const receipt = buildReceiptSnapshot()
 
     try {
       await createTransaction({
@@ -113,7 +139,13 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       })
       closeTicket(activeTicketId)
       onCompleted?.()
-      onClose()
+      if (options.print) {
+        setSaleReceipt(receipt)
+        onClose()
+        requestAnimationFrame(() => window.print())
+      } else {
+        onClose()
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Checkout failed')
     } finally {
@@ -124,8 +156,22 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   function handleClose() {
     if (submitting) return
     clearPayments()
+    abandonCreditPath()
     onClose()
   }
+
+  if (saleReceipt) {
+    return (
+      <SaleTicket
+        sale={saleReceipt}
+        onDone={() => {
+          setSaleReceipt(null)
+        }}
+      />
+    )
+  }
+
+  if (!open) return null
 
   return (
     <div
@@ -161,15 +207,6 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
             <span className="font-medium tabular-nums text-slate-900" data-testid="checkout-tendered">
               {formatMoney(totalTendered)}
             </span>
-            {changeDue > 0 ? (
-              <>
-                {' '}
-                · Change{' '}
-                <span className="font-medium tabular-nums text-emerald-800" data-testid="checkout-change">
-                  {formatMoney(changeDue)}
-                </span>
-              </>
-            ) : null}
           </p>
         </div>
 
@@ -196,11 +233,19 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
           ) : null}
 
           {requireCustomer || (!customer && payments.some((p) => p.method === 'CREDIT')) ? (
-            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3">
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3" data-testid="credit-customer-gate">
               <p className="mb-2 text-sm font-medium text-amber-950">
                 Assign a customer before charging store credit.
               </p>
               <CustomerSearch autoFocus onSelect={handleCustomerAssigned} />
+              <button
+                type="button"
+                data-testid="abandon-credit-path"
+                onClick={abandonCreditPath}
+                className="mt-2 text-sm font-medium text-amber-950 underline"
+              >
+                Back — choose another tender
+              </button>
             </div>
           ) : null}
 
@@ -221,23 +266,32 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
           ) : null}
         </div>
 
-        <div className="flex gap-3 border-t border-slate-200 px-5 py-4">
+        <div className="flex flex-col gap-2 border-t border-slate-200 px-5 py-4 sm:flex-row">
           <button
             type="button"
             onClick={handleClose}
             disabled={submitting}
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 disabled:opacity-50"
+            className="rounded-xl border border-slate-300 px-4 py-3 font-medium text-slate-700 disabled:opacity-50 sm:flex-1"
           >
             Cancel
           </button>
           <button
             type="button"
             disabled={!canComplete || submitting}
-            onClick={() => void handleComplete()}
-            data-testid="complete-transaction"
-            className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
+            onClick={() => void completeSale({ print: true })}
+            data-testid="print-and-pay"
+            className="rounded-xl border border-emerald-700 px-4 py-3 text-sm font-semibold text-emerald-900 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 sm:flex-1"
           >
-            {submitting ? 'Saving…' : 'Complete Transaction'}
+            Print and pay
+          </button>
+          <button
+            type="button"
+            disabled={!canComplete || submitting}
+            onClick={() => void completeSale({ print: false })}
+            data-testid="complete-transaction"
+            className="rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800 sm:flex-[2]"
+          >
+            {submitting ? 'Saving…' : 'PAY'}
           </button>
         </div>
       </div>

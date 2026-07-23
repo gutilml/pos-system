@@ -48,7 +48,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Money UI 2 decimals** | [033](features/033-frontend-money-display-2dp/README.md) | FE **033** done. |
 | **Search focus lock** | [034](features/034-frontend-search-focus-lock/README.md) | FE **034** done. |
 | **Search typeahead** | [035](features/035-frontend-search-typeahead/README.md) | FE **035** done. |
-| **Pay redesign / Print and pay** | [036](features/036-frontend-pay-modal-redesign/README.md) | FE **036** planned — split tenders, no overpay, print. |
+| **Pay redesign / Print and pay** | [036](features/036-frontend-pay-modal-redesign/README.md) | FE **036** done. |
 | **Assign customer on sell screen** | [037](features/037-frontend-assign-customer-sell-screen/README.md) | FE **037** planned — attach customer before Pay. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
@@ -94,7 +94,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 033 | FE | Done | [README](features/033-frontend-money-display-2dp/README.md) | [spec](features/033-frontend-money-display-2dp/spec.md) · [plan](features/033-frontend-money-display-2dp/plan.md) · [tasks](features/033-frontend-money-display-2dp/tasks.md) |
 | 034 | FE | Done | [README](features/034-frontend-search-focus-lock/README.md) | [spec](features/034-frontend-search-focus-lock/spec.md) · [plan](features/034-frontend-search-focus-lock/plan.md) · [tasks](features/034-frontend-search-focus-lock/tasks.md) |
 | 035 | FE | Done | [README](features/035-frontend-search-typeahead/README.md) | [spec](features/035-frontend-search-typeahead/spec.md) · [plan](features/035-frontend-search-typeahead/plan.md) · [tasks](features/035-frontend-search-typeahead/tasks.md) |
-| 036 | FE | Planned | [README](features/036-frontend-pay-modal-redesign/README.md) | [spec](features/036-frontend-pay-modal-redesign/spec.md) · [plan](features/036-frontend-pay-modal-redesign/plan.md) · [tasks](features/036-frontend-pay-modal-redesign/tasks.md) |
+| 036 | FE | Done | [README](features/036-frontend-pay-modal-redesign/README.md) | [spec](features/036-frontend-pay-modal-redesign/spec.md) · [plan](features/036-frontend-pay-modal-redesign/plan.md) · [tasks](features/036-frontend-pay-modal-redesign/tasks.md) |
 | 037 | FE | Planned | [README](features/037-frontend-assign-customer-sell-screen/README.md) | [spec](features/037-frontend-assign-customer-sell-screen/spec.md) · [plan](features/037-frontend-assign-customer-sell-screen/plan.md) · [tasks](features/037-frontend-assign-customer-sell-screen/tasks.md) |
 
 ---

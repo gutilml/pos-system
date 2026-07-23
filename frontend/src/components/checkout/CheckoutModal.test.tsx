@@ -5,6 +5,7 @@ import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import {
   resetCartForTests,
   selectActivePayments,
+  selectGrandTotal,
   useCartStore,
 } from '@/store/useCartStore'
 
@@ -43,7 +44,7 @@ describe('CheckoutModal', () => {
     })
   })
 
-  it('disables Complete Transaction until tenders cover the grand total', async () => {
+  it('disables PAY until tenders exactly cover the grand total', async () => {
     const user = userEvent.setup()
     render(<CheckoutModal open onClose={() => undefined} />)
 
@@ -66,6 +67,19 @@ describe('CheckoutModal', () => {
     expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
     expect(screen.getByTestId('checkout-tendered')).toHaveTextContent('6.48')
     expect(screen.getByTestId('complete-transaction')).toBeEnabled()
+    expect(screen.getByTestId('complete-transaction')).toHaveTextContent('PAY')
+  })
+
+  it('rejects tender amounts above remaining balance', async () => {
+    const user = userEvent.setup()
+    render(<CheckoutModal open onClose={() => undefined} />)
+
+    await user.clear(screen.getByLabelText('Tender amount'))
+    await user.type(screen.getByLabelText('Tender amount'), '10')
+    await user.click(screen.getByRole('button', { name: 'Add tender' }))
+
+    expect(screen.getByTestId('tender-amount-error')).toHaveTextContent(/cannot exceed/i)
+    expect(selectActivePayments(useCartStore.getState())).toHaveLength(0)
   })
 
   it('intercepts CREDIT tenders and requires a customer before adding', async () => {
@@ -90,7 +104,6 @@ describe('CheckoutModal', () => {
     await user.type(screen.getByLabelText('Tender amount'), '4.00')
     await user.click(screen.getByRole('button', { name: 'Add tender' }))
 
-    // Still blocked — no customer assigned yet.
     expect(selectActivePayments(useCartStore.getState())).toHaveLength(0)
     expect(screen.getByTestId('complete-transaction')).toBeDisabled()
 
@@ -110,7 +123,17 @@ describe('CheckoutModal', () => {
     expect(selectActivePayments(useCartStore.getState())[0].amount).toBe(4)
   })
 
-  it('posts payments[] payload and closes the ticket on success', async () => {
+  it('lets cashier abandon the credit customer gate', async () => {
+    const user = userEvent.setup()
+    render(<CheckoutModal open onClose={() => undefined} />)
+
+    await user.click(screen.getByRole('button', { name: 'CREDIT' }))
+    expect(screen.getByTestId('credit-customer-gate')).toBeInTheDocument()
+    await user.click(screen.getByTestId('abandon-credit-path'))
+    expect(screen.queryByTestId('credit-customer-gate')).not.toBeInTheDocument()
+  })
+
+  it('posts payments[] payload and closes the ticket on PAY', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
     vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-1', status: 'COMPLETED' })
@@ -149,6 +172,26 @@ describe('CheckoutModal', () => {
     expect(useCartStore.getState().activeTicketId).not.toBe(ticketId)
   })
 
+  it('Print and pay completes the sale and calls window.print', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    const printSpy = vi.spyOn(window, 'print').mockImplementation(() => undefined)
+    vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-print', status: 'COMPLETED' })
+
+    useCartStore.getState().addPayment('CASH', 6.48)
+    render(<CheckoutModal open onClose={onClose} />)
+
+    await user.click(screen.getByTestId('print-and-pay'))
+
+    await waitFor(() => {
+      expect(createTransaction).toHaveBeenCalled()
+    })
+    expect(onClose).toHaveBeenCalled()
+    expect(printSpy).toHaveBeenCalled()
+    expect(await screen.findByTestId('sale-ticket')).toBeInTheDocument()
+    printSpy.mockRestore()
+  })
+
   it('includes discount percentages in the checkout payload', async () => {
     const user = userEvent.setup()
     vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-2', status: 'COMPLETED' })
@@ -167,7 +210,12 @@ describe('CheckoutModal', () => {
       taxRate: 0,
       globalDiscountPercentage: 0.05,
     })
-    useCartStore.getState().addPayment('CASH', 1.791)
+    const total = selectGrandTotal(
+      useCartStore.getState().tickets[useCartStore.getState().activeTicketId].items,
+      0,
+      0.05,
+    )
+    useCartStore.getState().addPayment('CASH', total)
 
     render(<CheckoutModal open onClose={() => undefined} />)
     await user.click(screen.getByTestId('complete-transaction'))
