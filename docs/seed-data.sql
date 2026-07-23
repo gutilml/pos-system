@@ -10,6 +10,14 @@ BEGIN;
 -- categories: 00000000-0000-0000-0000-000000000101 .. 103
 -- products:   00000000-0000-0000-0000-000000000201 .. 210
 -- customers:  00000000-0000-0000-0000-000000000301 .. 302
+-- users:      00000000-0000-0000-0000-000000000401 (admin), 402 (cashier)
+
+DELETE FROM users
+WHERE id IN (
+    '00000000-0000-0000-0000-000000000401',
+    '00000000-0000-0000-0000-000000000402'
+)
+   OR username IN ('admin', 'cashier');
 
 DELETE FROM product_category
 WHERE product_id IN (
@@ -215,6 +223,26 @@ INSERT INTO customers (id, store_id, name, phone, credit_limit, current_balance)
         '555-0102',
         1000.0000,
         150.0000
+    );
+
+-- BCrypt hashes for plaintext "admin" / "cashier" (cost 10). Regenerate with:
+-- python -c "import bcrypt; print(bcrypt.hashpw(b'admin', bcrypt.gensalt(rounds=10)).decode())"
+INSERT INTO users (id, username, password_hash, role, store_id, is_active) VALUES
+    (
+        '00000000-0000-0000-0000-000000000401',
+        'admin',
+        '$2b$10$RtVi/T.dMr3VzR5NN71L5OiqUJnOAkrTPssfRTY8KXKVSnOAHIbfq',
+        'ADMIN',
+        '00000000-0000-0000-0000-000000000001',
+        true
+    ),
+    (
+        '00000000-0000-0000-0000-000000000402',
+        'cashier',
+        '$2b$10$HX/JihurdXFzKe63ImLQTuJ7P7J15jjiMgrvkMz17T31I4L3HLU/i',
+        'CASHIER',
+        '00000000-0000-0000-0000-000000000001',
+        true
     );
 
 COMMIT;

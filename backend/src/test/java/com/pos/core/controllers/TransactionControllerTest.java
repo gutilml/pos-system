@@ -8,9 +8,9 @@ import com.pos.core.exception.GlobalExceptionHandler;
 import com.pos.core.models.PaymentType;
 import com.pos.core.models.TransactionStatus;
 import com.pos.core.services.TransactionService;
+import com.pos.testsupport.UnsecuredWebMvcTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TransactionController.class)
+@UnsecuredWebMvcTest(controllers = TransactionController.class)
 @Import(GlobalExceptionHandler.class)
 class TransactionControllerTest {
 

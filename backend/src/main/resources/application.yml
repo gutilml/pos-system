@@ -16,3 +16,16 @@ stripe:
   webhook-secret: ${STRIPE_WEBHOOK_SECRET:whsec_placeholder}
   success-url: ${STRIPE_SUCCESS_URL:http://localhost:5173/payments/success?session_id={CHECKOUT_SESSION_ID}}
   cancel-url: ${STRIPE_CANCEL_URL:http://localhost:5173/payments/cancel}
+
+pos:
+  security:
+    jwt:
+      secret: ${POS_JWT_SECRET:local-dev-only-change-me-to-a-long-random-secret-key}
+      cookie-name: POS_TOKEN
+      ttl: PT8H
+    cors:
+      allowed-origins:
+        - http://localhost:5173
+    cookie:
+      secure: false
+      same-site: Lax

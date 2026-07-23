@@ -137,3 +137,14 @@ CREATE TABLE credit_ledger_entries (
     type VARCHAR(20) NOT NULL, -- 'CHARGE', 'PAYMENT'
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 12. SYSTEM USERS (AuthN — separate from credit customers)
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL, -- 'ADMIN' | 'CASHIER'
+    store_id UUID REFERENCES store_settings(id),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);

@@ -10,9 +10,9 @@ import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.CashDrawerEventType;
 import com.pos.core.models.ShiftStatus;
 import com.pos.core.services.shift.ShiftService;
+import com.pos.testsupport.UnsecuredWebMvcTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(ShiftController.class)
+@UnsecuredWebMvcTest(controllers = ShiftController.class)
 @Import(GlobalExceptionHandler.class)
 class ShiftControllerTest {
 

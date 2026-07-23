@@ -6,7 +6,7 @@ Modular monolith point-of-sale: Spring Boot backend, React/Vite frontend, Postgr
 
 **Do not hunt feature folders one by one.** Start at:
 
-**[docs/README.md](docs/README.md)** — topic index + links to every feature README (`002`–`023`), pending backlogs, and Phase A order.
+**[docs/README.md](docs/README.md)** — topic index + links to every feature README (`002`–`025`), pending backlogs, and Phase A order.
 
 Also: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) (architecture) · [docs/pending feature/](docs/pending%20feature/) (backlog).
 
@@ -32,13 +32,22 @@ Backend uses `ddl-auto: validate`, so the schema must exist before Spring Boot s
 # Schema (first time / empty DB)
 Get-Content docs\database-schema.sql | docker exec -i pos-postgres psql -U pos -d pos
 
-# Demo store, 10 products, 2 credit customers (safe to re-run)
+# Demo store, 10 products, 2 credit customers, admin + cashier users (safe to re-run)
 Get-Content docs\seed-data.sql | docker exec -i pos-postgres psql -U pos -d pos
 ```
 
-Seed store id is `00000000-0000-0000-0000-000000000001` (matches frontend `DEFAULT_STORE_ID`).
+Seed store id is `00000000-0000-0000-0000-000000000001` (matches frontend `DEFAULT_STORE_ID` until Feature 026).
 
-**Note:** There is no login yet — Auth/RBAC is the next platform feature. `admin`/`admin` cannot be seeded until user accounts exist.
+**Auth (Feature 025):** API requires login. Seed users:
+
+| Username | Password | Role |
+|----------|----------|------|
+| `admin` | `admin` | ADMIN |
+| `cashier` | `cashier` | CASHIER |
+
+Flow: `GET /api/v1/auth/csrf` → `POST /api/v1/auth/login` with `X-XSRF-TOKEN` → HttpOnly `POS_TOKEN` cookie. Frontend login UI is **Feature 026** — until then the SPA will get **401** on live APIs.
+
+Existing DB: apply the new `users` table from `docs/database-schema.sql` (section 12), then re-run seed.
 
 ### 3. Backend
 
@@ -55,6 +64,8 @@ cd backend
 ```
 
 API: http://localhost:8080
+
+Optional: set `POS_JWT_SECRET` for a non-default signing key.
 
 ### 4. Frontend
 

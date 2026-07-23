@@ -44,6 +44,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 ## Register / cart
 
+- [ ] **Multi-barcode per product (UX)** — Depends on backend multi-barcode schema/API (see backend pending). Today register treats scanned value as SKU (Features 021/022). After BE ships: scan any linked barcode → same product; no cart-line change needed if API still returns one product. **Admin gap:** product create/edit UI must manage a list of barcodes (add/remove, show primary), not a single SKU-as-barcode field. Out of scope until backend triad exists.
 - [x] **Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.
 - [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when settings API exists.
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
@@ -53,11 +54,19 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 ## Auth & multi-store
 
-- [ ] **Login / session** — Cashier identity for shift gate and audit.
-- [ ] **System user management UI** — Admin/manager screens to create, edit, deactivate, and assign cashier / manager / admin users to stores once backend user APIs exist.
-- [ ] **Current-user context** — Replace hardcoded cashier/store assumptions with authenticated user + role + store context for shift, checkout, and admin flows.
-- [ ] **Role-gated navigation and actions** — Hide or block manager/admin-only UI such as drawer adjustments, inventory/admin screens, and user management. **Needs clarity** with backend RBAC (which screens/actions). Shift close with discrepancy is cashier-allowed; no manager override UI planned for variance.
-- [ ] **Store picker** — Multi-store merchants; stop using a single hardcoded UUID.
+### Auth decisions (2026-07-22) — mirror backend pending
+
+- JWT in HttpOnly cookies + CSRF (`XSRF-TOKEN` / `X-XSRF-TOKEN`) + credentials on API calls.
+- Roles ADMIN + CASHIER; **equal permissions for now** (no role-gated UI yet).
+- Single store for now; drop `DEFAULT_STORE_ID` hardcode in favor of store from auth/config once BE exposes it on `/me` (or keep seed UUID until then).
+- User management **UI deferred** until user CRUD API exists.
+- Shift ↔ user linking **deferred (Option C)** — Auth v1 login only; shift gate stays store-scoped until a later follow-up.
+
+- [ ] **Login / logout UI (v1)** — Login screen; Auth gate before ShiftGate; call login/logout/me; attach CSRF header on mutating requests. **Follow-up Feature 026** after Backend Auth v1 (025).
+- [ ] **Current-user context (v1)** — Hold authenticated user (+ role) in client state; use store id from `/me` or single-store config instead of scattered hardcodes where practical. **Part of Feature 026.**
+- [ ] **System user management UI** — Admin screens to create/edit/deactivate users. **Deferred** with backend user CRUD API.
+- [ ] **Role-gated navigation and actions** — Deferred until ADMIN vs CASHIER permissions diverge. Shift close with discrepancy remains cashier-allowed; no manager override for variance.
+- [ ] **Store picker / multi-org UX** — Deferred with multi-organization / multi-store tenancy (Oxxo-, Walmart-style orgs with many stores). Not in Auth v1.
 
 ## Opt-in module UIs
 

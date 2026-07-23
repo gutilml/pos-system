@@ -1,0 +1,122 @@
+package com.pos.auth.services;
+
+import com.pos.auth.dtos.LoginRequestDTO;
+import com.pos.auth.models.Role;
+import com.pos.auth.models.User;
+import com.pos.auth.repositories.UserRepository;
+import com.pos.auth.security.AuthCookieService;
+import com.pos.auth.security.JwtService;
+import com.pos.auth.security.PosUserDetails;
+import com.pos.core.models.StoreSettings;
+import jakarta.servlet.http.HttpServletResponse;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class AuthServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtService jwtService;
+    @Mock
+    private AuthCookieService authCookieService;
+    @Mock
+    private HttpServletResponse response;
+
+    @InjectMocks
+    private AuthService authService;
+
+    private User admin;
+    private StoreSettings store;
+
+    @BeforeEach
+    void setUp() {
+        SecurityContextHolder.clearContext();
+        store = new StoreSettings();
+        store.setId(UUID.fromString("00000000-0000-0000-0000-000000000001"));
+        store.setStoreName("Demo Corner Store");
+
+        admin = new User();
+        admin.setId(UUID.fromString("00000000-0000-0000-0000-000000000401"));
+        admin.setUsername("admin");
+        admin.setPasswordHash("hash");
+        admin.setRole(Role.ADMIN);
+        admin.setStore(store);
+        admin.setActive(true);
+    }
+
+    @Test
+    void login_setsCookieAndReturnsUser() {
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.username()).isEqualTo("admin");
+        assertThat(result.role()).isEqualTo(Role.ADMIN);
+        assertThat(result.storeId()).isEqualTo(store.getId());
+        verify(authCookieService).writeJwtCookie(response, "jwt-token");
+    }
+
+    @Test
+    void login_rejectsBadPassword() {
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("wrong", "hash")).thenReturn(false);
+
+        assertThatThrownBy(() -> authService.login(new LoginRequestDTO("admin", "wrong"), response))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    @Test
+    void login_rejectsInactiveUser() {
+        admin.setActive(false);
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+
+        assertThatThrownBy(() -> authService.login(new LoginRequestDTO("admin", "admin"), response))
+                .isInstanceOf(BadCredentialsException.class);
+    }
+
+    @Test
+    void logout_clearsCookie() {
+        authService.logout(response);
+        verify(authCookieService).clearJwtCookie(response);
+    }
+
+    @Test
+    void me_returnsCurrentUser() {
+        var details = new PosUserDetails(admin);
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(details, null, details.getAuthorities())
+        );
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+
+        var me = authService.me();
+
+        assertThat(me.username()).isEqualTo("admin");
+        assertThat(me.storeName()).isEqualTo("Demo Corner Store");
+    }
+}

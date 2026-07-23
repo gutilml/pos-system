@@ -19,3 +19,16 @@ stripe:
   webhook-secret: whsec_unit
   success-url: http://localhost/success?session_id={CHECKOUT_SESSION_ID}
   cancel-url: http://localhost/cancel
+
+pos:
+  security:
+    jwt:
+      secret: test-jwt-secret-key-at-least-32-bytes-long!!
+      cookie-name: POS_TOKEN
+      ttl: PT1H
+    cors:
+      allowed-origins:
+        - http://localhost:5173
+    cookie:
+      secure: false
+      same-site: Lax

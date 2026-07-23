@@ -22,13 +22,44 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 - [x] **`GET /api/v1/shifts/current`** — Feature 017: store-scoped open shift or 404 via `ShiftService.getCurrentOpenShift`. Unblocks frontend Feature 018.
 - [ ] **Shift history / lookup** — e.g. `GET /api/v1/shifts/{id}` and/or list closed shifts for reconciliation reports.
-- [ ] **Cashier / user on shifts** — Today shifts are store-only. Decide how authenticated cashier identity attaches to open/close and drawer events.
+- [ ] **Cashier / user on shifts** — Today shifts are store-only (`shifts` has no user columns). **Decision (2026-07-22): Option C — defer.** Auth v1 ships login/JWT/CSRF without changing shift schema or open/current/close rules (still one OPEN shift per store). Follow-up later: prefer **A** (audit `opened_by` / `closed_by`) before **B** (one open shift per user).
 - [ ] **Pay-in / pay-out policy** — Backend events exist; clarify validation rules (reasons required, max amounts, who can authorize).
 - [ ] **Expected cash = CASH tenders only** — Today `calculateExpectedCash` sums all transaction `grandTotal`s for the shift. With CARD/CREDIT/split tenders, drawer expected cash can be overstated. Follow-up: sum CASH `transaction_payments` (+ pay-ins − pay-outs). Surfaces on Feature 024 discrepancy ticket; not part of 024.
 
 ## Catalog & checkout APIs
 
 - [x] **Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.
+- [ ] **Multi-barcode per product** — Today `products.sku` is UNIQUE and treated as *the* barcode (Feature 021 scan path). Real catalogs often need **one product → many scannable codes** (supplier UPC + store PLU, multipack vs unit, regional packs, legacy codes after rebrand).
+
+  **Problem with current schema**
+  - One column cannot hold multiple codes without denormalizing (comma lists) or inventing fake “extra products.”
+  - SKU and barcode are conflated: internal stock-keeping identity vs scannable identifiers.
+
+  **Proposed schema direction (to decide when promoted)**
+  1. Keep `products.sku` as the **internal catalog code** (still UNIQUE) — may or may not equal a barcode.
+  2. Add child table, e.g. `product_barcodes`:
+     - `id UUID PK`
+     - `product_id UUID NOT NULL REFERENCES products(id) ON DELETE CASCADE`
+     - `barcode VARCHAR(100) NOT NULL` — scannable value (EAN/UPC/PLU/etc.)
+     - `is_primary BOOLEAN NOT NULL DEFAULT false` — optional convenience for labels/admin
+     - `created_at TIMESTAMPTZ`
+     - **UNIQUE (`barcode`)** globally (one code → at most one product)
+     - Index on `product_id`; optional partial unique so at most one `is_primary` per product
+  3. **Migration:** for each existing product, insert one `product_barcodes` row with `barcode = products.sku` (and `is_primary = true`) so register scans keep working.
+  4. Do **not** remove `sku` in v1 of this change — avoid breaking create/search DTOs and seed data; clarify in docs that SKU ≠ barcode list.
+
+  **API / search impact**
+  - Feature 021 exact match must resolve `q` against **any** barcode (and optionally still against `sku`).
+  - Create/update product payloads: accept `barcodes: string[]` (or structured list); validate uniqueness + non-empty if scan-required.
+  - `ProductDTO`: expose `barcodes` (and maybe `primaryBarcode`) for admin; register search can keep returning product identity + price (scan only needs resolve → product).
+
+  **Open decisions before a triad**
+  - Must every product have ≥1 barcode, or can some be name-search-only?
+  - Can `sku` stay equal to primary barcode for simplicity, or force SKU as a separate human code?
+  - Soft-retire old barcodes (keep history) vs hard delete when codes change?
+  - Parent/child pack products: shared barcodes forbidden (UNIQUE already enforces) — confirm no “scan pack adds child” special case here.
+
+  Pair with frontend catalog admin + register scan (see frontend pending). Promote to `docs/features/00N-*` when scheduled.
 - [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
 - [ ] **Categories CRUD** — Entities exist; no public category API yet.
 - [ ] **Store settings API** — Read/update `features` JSONB (`enable_inventory`, `enable_customer_credit`, etc.) so clients can opt-in correctly.
@@ -53,12 +84,24 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 ## Platform / ops
 
-- [ ] **AuthN/AuthZ** — Spring Security, roles (cashier / manager / admin), store tenancy.
-- [ ] **System user accounts** — Add backend-owned cashier / manager / admin users, including create/update/deactivate APIs, password handling, store assignment, and audit-friendly identity fields separate from customer credit accounts.
-- [ ] **Session / login APIs** — Issue and validate authenticated sessions or JWTs for the frontend, including logout / refresh behavior and current-user lookup.
-- [ ] **Role-based authorization policies** — Enforce manager-only operations (drawer adjustments, shift close overrides, product/admin changes) and cashier-scoped checkout actions at the controller/service boundary.
-- [ ] **CORS / API versioning conventions** — Confirm for SPA + Fargate deployment.
-- [x] **Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers. Re-runnable. Auth users still blocked until AuthN/AuthZ.
+### Auth decisions (2026-07-22) — for upcoming Feature 025+
+
+- **Token:** JWT in **HttpOnly** cookies (stateless; no DB session lookup per request).
+- **CSRF:** Spring CSRF with readable `XSRF-TOKEN` cookie; SPA sends `X-XSRF-TOKEN` on mutating requests (Axios/fetch helper).
+- **CORS:** Strict allowlist — only the React app origin.
+- **Roles (v1):** `ADMIN` + `CASHIER` only; **for now both can do everything** (roles exist for future gating; no manager role yet).
+- **Tenancy (v1):** **Single store** only (continue using the demo store / one `store_settings` row). Multi-org / multi-store deferred (see below).
+- **User provisioning (v1):** Seed and/or SQL only — **no** user CRUD API yet (deferred below).
+- **Shift ↔ user:** **Deferred (Option C, 2026-07-22).** Auth v1 does not change shift open/current/close; still one open shift per store. Later: audit stamps (A), then optional per-user shifts (B).
+
+- [x] **AuthN/AuthZ (v1)** — Feature 025: Spring Security + JWT HttpOnly cookie (`POS_TOKEN`) + CSRF + strict CORS; roles ADMIN/CASHIER (equal permissions).
+- [x] **System users table (v1)** — Feature 025: `users` table + seed `admin`/`admin` and `cashier`/`cashier`.
+- [x] **Login / logout / me APIs (v1)** — Feature 025: `GET /auth/csrf`, `POST /auth/login`, `POST /auth/logout`, `GET /auth/me`.
+- [ ] **User management API** — Create / update / deactivate / list users (ADMIN). **Deferred** after Auth v1 login works. Pair with FE user-mgmt screen.
+- [ ] **Role-based authorization policies** — Deferred: when ADMIN vs CASHIER should differ (drawer rules, catalog admin, etc.). v1: both allowed everywhere once authenticated.
+- [ ] **Multi-organization / multi-store tenancy** — Future model: organizations (e.g. Oxxo, Walmart) → many stores under an org; same platform serving multiple orgs. Not in Auth v1. Needs org tables, store membership, and picker UX later.
+- [ ] **CORS / API versioning conventions** — Partially decided (strict React origin for Auth v1); confirm for SPA + Fargate deployment hosts/env.
+- [x] **Seed data / fixtures** — `docs/seed-data.sql`: fixed store UUID (`DEFAULT_STORE_ID`), 3 categories, 10 products (incl. 2 weight + 1 no-global-discount), 2 credit customers, admin + cashier users. Re-runnable.
 
 ---
 

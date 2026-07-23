@@ -4,9 +4,9 @@ import com.pos.core.dtos.payments.CheckoutSessionResponseDTO;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.GlobalExceptionHandler;
 import com.pos.core.services.payments.StripePaymentService;
+import com.pos.testsupport.UnsecuredWebMvcTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -21,7 +21,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(PaymentController.class)
+@UnsecuredWebMvcTest(controllers = PaymentController.class)
 @Import(GlobalExceptionHandler.class)
 class PaymentControllerTest {
 
