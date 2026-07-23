@@ -1,4 +1,5 @@
 import type { CartProduct } from '@/types/cart'
+import { apiFetch, parseJson } from '@/api/http'
 
 const API_BASE = '/api/v1'
 
@@ -14,14 +15,6 @@ export type ProductApi = {
   sellByWeight?: boolean
   unitOfMeasure?: string | null
   excludeFromGlobalDiscounts?: boolean
-}
-
-async function parseJson<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(detail || `Request failed (${response.status})`)
-  }
-  return response.json() as Promise<T>
 }
 
 export function toCartProduct(dto: ProductApi): CartProduct {
@@ -44,6 +37,6 @@ export async function searchProducts(query: string): Promise<ProductApi[]> {
   if (!trimmed) return []
 
   const params = new URLSearchParams({ q: trimmed })
-  const response = await fetch(`${API_BASE}/products/search?${params.toString()}`)
+  const response = await apiFetch(`${API_BASE}/products/search?${params.toString()}`)
   return parseJson<ProductApi[]>(response)
 }

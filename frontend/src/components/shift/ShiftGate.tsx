@@ -1,6 +1,7 @@
 import { useEffect, type ReactNode } from 'react'
 import { OpenShiftModal } from '@/components/shift/OpenShiftModal'
 import { ShiftCloseTicket } from '@/components/shift/ShiftCloseTicket'
+import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
 type ShiftGateProps = {
@@ -14,10 +15,11 @@ export function ShiftGate({ children }: ShiftGateProps) {
   const hydrationFailed = useShiftStore((s) => s.hydrationFailed)
   const error = useShiftStore((s) => s.error)
   const checkCurrentShift = useShiftStore((s) => s.checkCurrentShift)
+  const storeId = useAuthStore(selectStoreId)
 
   useEffect(() => {
-    void checkCurrentShift()
-  }, [checkCurrentShift])
+    void checkCurrentShift(storeId)
+  }, [checkCurrentShift, storeId])
 
   if (lastClosedShift) {
     return <ShiftCloseTicket shift={lastClosedShift} />
@@ -52,7 +54,7 @@ export function ShiftGate({ children }: ShiftGateProps) {
           <button
             type="button"
             data-testid="retry-shift-check"
-            onClick={() => void checkCurrentShift()}
+            onClick={() => void checkCurrentShift(storeId)}
             className="mt-5 w-full rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white active:bg-emerald-800"
           >
             Retry

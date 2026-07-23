@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import { createTransaction } from '@/api/transactions'
-import { DEFAULT_STORE_ID } from '@/api/shifts'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
+import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import {
   selectActiveCustomer,
   selectActiveGlobalDiscountPercentage,
@@ -28,6 +28,7 @@ export function CheckoutFooter() {
   const closeTicket = useCartStore((s) => s.closeTicket)
   const activeTicketId = useCartStore((s) => s.activeTicketId)
   const setGlobalDiscountPercentage = useCartStore((s) => s.setGlobalDiscountPercentage)
+  const storeId = useAuthStore(selectStoreId)
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [cardError, setCardError] = useState<string | null>(null)
@@ -55,7 +56,7 @@ export function CheckoutFooter() {
     setCardStarting(true)
     try {
       await createTransaction({
-        storeId: DEFAULT_STORE_ID,
+        storeId,
         taxRate: taxRate || undefined,
         customerId: customer?.id,
         globalDiscountPercentage: globalDiscount > 0 ? globalDiscount : undefined,

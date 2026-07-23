@@ -36,16 +36,16 @@ Get-Content docs\database-schema.sql | docker exec -i pos-postgres psql -U pos -
 Get-Content docs\seed-data.sql | docker exec -i pos-postgres psql -U pos -d pos
 ```
 
-Seed store id is `00000000-0000-0000-0000-000000000001` (matches frontend `DEFAULT_STORE_ID` until Feature 026).
+Seed store id is `00000000-0000-0000-0000-000000000001` (frontend `DEFAULT_STORE_ID` fallback; live session prefers `/me.storeId`).
 
-**Auth (Feature 025):** API requires login. Seed users:
+**Auth (Features 025–026):** API requires login. Seed users:
 
 | Username | Password | Role |
 |----------|----------|------|
 | `admin` | `admin` | ADMIN |
 | `cashier` | `cashier` | CASHIER |
 
-Flow: `GET /api/v1/auth/csrf` → `POST /api/v1/auth/login` with `X-XSRF-TOKEN` → HttpOnly `POS_TOKEN` cookie. Frontend login UI is **Feature 026** — until then the SPA will get **401** on live APIs.
+Flow: SPA AuthGate → `GET /api/v1/auth/csrf` → `POST /api/v1/auth/login` with `X-XSRF-TOKEN` → HttpOnly `POS_TOKEN` cookie. Logout from the cashier menu.
 
 Existing DB: apply the new `users` table from `docs/database-schema.sql` (section 12), then re-run seed.
 

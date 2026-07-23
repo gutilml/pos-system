@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { searchCustomers, type CustomerSearchResult } from '@/api/customers'
 import { formatMoney, roundMoney } from '@/lib/money'
+import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import type { AssignedCustomer } from '@/store/useCartStore'
 
 type CustomerSearchProps = {
@@ -26,6 +27,7 @@ function availableCredit(customer: CustomerSearchResult): number {
 
 export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchProps) {
   const inputId = useId()
+  const storeId = useAuthStore(selectStoreId)
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<CustomerSearchResult[]>([])
   const [loading, setLoading] = useState(false)
@@ -43,7 +45,7 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
     let cancelled = false
     const timer = window.setTimeout(() => {
       setLoading(true)
-      void searchCustomers(trimmed)
+      void searchCustomers(trimmed, storeId)
         .then((rows) => {
           if (cancelled) return
           setResults(rows)
@@ -63,7 +65,7 @@ export function CustomerSearch({ onSelect, autoFocus = false }: CustomerSearchPr
       cancelled = true
       window.clearTimeout(timer)
     }
-  }, [query])
+  }, [query, storeId])
 
   return (
     <div className="space-y-2" data-testid="customer-search">

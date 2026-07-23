@@ -1,3 +1,5 @@
+import { apiFetch, parseJson } from '@/api/http'
+
 const API_BASE = '/api/v1'
 
 export type PaymentMethodPayload = 'CASH' | 'CARD' | 'CREDIT'
@@ -29,14 +31,6 @@ export type CreateTransactionResponse = {
   status: string
 }
 
-async function parseJson<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(detail || `Request failed (${response.status})`)
-  }
-  return response.json() as Promise<T>
-}
-
 /**
  * Persists the current ticket as a backend transaction.
  * Payload matches Feature 013 payments[] + Feature 015 discount fields.
@@ -44,7 +38,7 @@ async function parseJson<T>(response: Response): Promise<T> {
 export async function createTransaction(
   request: CreateTransactionRequest,
 ): Promise<CreateTransactionResponse> {
-  const response = await fetch(`${API_BASE}/transactions`, {
+  const response = await apiFetch(`${API_BASE}/transactions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(request),

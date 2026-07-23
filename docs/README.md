@@ -40,7 +40,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Product search / barcode** | [021](features/021-backend-product-search/README.md), [022](features/022-frontend-live-product-catalog/README.md) | Live catalog wire-up (planned) |
 | **CARD = external terminal** | [023](features/023-frontend-external-terminal-card/README.md) | Mark paid on Pay; no Stripe QR (planned) |
 | **Close shift discrepancy print** | [024](features/024-frontend-shift-discrepancy-ticket/README.md) | No manager auth; browser print ticket after blind close |
-| **Auth / RBAC / users** | [025](features/025-backend-auth-v1/README.md) | BE Auth v1 (JWT cookie + CSRF). FE login = **026** (pending). User CRUD / role policies / multi-store deferred. |
+| **Auth / RBAC / users** | [025](features/025-backend-auth-v1/README.md), [026](features/026-frontend-auth-v1/README.md) | BE + FE Auth v1 done. User CRUD / role policies / multi-store deferred. |
 | **Product update / categories** | Pending only | Needs clarity — see pending docs |
 
 ---
@@ -75,6 +75,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 023 | FE | Done | [README](features/023-frontend-external-terminal-card/README.md) | [spec](features/023-frontend-external-terminal-card/spec.md) · [plan](features/023-frontend-external-terminal-card/plan.md) · [tasks](features/023-frontend-external-terminal-card/tasks.md) |
 | 024 | FE | Done | [README](features/024-frontend-shift-discrepancy-ticket/README.md) | [spec](features/024-frontend-shift-discrepancy-ticket/spec.md) · [plan](features/024-frontend-shift-discrepancy-ticket/plan.md) · [tasks](features/024-frontend-shift-discrepancy-ticket/tasks.md) |
 | 025 | BE | Done | [README](features/025-backend-auth-v1/README.md) | [spec](features/025-backend-auth-v1/spec.md) · [plan](features/025-backend-auth-v1/plan.md) · [tasks](features/025-backend-auth-v1/tasks.md) |
+| 026 | FE | Done | [README](features/026-frontend-auth-v1/README.md) | [spec](features/026-frontend-auth-v1/spec.md) · [plan](features/026-frontend-auth-v1/plan.md) · [tasks](features/026-frontend-auth-v1/tasks.md) |
 
 ---
 

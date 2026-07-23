@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
 export function OpenShiftModal() {
@@ -6,6 +7,7 @@ export function OpenShiftModal() {
   const isLoading = useShiftStore((s) => s.isLoading)
   const error = useShiftStore((s) => s.error)
   const clearError = useShiftStore((s) => s.clearError)
+  const storeId = useAuthStore(selectStoreId)
 
   const [amount, setAmount] = useState('100.0000')
   const [localError, setLocalError] = useState<string | null>(null)
@@ -22,7 +24,7 @@ export function OpenShiftModal() {
     }
 
     try {
-      await openShift(parsed)
+      await openShift(parsed, storeId)
     } catch {
       // error surfaced via store
     }

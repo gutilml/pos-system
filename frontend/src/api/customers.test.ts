@@ -16,25 +16,29 @@ describe('searchCustomers', () => {
   })
 
   it('calls search with storeId and q', async () => {
-    const fetchMock = vi.fn().mockResolvedValue({
-      ok: true,
-      json: async () => [
-        {
-          id: 'cust-1',
-          storeId: '00000000-0000-0000-0000-000000000001',
-          name: 'Dana Tab',
-          phone: '555-0100',
-          creditLimit: 500,
-          currentBalance: 50,
-        },
-      ],
-    })
+    const payload = [
+      {
+        id: 'cust-1',
+        storeId: '00000000-0000-0000-0000-000000000001',
+        name: 'Dana Tab',
+        phone: '555-0100',
+        creditLimit: 500,
+        currentBalance: 50,
+      },
+    ]
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify(payload), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
     vi.stubGlobal('fetch', fetchMock)
 
     const rows = await searchCustomers('Dana')
 
     expect(fetchMock).toHaveBeenCalledWith(
       '/api/v1/customers/search?storeId=00000000-0000-0000-0000-000000000001&q=Dana',
+      expect.objectContaining({ credentials: 'include' }),
     )
     expect(rows[0].name).toBe('Dana Tab')
     expect(rows[0].creditLimit).toBe(500)

@@ -1,4 +1,5 @@
 import { DEFAULT_STORE_ID } from '@/api/shifts'
+import { apiFetch, parseJson } from '@/api/http'
 
 const API_BASE = '/api/v1'
 
@@ -10,14 +11,6 @@ export type CustomerSearchResult = {
   creditLimit: number
   currentBalance: number
   createdAt?: string
-}
-
-async function parseJson<T>(response: Response): Promise<T> {
-  if (!response.ok) {
-    const detail = await response.text()
-    throw new Error(detail || `Request failed (${response.status})`)
-  }
-  return response.json() as Promise<T>
 }
 
 /**
@@ -32,6 +25,6 @@ export async function searchCustomers(
   if (!trimmed) return []
 
   const params = new URLSearchParams({ storeId, q: trimmed })
-  const response = await fetch(`${API_BASE}/customers/search?${params.toString()}`)
+  const response = await apiFetch(`${API_BASE}/customers/search?${params.toString()}`)
   return parseJson<CustomerSearchResult[]>(response)
 }

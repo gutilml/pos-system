@@ -37,14 +37,14 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 
 ## Shift UX polish
 
-- [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Store selection or auth-derived store context.
+- [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Feature 026 prefers `/me.storeId` via `selectStoreId`; constant remains as unauthenticated/fallback until multi-store picker.
 - [ ] **Cash drawer pay-in / pay-out UI** — Backend `POST /shifts/{id}/events` exists; no cashier UI yet.
 - [x] **Post-close discrepancy ticket** — Feature 024: after blind close, `ShiftCloseTicket` shows API expected/actual/discrepancy; Print via `window.print`; Done → Open Shift gate. No manager auth.
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling.
 
 ## Register / cart
 
-- [ ] **Multi-barcode per product (UX)** — Depends on backend multi-barcode schema/API (see backend pending). Today register treats scanned value as SKU (Features 021/022). After BE ships: scan any linked barcode → same product; no cart-line change needed if API still returns one product. **Admin gap:** product create/edit UI must manage a list of barcodes (add/remove, show primary), not a single SKU-as-barcode field. Out of scope until backend triad exists.
+- [ ] **Multi SKU/barcode per product (UX)** — Mirrors backend **1 product → N codes** decision (2026-07-22); **zero codes allowed** (name-search-only). Today register uses a single `sku` (Features 021/022). After BE: any linked code scans to the same product; products with no codes only via typed name search. **Admin:** manage an optional list of SKU/barcodes (add/remove, mark primary). Cart can show primary code when present. Out of scope until backend triad exists.
 - [x] **Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.
 - [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when settings API exists.
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
@@ -62,8 +62,8 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 - User management **UI deferred** until user CRUD API exists.
 - Shift ↔ user linking **deferred (Option C)** — Auth v1 login only; shift gate stays store-scoped until a later follow-up.
 
-- [ ] **Login / logout UI (v1)** — Login screen; Auth gate before ShiftGate; call login/logout/me; attach CSRF header on mutating requests. **Follow-up Feature 026** after Backend Auth v1 (025).
-- [ ] **Current-user context (v1)** — Hold authenticated user (+ role) in client state; use store id from `/me` or single-store config instead of scattered hardcodes where practical. **Part of Feature 026.**
+- [x] **Login / logout UI (v1)** — Feature 026: LoginForm + AuthGate before ShiftGate; login/logout/me; `apiFetch` credentials + CSRF. Logout in CashierMenu.
+- [x] **Current-user context (v1)** — Feature 026: `useAuthStore` holds user (+ role); `selectStoreId` from `/me` with `DEFAULT_STORE_ID` fallback.
 - [ ] **System user management UI** — Admin screens to create/edit/deactivate users. **Deferred** with backend user CRUD API.
 - [ ] **Role-gated navigation and actions** — Deferred until ADMIN vs CASHIER permissions diverge. Shift close with discrepancy remains cashier-allowed; no manager override for variance.
 - [ ] **Store picker / multi-org UX** — Deferred with multi-organization / multi-store tenancy (Oxxo-, Walmart-style orgs with many stores). Not in Auth v1.

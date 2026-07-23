@@ -1,0 +1,49 @@
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { apiFetch, parseJson, readCookie } from '@/api/http'
+
+describe('http helpers', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+    vi.restoreAllMocks()
+    document.cookie = 'XSRF-TOKEN=; Max-Age=0; path=/'
+  })
+
+  it('readCookie returns the named cookie value', () => {
+    document.cookie = 'XSRF-TOKEN=csrf-abc; path=/'
+    expect(readCookie('XSRF-TOKEN')).toBe('csrf-abc')
+  })
+
+  it('apiFetch always sends credentials and adds CSRF on POST', async () => {
+    document.cookie = 'XSRF-TOKEN=token-1; path=/'
+    const fetchMock = vi.fn().mockResolvedValue(new Response('{}', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await apiFetch('/api/v1/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{}',
+    })
+
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(init.credentials).toBe('include')
+    expect(new Headers(init.headers).get('X-XSRF-TOKEN')).toBe('token-1')
+  })
+
+  it('apiFetch does not force CSRF on GET', async () => {
+    document.cookie = 'XSRF-TOKEN=token-1; path=/'
+    const fetchMock = vi.fn().mockResolvedValue(new Response('[]', { status: 200 }))
+    vi.stubGlobal('fetch', fetchMock)
+
+    await apiFetch('/api/v1/products')
+
+    const [, init] = fetchMock.mock.calls[0] as [string, RequestInit]
+    expect(init.credentials).toBe('include')
+    expect(new Headers(init.headers).get('X-XSRF-TOKEN')).toBeNull()
+  })
+
+  it('parseJson allows empty 204 bodies', async () => {
+    const response = new Response(null, { status: 204 })
+    await expect(parseJson<void>(response)).resolves.toBeUndefined()
+  })
+})

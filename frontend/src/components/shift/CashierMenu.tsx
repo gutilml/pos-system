@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { CloseShiftModal } from '@/components/shift/CloseShiftModal'
+import { useAuthStore } from '@/store/useAuthStore'
 
 export function CashierMenu() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [closeModalOpen, setCloseModalOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
+  const logout = useAuthStore((s) => s.logout)
+  const username = useAuthStore((s) => s.user?.username)
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -16,6 +20,16 @@ export function CashierMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  async function handleLogout() {
+    setMenuOpen(false)
+    setLoggingOut(true)
+    try {
+      await logout()
+    } finally {
+      setLoggingOut(false)
+    }
+  }
+
   return (
     <div className="relative" ref={menuRef}>
       <button
@@ -25,7 +39,7 @@ export function CashierMenu() {
         onClick={() => setMenuOpen((open) => !open)}
         className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
       >
-        Cashier
+        {username ? `Cashier (${username})` : 'Cashier'}
       </button>
 
       {menuOpen ? (
@@ -43,6 +57,16 @@ export function CashierMenu() {
             className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
           >
             Close Shift
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            data-testid="logout-menu-item"
+            disabled={loggingOut}
+            onClick={() => void handleLogout()}
+            className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100 disabled:text-slate-400"
+          >
+            {loggingOut ? 'Logging out…' : 'Log out'}
           </button>
         </div>
       ) : null}

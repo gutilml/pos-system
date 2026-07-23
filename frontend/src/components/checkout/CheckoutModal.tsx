@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { DEFAULT_STORE_ID } from '@/api/shifts'
 import { createTransaction } from '@/api/transactions'
 import { CustomerSearch } from '@/components/checkout/CustomerSearch'
 import { PaymentTenderList } from '@/components/checkout/PaymentTenderList'
 import { TenderInputArea } from '@/components/checkout/TenderInputArea'
 import { formatMoney } from '@/lib/money'
+import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import {
   selectActiveCustomer,
   selectActiveGlobalDiscountPercentage,
@@ -39,6 +39,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const clearPayments = useCartStore((s) => s.clearPayments)
   const setCustomer = useCartStore((s) => s.setCustomer)
   const closeTicket = useCartStore((s) => s.closeTicket)
+  const storeId = useAuthStore(selectStoreId)
 
   const [requireCustomer, setRequireCustomer] = useState(false)
   const [pendingCreditAmount, setPendingCreditAmount] = useState<number | null>(null)
@@ -95,7 +96,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
 
     try {
       await createTransaction({
-        storeId: DEFAULT_STORE_ID,
+        storeId,
         taxRate: taxRate || undefined,
         customerId: customer?.id,
         globalDiscountPercentage: globalDiscount > 0 ? globalDiscount : undefined,

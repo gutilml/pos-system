@@ -96,7 +96,7 @@ describe('CheckoutModal', () => {
 
     await user.type(screen.getByLabelText('Find customer'), 'Dana')
     await waitFor(() => {
-      expect(searchCustomers).toHaveBeenCalledWith('Dana')
+      expect(searchCustomers).toHaveBeenCalledWith('Dana', expect.any(String))
     })
     await user.click(await screen.findByRole('button', { name: /Dana Tab/ }))
 
