@@ -3,6 +3,7 @@ import { CheckoutModal } from '@/components/checkout/CheckoutModal'
 import { createTransaction } from '@/api/transactions'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
+import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 import {
   selectActiveCustomer,
@@ -79,7 +80,7 @@ export function CheckoutFooter() {
   return (
     <>
       <footer className="shrink-0 border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_12px_rgba(15,23,42,0.06)]">
-        <div className="mb-3">
+        <div className="mb-3" data-register-editable>
           <label
             htmlFor="global-discount"
             className="mb-1 block text-sm font-medium text-slate-700"
@@ -92,7 +93,10 @@ export function CheckoutFooter() {
             inputMode="decimal"
             value={displayGlobalPct}
             onChange={(e) => setGlobalDraft(e.target.value)}
-            onBlur={commitGlobalDiscount}
+            onBlur={() => {
+              commitGlobalDiscount()
+              requestRegisterSearchFocus()
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 commitGlobalDiscount()
@@ -168,7 +172,13 @@ export function CheckoutFooter() {
         </div>
       </footer>
 
-      <CheckoutModal open={checkoutOpen} onClose={() => setCheckoutOpen(false)} />
+      <CheckoutModal
+        open={checkoutOpen}
+        onClose={() => {
+          setCheckoutOpen(false)
+          requestRegisterSearchFocus()
+        }}
+      />
     </>
   )
 }

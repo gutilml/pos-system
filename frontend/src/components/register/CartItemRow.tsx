@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
+import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import {
   selectActiveGlobalDiscountPercentage,
   selectItemPricedLine,
@@ -33,7 +34,10 @@ export function CartItemRow({ item }: CartItemRowProps) {
   }
 
   return (
-    <li className="flex items-start gap-3 border-b border-slate-100 px-4 py-3">
+    <li
+      className="flex items-start gap-3 border-b border-slate-100 px-4 py-3"
+      data-register-editable
+    >
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <p className="truncate font-medium text-slate-900">{item.name}</p>
@@ -58,7 +62,10 @@ export function CartItemRow({ item }: CartItemRowProps) {
             aria-label={`Item discount percent for ${item.name}`}
             value={displayPct}
             onChange={(e) => setDraftPct(e.target.value)}
-            onBlur={commitItemDiscount}
+            onBlur={() => {
+              commitItemDiscount()
+              requestRegisterSearchFocus()
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 commitItemDiscount()

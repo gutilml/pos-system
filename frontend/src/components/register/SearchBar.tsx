@@ -1,5 +1,10 @@
 import { useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { searchProducts, toCartProduct } from '@/api/products'
+import {
+  isRegisterModalOpen,
+  REGISTER_SEARCH_FOCUS_EVENT,
+  requestRegisterSearchFocus,
+} from '@/lib/registerSearchFocus'
 import { useCartStore } from '@/store/useCartStore'
 
 type SearchBarProps = {
@@ -19,6 +24,15 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
     }
   }, [autoFocus])
 
+  useEffect(() => {
+    function onRequestFocus() {
+      if (isRegisterModalOpen()) return
+      inputRef.current?.focus()
+    }
+    window.addEventListener(REGISTER_SEARCH_FOCUS_EVENT, onRequestFocus)
+    return () => window.removeEventListener(REGISTER_SEARCH_FOCUS_EVENT, onRequestFocus)
+  }, [])
+
   async function submitQuery(raw: string) {
     const trimmed = raw.trim()
     if (!trimmed || searching) return
@@ -34,12 +48,12 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
 
       addItem(toCartProduct(rows[0]))
       setQuery('')
-      inputRef.current?.focus()
+      requestRegisterSearchFocus()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Product search failed')
     } finally {
       setSearching(false)
-      inputRef.current?.focus()
+      requestRegisterSearchFocus()
     }
   }
 
@@ -54,6 +68,18 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
       event.preventDefault()
       void submitQuery(query)
     }
+  }
+
+  function handleBlur() {
+    window.setTimeout(() => {
+      if (isRegisterModalOpen()) return
+      const active = document.activeElement
+      if (active instanceof HTMLElement && active.closest('[data-register-editable]')) {
+        return
+      }
+      if (active === inputRef.current) return
+      inputRef.current?.focus()
+    }, 0)
   }
 
   return (
@@ -71,6 +97,7 @@ export function SearchBar({ autoFocus = true }: SearchBarProps) {
           if (error) setError(null)
         }}
         onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
         placeholder="Search / Scan Barcode"
         autoComplete="off"
         disabled={searching}

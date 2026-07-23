@@ -45,6 +45,18 @@ export function WeightModal() {
     }
   }, [pending])
 
+  useEffect(() => {
+    if (!pending) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        clearPendingWeight()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [pending, clearPendingWeight])
+
   if (!pending) {
     return null
   }

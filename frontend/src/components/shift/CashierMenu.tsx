@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CashDrawerEventType } from '@/api/shifts'
 import { CloseShiftModal } from '@/components/shift/CloseShiftModal'
 import { DrawerEventModal } from '@/components/shift/DrawerEventModal'
+import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
@@ -110,11 +111,20 @@ export function CashierMenu() {
         </div>
       ) : null}
 
-      <CloseShiftModal open={closeModalOpen} onClose={() => setCloseModalOpen(false)} />
+      <CloseShiftModal
+        open={closeModalOpen}
+        onClose={() => {
+          setCloseModalOpen(false)
+          requestRegisterSearchFocus()
+        }}
+      />
       <DrawerEventModal
         open={drawerModalOpen}
         initialType={drawerInitialType}
-        onClose={() => setDrawerModalOpen(false)}
+        onClose={() => {
+          setDrawerModalOpen(false)
+          requestRegisterSearchFocus()
+        }}
       />
     </div>
   )

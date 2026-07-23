@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { CartItemRow } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
@@ -6,10 +7,18 @@ import { WeightModal } from '@/components/register/WeightModal'
 import { AuthGate } from '@/components/auth/AuthGate'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
+import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 export function RegisterScreen() {
   const items = useCartStore(selectActiveItems)
+  const pendingWeight = useCartStore((s) => s.pendingWeightProduct)
+
+  useEffect(() => {
+    if (!pendingWeight) {
+      requestRegisterSearchFocus()
+    }
+  }, [pendingWeight])
 
   return (
     <AuthGate>
