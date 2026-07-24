@@ -21,5 +21,7 @@ describe('i18n', () => {
     expect(translate('checkout.creditGate', 'es')).toMatch(/crédito/i)
     expect(translate('shift.closeTitle', 'es')).toMatch(/Cerrar turno/i)
     expect(translate('tender.cash', 'es')).toBe('EFECTIVO')
+    expect(translate('cashier.catalog', 'es')).toMatch(/Productos/i)
+    expect(translate('admin.title', 'en')).toBe('Catalog')
   })
 })

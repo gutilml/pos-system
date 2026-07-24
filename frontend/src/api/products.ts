@@ -13,13 +13,43 @@ export type ProductApi = {
   description?: string | null
   costPrice?: number
   sellingPrice: number
+  wholesalePrice?: number | null
+  targetMargin?: number | null
+  effectiveMargin?: number | null
   active?: boolean
   categoryIds?: string[]
   sellByWeight?: boolean
   unitOfMeasure?: string | null
+  parentProductId?: string | null
+  qtyPerPackage?: number | null
+  packageUnit?: string | null
   excludeFromGlobalDiscounts?: boolean
   trackInventory?: boolean
   currentStock?: number
+  lowStockThreshold?: number | null
+}
+
+export type ProductRequestBody = {
+  skus?: string[]
+  primarySku?: string | null
+  name: string
+  description?: string | null
+  costPrice?: number | null
+  sellingPrice?: number | null
+  wholesalePrice?: number | null
+  targetMargin?: number | null
+  categoryId?: string | null
+  categoryIds?: string[]
+  sellByWeight?: boolean
+  unitOfMeasure?: string | null
+  parentProductId?: string | null
+  qtyPerPackage?: number | null
+  packageUnit?: string | null
+  trackInventory?: boolean
+  currentStock?: number | null
+  lowStockThreshold?: number | null
+  active?: boolean
+  excludeFromGlobalDiscounts?: boolean
 }
 
 export function toCartProduct(dto: ProductApi): CartProduct {
@@ -51,4 +81,32 @@ export async function searchProducts(
     signal,
   })
   return parseJson<ProductApi[]>(response)
+}
+
+export async function listProducts(signal?: AbortSignal): Promise<ProductApi[]> {
+  const response = await apiFetch(`${API_BASE}/products`, { signal })
+  return parseJson<ProductApi[]>(response)
+}
+
+export async function getProduct(id: string, signal?: AbortSignal): Promise<ProductApi> {
+  const response = await apiFetch(`${API_BASE}/products/${id}`, { signal })
+  return parseJson<ProductApi>(response)
+}
+
+export async function createProduct(body: ProductRequestBody): Promise<ProductApi> {
+  const response = await apiFetch(`${API_BASE}/products`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return parseJson<ProductApi>(response)
+}
+
+export async function updateProduct(id: string, body: ProductRequestBody): Promise<ProductApi> {
+  const response = await apiFetch(`${API_BASE}/products/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  return parseJson<ProductApi>(response)
 }

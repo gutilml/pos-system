@@ -73,17 +73,18 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Cash drawer pay-in / pay-out UI** — Feature 031: Cashier menu Pay in/out → `DrawerEventModal` → `POST /shifts/{id}/events` (Feature 007).~~
 - [x] ~~**Post-close discrepancy ticket** — Feature 024: after blind close, `ShiftCloseTicket` shows API expected/actual/discrepancy; Print via `window.print`; Done → Open Shift gate. No manager auth.~~
 - [x] ~~**Post-close ticket CARD + CREDIT totals** — Feature 030: blind count kept; ticket sales summary shows CASH / CARD / CREDIT (store tab) + sales grand total from Feature 029.~~
-- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling.
 
 ## Register / cart
 
 - [x] ~~**Multi SKU/barcode per product (UX)** — Feature 028: register consumes `skus` / `primarySku`; cart shows primary when present; name-only OK. Admin SKU list UI still deferred.~~
 - [x] ~~**Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.~~
-- [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when Feature [045](../features/045-backend-store-preferences/) preferences (e.g. `default_tax_rate`) ship.
-- [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
+- [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when Feature [045](../features/045-backend-store-preferences/) preferences (e.g. `default_tax_rate`) ship. **On hold** (2026-07-23) vs catalog (050–053).
+- [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail. **On hold** (2026-07-23) vs catalog (050–053).
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
-- [ ] **Void tickets** — UI for void once backend supports those statuses.
+- [ ] **Void tickets** — UI for void once backend supports those statuses. **On hold** (2026-07-23) vs catalog (050–053).
 - [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
+- [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup.~~
+- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog (050–053).
 
 ## Auth & multi-store
 

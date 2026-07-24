@@ -122,6 +122,45 @@ export type MessageKey =
   | 'common.print'
   | 'common.done'
   | 'common.retry'
+  | 'cashier.catalog'
+  | 'admin.title'
+  | 'admin.productsTab'
+  | 'admin.categoriesTab'
+  | 'admin.newProduct'
+  | 'admin.filterProducts'
+  | 'admin.noProducts'
+  | 'admin.noBarcode'
+  | 'admin.name'
+  | 'admin.description'
+  | 'admin.barcodes'
+  | 'admin.barcodesHint'
+  | 'admin.category'
+  | 'admin.none'
+  | 'admin.sellByWeight'
+  | 'admin.active'
+  | 'admin.unitOfMeasure'
+  | 'admin.parentProduct'
+  | 'admin.qtyPerPackage'
+  | 'admin.packageUnit'
+  | 'admin.cost'
+  | 'admin.marginPct'
+  | 'admin.retail'
+  | 'admin.wholesale'
+  | 'admin.inventory'
+  | 'admin.trackInventory'
+  | 'admin.stock'
+  | 'admin.minStock'
+  | 'admin.save'
+  | 'admin.loadFailed'
+  | 'admin.saveFailed'
+  | 'admin.parentPackageTitle'
+  | 'admin.parentPackageHint'
+  | 'admin.parentPackageInvalid'
+  | 'admin.newCategory'
+  | 'admin.editCategory'
+  | 'admin.noCategories'
+  | 'admin.categoryInvalid'
+  | 'admin.delete'
 
 export type MessageDict = Record<MessageKey, string>
 
@@ -142,6 +181,45 @@ export const en: MessageDict = {
   'cashier.loggingOut': 'Logging out…',
   'cashier.language': 'Language',
   'cashier.languageSaveFailed': 'Failed to save language',
+  'cashier.catalog': 'Products & categories',
+  'admin.title': 'Catalog',
+  'admin.productsTab': 'Products',
+  'admin.categoriesTab': 'Categories',
+  'admin.newProduct': 'New product',
+  'admin.filterProducts': 'Filter by name or barcode',
+  'admin.noProducts': 'No products yet.',
+  'admin.noBarcode': 'No barcode',
+  'admin.name': 'Name',
+  'admin.description': 'Description',
+  'admin.barcodes': 'Barcodes',
+  'admin.barcodesHint': 'One per line or comma-separated (optional)',
+  'admin.category': 'Category',
+  'admin.none': 'None',
+  'admin.sellByWeight': 'Sell by weight / bulk',
+  'admin.active': 'Active',
+  'admin.unitOfMeasure': 'Unit of measure',
+  'admin.parentProduct': 'Parent package product',
+  'admin.qtyPerPackage': 'Qty per package',
+  'admin.packageUnit': 'Package unit',
+  'admin.cost': 'Cost',
+  'admin.marginPct': 'Margin %',
+  'admin.retail': 'Retail',
+  'admin.wholesale': 'Wholesale',
+  'admin.inventory': 'Inventory',
+  'admin.trackInventory': 'Track inventory',
+  'admin.stock': 'Stock',
+  'admin.minStock': 'Min stock',
+  'admin.save': 'Save',
+  'admin.loadFailed': 'Failed to load catalog',
+  'admin.saveFailed': 'Failed to save',
+  'admin.parentPackageTitle': 'Complete parent package',
+  'admin.parentPackageHint': 'This parent needs package qty and unit before linking.',
+  'admin.parentPackageInvalid': 'Enter a qty greater than zero and a package unit',
+  'admin.newCategory': 'New category',
+  'admin.editCategory': 'Edit category',
+  'admin.noCategories': 'No categories yet.',
+  'admin.categoryInvalid': 'Enter a name and a margin between 0 and 100%',
+  'admin.delete': 'Delete',
   'register.title': 'POS Register',
   'register.emptyCart': 'Scan a barcode or search by name to start a ticket.',
   'search.placeholder': 'Scan or search products',
@@ -265,6 +343,45 @@ export const es: MessageDict = {
   'cashier.loggingOut': 'Cerrando sesión…',
   'cashier.language': 'Idioma',
   'cashier.languageSaveFailed': 'No se pudo guardar el idioma',
+  'cashier.catalog': 'Productos y categorías',
+  'admin.title': 'Catálogo',
+  'admin.productsTab': 'Productos',
+  'admin.categoriesTab': 'Categorías',
+  'admin.newProduct': 'Nuevo producto',
+  'admin.filterProducts': 'Filtrar por nombre o código',
+  'admin.noProducts': 'Aún no hay productos.',
+  'admin.noBarcode': 'Sin código',
+  'admin.name': 'Nombre',
+  'admin.description': 'Descripción',
+  'admin.barcodes': 'Códigos de barras',
+  'admin.barcodesHint': 'Uno por línea o separados por coma (opcional)',
+  'admin.category': 'Categoría',
+  'admin.none': 'Ninguna',
+  'admin.sellByWeight': 'Venta por peso / granel',
+  'admin.active': 'Activo',
+  'admin.unitOfMeasure': 'Unidad de medida',
+  'admin.parentProduct': 'Producto padre (paquete)',
+  'admin.qtyPerPackage': 'Cant. por paquete',
+  'admin.packageUnit': 'Unidad del paquete',
+  'admin.cost': 'Costo',
+  'admin.marginPct': 'Margen %',
+  'admin.retail': 'Precio venta',
+  'admin.wholesale': 'Mayoreo',
+  'admin.inventory': 'Inventario',
+  'admin.trackInventory': 'Llevar inventario',
+  'admin.stock': 'Existencia',
+  'admin.minStock': 'Mínimo',
+  'admin.save': 'Guardar',
+  'admin.loadFailed': 'No se pudo cargar el catálogo',
+  'admin.saveFailed': 'No se pudo guardar',
+  'admin.parentPackageTitle': 'Completar paquete padre',
+  'admin.parentPackageHint': 'El padre necesita cantidad y unidad de paquete antes de vincular.',
+  'admin.parentPackageInvalid': 'Ingresa una cantidad mayor que cero y una unidad',
+  'admin.newCategory': 'Nueva categoría',
+  'admin.editCategory': 'Editar categoría',
+  'admin.noCategories': 'Aún no hay categorías.',
+  'admin.categoryInvalid': 'Ingresa un nombre y un margen entre 0 y 100%',
+  'admin.delete': 'Eliminar',
   'register.title': 'Caja POS',
   'register.emptyCart': 'Escanea un código o busca por nombre para iniciar un ticket.',
   'search.placeholder': 'Escanear o buscar productos',
