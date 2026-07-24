@@ -18,6 +18,22 @@ Also: [PROJECT_CONTEXT.md](PROJECT_CONTEXT.md) (architecture) · [docs/pending f
 
 ## Local setup
 
+### Quick restart (Windows)
+
+Stop stale localhost processes and start Postgres + backend + frontend cleanly:
+
+```powershell
+.\scripts\localhost-restart.ps1
+```
+
+Useful variants:
+
+```powershell
+.\scripts\localhost-restart.ps1 -StopOnly
+.\scripts\localhost-restart.ps1 -StartOnly
+.\scripts\localhost-restart.ps1 -ResetDb   # also re-apply schema + seed
+```
+
 ### 1. Start PostgreSQL
 
 ```bash
