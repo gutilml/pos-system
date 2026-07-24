@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import type { CashDrawerEventType } from '@/api/shifts'
 import { CloseShiftModal } from '@/components/shift/CloseShiftModal'
 import { DrawerEventModal } from '@/components/shift/DrawerEventModal'
-import { CatalogAdminModal } from '@/features/admin/CatalogAdminModal'
 import { useLocale, useT } from '@/i18n/useT'
 import type { Locale } from '@/i18n/locale'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
@@ -15,7 +14,6 @@ export function CashierMenu() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [closeModalOpen, setCloseModalOpen] = useState(false)
   const [drawerModalOpen, setDrawerModalOpen] = useState(false)
-  const [catalogOpen, setCatalogOpen] = useState(false)
   const [drawerInitialType, setDrawerInitialType] =
     useState<CashDrawerEventType>('PAY_IN')
   const [loggingOut, setLoggingOut] = useState(false)
@@ -124,18 +122,6 @@ export function CashierMenu() {
               </p>
             ) : null}
           </div>
-          <button
-            type="button"
-            role="menuitem"
-            data-testid="catalog-menu-item"
-            onClick={() => {
-              setMenuOpen(false)
-              setCatalogOpen(true)
-            }}
-            className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
-          >
-            {t('cashier.catalog')}
-          </button>
           {hasOpenShift ? (
             <>
               <button
@@ -200,7 +186,6 @@ export function CashierMenu() {
           requestRegisterSearchFocus()
         }}
       />
-      <CatalogAdminModal open={catalogOpen} onClose={() => setCatalogOpen(false)} />
     </div>
   )
 }

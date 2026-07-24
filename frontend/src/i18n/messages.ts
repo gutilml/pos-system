@@ -128,6 +128,7 @@ export type MessageKey =
   | 'workspace.customers'
   | 'workspace.inventory'
   | 'workspace.comingSoon'
+  | 'products.subNavAria'
   | 'cashier.catalog'
   | 'admin.title'
   | 'admin.productsTab'
@@ -336,6 +337,7 @@ export const en: MessageDict = {
   'workspace.customers': 'Customer',
   'workspace.inventory': 'Inventory',
   'workspace.comingSoon': 'Coming soon. This workspace will be available in a later update.',
+  'products.subNavAria': 'Products sections',
 }
 
 export const es: MessageDict = {
@@ -504,6 +506,7 @@ export const es: MessageDict = {
   'workspace.customers': 'Cliente',
   'workspace.inventory': 'Inventario',
   'workspace.comingSoon': 'Próximamente. Este espacio estará disponible en una actualización posterior.',
+  'products.subNavAria': 'Secciones de productos',
 }
 
 const dictionaries: Record<Locale, MessageDict> = { en, es }
