@@ -61,7 +61,10 @@ Use this table when you know the *subject*, not the feature number.
 | **Pay three amount fields** | [047](features/047-frontend-pay-three-amount-fields/README.md) | FE **047** done — CASH/CARD/CREDIT fields; no Add tender. |
 | **UI locale coverage polish** | [048](features/048-frontend-ui-locale-coverage/README.md) | FE **048** done — Customer popup, New Ticket, Stock→Inv. |
 | **UI locale remaining chrome** | [049](features/049-frontend-ui-locale-remaining-chrome/README.md) | FE **049** done — Pay/shift/drawer/weight/tickets/gates EN/ES. |
-| **Product update / categories** | Pending only | Needs clarity — see pending docs |
+| **Product create/update** | [050](features/050-backend-product-create-update/README.md) | BE **050** Done — catalog fields, margin hierarchy, parent package. |
+| **Categories CRUD** | [051](features/051-backend-categories-crud/README.md) | BE **051** Done. |
+| **Parent stock on sale** | [052](features/052-backend-parent-stock-deduction/README.md) | BE **052** Done — after 050. |
+| **Product/category admin UI** | [053](features/053-frontend-product-category-admin/README.md) | FE **053** Done — after 050/051. |
 
 ---
 
@@ -119,6 +122,10 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 047 | FE | Done | [README](features/047-frontend-pay-three-amount-fields/README.md) | [spec](features/047-frontend-pay-three-amount-fields/spec.md) · [plan](features/047-frontend-pay-three-amount-fields/plan.md) · [tasks](features/047-frontend-pay-three-amount-fields/tasks.md) |
 | 048 | FE | Done | [README](features/048-frontend-ui-locale-coverage/README.md) | [spec](features/048-frontend-ui-locale-coverage/spec.md) · [plan](features/048-frontend-ui-locale-coverage/plan.md) · [tasks](features/048-frontend-ui-locale-coverage/tasks.md) |
 | 049 | FE | Done | [README](features/049-frontend-ui-locale-remaining-chrome/README.md) | [spec](features/049-frontend-ui-locale-remaining-chrome/spec.md) · [plan](features/049-frontend-ui-locale-remaining-chrome/plan.md) · [tasks](features/049-frontend-ui-locale-remaining-chrome/tasks.md) |
+| 050 | BE | Done | [README](features/050-backend-product-create-update/README.md) | [spec](features/050-backend-product-create-update/spec.md) · [plan](features/050-backend-product-create-update/plan.md) · [tasks](features/050-backend-product-create-update/tasks.md) |
+| 051 | BE | Done | [README](features/051-backend-categories-crud/README.md) | [spec](features/051-backend-categories-crud/spec.md) · [plan](features/051-backend-categories-crud/plan.md) · [tasks](features/051-backend-categories-crud/tasks.md) |
+| 052 | BE | Done | [README](features/052-backend-parent-stock-deduction/README.md) | [spec](features/052-backend-parent-stock-deduction/spec.md) · [plan](features/052-backend-parent-stock-deduction/plan.md) · [tasks](features/052-backend-parent-stock-deduction/tasks.md) |
+| 053 | FE | Done | [README](features/053-frontend-product-category-admin/README.md) | [spec](features/053-frontend-product-category-admin/spec.md) · [plan](features/053-frontend-product-category-admin/plan.md) · [tasks](features/053-frontend-product-category-admin/tasks.md) |
 
 ---
 

@@ -13,15 +13,23 @@ public record ProductDTO(
         String description,
         BigDecimal costPrice,
         BigDecimal sellingPrice,
+        BigDecimal wholesalePrice,
+        BigDecimal targetMargin,
+        BigDecimal effectiveMargin,
         Boolean active,
         List<UUID> categoryIds,
         Boolean sellByWeight,
         String unitOfMeasure,
+        UUID parentProductId,
+        BigDecimal qtyPerPackage,
+        String packageUnit,
         Boolean excludeFromGlobalDiscounts,
         Boolean trackInventory,
-        BigDecimal currentStock
+        BigDecimal currentStock,
+        BigDecimal lowStockThreshold
 ) {
     /**
      * {@code sku} is a transitional alias of {@code primarySku} (nullable when the product has no codes).
+     * Parent package: {@code qtyPerPackage}/{@code packageUnit} map to entity unitsPerPackage/unitOfMeasure.
      */
 }

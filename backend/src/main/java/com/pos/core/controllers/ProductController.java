@@ -50,6 +50,14 @@ public class ProductController {
         return productService.create(request);
     }
 
+    @PutMapping("/{id}")
+    public ProductDTO updateProduct(
+            @PathVariable UUID id,
+            @Valid @RequestBody ProductRequestDTO request
+    ) {
+        return productService.update(id, request);
+    }
+
     @PutMapping("/{id}/skus")
     public ProductDTO replaceProductSkus(
             @PathVariable UUID id,

@@ -13,7 +13,19 @@ public record ProductRequestDTO(
         String description,
         BigDecimal costPrice,
         BigDecimal sellingPrice,
+        BigDecimal wholesalePrice,
+        BigDecimal targetMargin,
         UUID categoryId,
-        List<UUID> categoryIds
+        List<UUID> categoryIds,
+        Boolean sellByWeight,
+        String unitOfMeasure,
+        UUID parentProductId,
+        BigDecimal qtyPerPackage,
+        String packageUnit,
+        Boolean trackInventory,
+        BigDecimal currentStock,
+        BigDecimal lowStockThreshold,
+        Boolean active,
+        Boolean excludeFromGlobalDiscounts
 ) {
 }

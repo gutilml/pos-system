@@ -48,13 +48,20 @@ class ProductControllerTest {
                 null,
                 new BigDecimal("1.0000"),
                 new BigDecimal("1.9900"),
+                null,
+                null,
+                null,
                 true,
                 List.of(),
                 false,
                 null,
+                null,
+                null,
+                null,
                 false,
                 true,
-                new BigDecimal("12.0000")
+                new BigDecimal("12.0000"),
+                null
         );
     }
 

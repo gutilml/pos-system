@@ -33,6 +33,10 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
             """)
     List<Product> searchActiveByNameOrCode(@Param("q") String q, Pageable pageable);
 
+    List<Product> findByParentProductId(UUID parentProductId);
+
+    long countByCategories_Id(UUID categoryId);
+
     @Query("""
             SELECT MAX(c.targetMargin)
             FROM Product p

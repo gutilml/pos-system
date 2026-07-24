@@ -8,6 +8,7 @@ import com.pos.core.dtos.UpdateStoreSettingsRequest;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.StoreSettings;
+import com.pos.core.pricing.ProductPricing;
 import com.pos.core.repositories.StoreSettingsRepository;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
@@ -25,9 +26,10 @@ import java.util.UUID;
 public class StoreSettingsServiceImpl implements StoreSettingsService {
 
     public static final String PREF_UI_LOCALE = "ui_locale";
+    public static final String PREF_DEFAULT_MARGIN = "default_margin";
     public static final String DEFAULT_UI_LOCALE = "en";
     private static final Set<String> ALLOWED_UI_LOCALES = Set.of("en", "es");
-    private static final Set<String> ALLOWED_PREFERENCE_KEYS = Set.of(PREF_UI_LOCALE);
+    private static final Set<String> ALLOWED_PREFERENCE_KEYS = Set.of(PREF_UI_LOCALE, PREF_DEFAULT_MARGIN);
 
     private final StoreSettingsRepository storeSettingsRepository;
     private final UserRepository userRepository;
@@ -74,6 +76,9 @@ public class StoreSettingsServiceImpl implements StoreSettingsService {
                 }
                 if (PREF_UI_LOCALE.equals(key)) {
                     preferences.put(key, normalizeUiLocale(entry.getValue()));
+                } else if (PREF_DEFAULT_MARGIN.equals(key)) {
+                    preferences.put(key, ProductPricing.readStoreDefaultMargin(
+                            Map.of(PREF_DEFAULT_MARGIN, entry.getValue())));
                 }
             }
             store.setPreferences(preferences);

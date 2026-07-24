@@ -38,12 +38,13 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 - [x] ~~**Product search / barcode lookup** — Feature 021: exact active SKU first, then name/SKU contains; `ProductDTO` includes `sellByWeight`, `unitOfMeasure`, `excludeFromGlobalDiscounts`.~~
 - [x] ~~**Multi SKU/barcode per product (1→N)** — Feature 027: `product_skus`; drop `products.sku`; zero codes OK; hard-delete; `PUT /api/v1/products/{id}/skus`. Paired FE: **028**.~~
-- [ ] **Product update / deactivate** — Create exists; update/delete (or soft-deactivate via `isActive`) not exposed.
-- [ ] **Categories CRUD** — Entities exist; no public category API yet.
+- [x] ~~**Product create/update catalog fields** — Feature [050](../features/050-backend-product-create-update/README.md): create+update, wholesale, margin hierarchy (store→category→product), parent package unit/qty, child cost from parent, inventory gated.~~
+- [x] ~~**Categories CRUD** — Feature [051](../features/051-backend-categories-crud/README.md): public category API + `targetMargin`.~~
 - [x] ~~**Store settings API** — Feature 045: `preferences` JSONB + GET/PATCH `/stores/{id}/settings` + `uiLocale` on `/me`. Boolean opt-ins stay in `features`. Unlocks FE [046](../features/046-frontend-ui-locale/). Org-level prefs deferred.~~
 - [x] ~~**Product stock + inventory flag for SPA** — Feature 042: `currentStock` + `trackInventory` on `ProductDTO`; `enableInventory` on `/auth/me` (+ login). Unblocks FE [043](../features/043-frontend-cart-stock-column/).~~
-- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.)
-- [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions. Candidate for `preferences.default_tax_rate` after Feature [045](../features/045-backend-store-preferences/).
+- [x] ~~**Parent package stock deduction on sale** — Feature [052](../features/052-backend-parent-stock-deduction/README.md): `Δparent = −(sold÷qtyPerPackage)`.~~
+- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.) **On hold** (2026-07-23) vs catalog work.
+- [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions. Candidate for `preferences.default_tax_rate` after Feature [045](../features/045-backend-store-preferences/). **On hold** (2026-07-23) vs catalog work.
 - [x] ~~**Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.~~
 
 ## Payments

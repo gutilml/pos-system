@@ -45,6 +45,13 @@ public class Product {
     @Column(name = "selling_price", nullable = false, precision = 12, scale = 4)
     private BigDecimal sellingPrice;
 
+    @Column(name = "wholesale_price", precision = 12, scale = 4)
+    private BigDecimal wholesalePrice = BigDecimal.ZERO.setScale(4);
+
+    /** Nullable product-level margin override (fraction 0–1). */
+    @Column(name = "target_margin", precision = 5, scale = 4)
+    private BigDecimal targetMargin;
+
     @Column(name = "track_inventory")
     private Boolean trackInventory = false;
 
@@ -134,6 +141,22 @@ public class Product {
 
     public void setSellingPrice(BigDecimal sellingPrice) {
         this.sellingPrice = sellingPrice;
+    }
+
+    public BigDecimal getWholesalePrice() {
+        return wholesalePrice;
+    }
+
+    public void setWholesalePrice(BigDecimal wholesalePrice) {
+        this.wholesalePrice = wholesalePrice;
+    }
+
+    public BigDecimal getTargetMargin() {
+        return targetMargin;
+    }
+
+    public void setTargetMargin(BigDecimal targetMargin) {
+        this.targetMargin = targetMargin;
     }
 
     public Boolean getTrackInventory() {

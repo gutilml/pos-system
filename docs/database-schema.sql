@@ -30,19 +30,23 @@ CREATE TABLE products (
     -- Pricing
     cost_price DECIMAL(12, 4) DEFAULT 0.0000,
     selling_price DECIMAL(12, 4) NOT NULL,
-    
+    wholesale_price DECIMAL(12, 4) DEFAULT 0.0000,
+    target_margin DECIMAL(5, 4), -- nullable product override (Feature 050); hierarchy: product → category → store
+
     -- Inventory & Unit Rules
     track_inventory BOOLEAN DEFAULT false,
     current_stock DECIMAL(10, 4) DEFAULT 0.0000, -- Decimal to support fractional sales
     low_stock_threshold DECIMAL(10, 4) DEFAULT 0.0000,
-    
+
     -- Bulk & Parent/Child Logic
+    -- unit_of_measure: sell UoM for bulk children, or package unit for parents (Feature 050)
+    -- units_per_package: qty per parent package only (Feature 050/052); not on children
     sell_by_weight BOOLEAN DEFAULT false,
-    unit_of_measure VARCHAR(20), -- 'gr', 'ml', 'unit'
+    unit_of_measure VARCHAR(20), -- 'gr', 'ml', 'kg', 'unit'
     is_individual_unit BOOLEAN DEFAULT false,
     parent_product_id UUID REFERENCES products(id) ON DELETE SET NULL,
     units_per_package DECIMAL(10, 4),
-    
+
     -- Status
     is_active BOOLEAN DEFAULT true,
     exclude_from_global_discounts BOOLEAN NOT NULL DEFAULT false,

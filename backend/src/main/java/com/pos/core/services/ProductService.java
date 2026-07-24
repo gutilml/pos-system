@@ -17,5 +17,7 @@ public interface ProductService {
 
     ProductDTO create(ProductRequestDTO request);
 
+    ProductDTO update(UUID id, ProductRequestDTO request);
+
     ProductDTO replaceSkus(UUID productId, ProductSkusUpdateDTO request);
 }

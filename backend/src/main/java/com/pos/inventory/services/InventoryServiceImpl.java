@@ -4,6 +4,7 @@ import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.Product;
 import com.pos.core.models.TransactionItem;
+import com.pos.core.pricing.ProductPricing;
 import com.pos.core.repositories.ProductRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,54 +43,66 @@ public class InventoryServiceImpl implements InventoryService {
 
             BigDecimal quantity = item.getQuantity().setScale(STOCK_SCALE, STOCK_ROUNDING);
 
-            if (isYieldDeduction(product)) {
-                deductParentYield(product, quantity);
-            } else {
+            if (product.getParentProduct() != null) {
+                deductParentPackage(product, quantity);
+            } else if (Boolean.TRUE.equals(product.getTrackInventory())) {
                 deductFromProduct(product, quantity);
             }
         }
     }
 
     /**
-     * Individual child units deduct a fractional share of the parent package.
-     * Example: 1 can from a 24-pack → parent loses 1/24 = 0.0417 (HALF_UP, scale 4).
+     * Parent stock is in packages: Δ = −(soldQtyInParentUnit ÷ parent.qtyPerPackage).
      */
-    BigDecimal calculateYieldDeduction(BigDecimal quantitySold, BigDecimal unitsPerPackage) {
-        if (unitsPerPackage == null || unitsPerPackage.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessRuleException("unitsPerPackage must be greater than zero for yield deduction");
+    BigDecimal calculateParentPackageDeduction(BigDecimal soldQtyInParentUnit, BigDecimal qtyPerPackage) {
+        if (qtyPerPackage == null || qtyPerPackage.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("Parent qtyPerPackage must be greater than zero");
         }
-
-        BigDecimal fractionPerUnit = BigDecimal.ONE.divide(unitsPerPackage, STOCK_SCALE, STOCK_ROUNDING);
-        return quantitySold.multiply(fractionPerUnit).setScale(STOCK_SCALE, STOCK_ROUNDING);
+        return soldQtyInParentUnit.divide(qtyPerPackage, STOCK_SCALE, STOCK_ROUNDING);
     }
 
-    private boolean isYieldDeduction(Product product) {
-        return Boolean.TRUE.equals(product.getIndividualUnit())
-                && product.getParentProduct() != null
-                && product.getUnitsPerPackage() != null
-                && product.getUnitsPerPackage().compareTo(BigDecimal.ZERO) > 0;
+    /** @deprecated Feature 052 — use {@link #calculateParentPackageDeduction} */
+    BigDecimal calculateYieldDeduction(BigDecimal quantitySold, BigDecimal unitsPerPackage) {
+        return calculateParentPackageDeduction(quantitySold, unitsPerPackage);
     }
 
-    private void deductParentYield(Product child, BigDecimal quantitySold) {
+    private void deductParentPackage(Product child, BigDecimal quantitySold) {
         Product parent = productRepository.findById(child.getParentProduct().getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Parent product not found: " + child.getParentProduct().getId()));
 
-        BigDecimal deduction = calculateYieldDeduction(quantitySold, child.getUnitsPerPackage());
-        applyDeduction(parent, deduction);
+        if (!Boolean.TRUE.equals(parent.getTrackInventory())) {
+            return;
+        }
+        if (parent.getUnitsPerPackage() == null || parent.getUnitsPerPackage().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("Parent product is missing qtyPerPackage for stock deduction");
+        }
+        if (parent.getUnitOfMeasure() == null || parent.getUnitOfMeasure().isBlank()) {
+            throw new BusinessRuleException("Parent product is missing packageUnit for stock deduction");
+        }
+
+        String childUnit = child.getUnitOfMeasure() != null ? child.getUnitOfMeasure() : parent.getUnitOfMeasure();
+        BigDecimal soldInParentUnit = ProductPricing.convertQuantity(
+                quantitySold, childUnit, parent.getUnitOfMeasure());
+        BigDecimal deduction = calculateParentPackageDeduction(soldInParentUnit, parent.getUnitsPerPackage());
+        applyDeduction(parent, deduction, true);
         productRepository.save(parent);
     }
 
     private void deductFromProduct(Product product, BigDecimal quantity) {
-        applyDeduction(product, quantity);
+        applyDeduction(product, quantity, true);
         productRepository.save(product);
     }
 
-    private void applyDeduction(Product product, BigDecimal deduction) {
+    private void applyDeduction(Product product, BigDecimal deduction, boolean rejectInsufficient) {
         BigDecimal current = product.getCurrentStock() != null
                 ? product.getCurrentStock()
                 : BigDecimal.ZERO.setScale(STOCK_SCALE, STOCK_ROUNDING);
-
-        product.setCurrentStock(current.subtract(deduction).setScale(STOCK_SCALE, STOCK_ROUNDING));
+        BigDecimal next = current.subtract(deduction).setScale(STOCK_SCALE, STOCK_ROUNDING);
+        if (rejectInsufficient && next.compareTo(BigDecimal.ZERO) < 0) {
+            throw new BusinessRuleException(
+                    "Insufficient stock for product " + product.getId() + ": have " + current + ", need " + deduction);
+        }
+        product.setCurrentStock(next);
     }
 }
