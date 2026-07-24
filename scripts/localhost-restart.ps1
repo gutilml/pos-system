@@ -163,6 +163,9 @@ function Start-All {
 
   if ($ResetDb) {
     Write-Step 'Resetting demo DB (schema + seed)'
+    Write-Host '  Dropping public schema objects'
+    'DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO pos; GRANT ALL ON SCHEMA public TO public;' |
+      docker exec -i pos-postgres psql -U pos -d pos | Out-Null
     Invoke-SqlFile -Path $SchemaSql -Label 'schema'
     Invoke-SqlFile -Path $SeedSql -Label 'seed'
   }
