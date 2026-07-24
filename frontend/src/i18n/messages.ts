@@ -122,6 +122,12 @@ export type MessageKey =
   | 'common.print'
   | 'common.done'
   | 'common.retry'
+  | 'workspace.navAria'
+  | 'workspace.sell'
+  | 'workspace.products'
+  | 'workspace.customers'
+  | 'workspace.inventory'
+  | 'workspace.comingSoon'
   | 'cashier.catalog'
   | 'admin.title'
   | 'admin.productsTab'
@@ -324,6 +330,12 @@ export const en: MessageDict = {
   'common.print': 'Print',
   'common.done': 'Done',
   'common.retry': 'Retry',
+  'workspace.navAria': 'Workspace',
+  'workspace.sell': 'Register / Sell',
+  'workspace.products': 'Products',
+  'workspace.customers': 'Customer',
+  'workspace.inventory': 'Inventory',
+  'workspace.comingSoon': 'Coming soon. This workspace will be available in a later update.',
 }
 
 export const es: MessageDict = {
@@ -486,6 +498,12 @@ export const es: MessageDict = {
   'common.print': 'Imprimir',
   'common.done': 'Listo',
   'common.retry': 'Reintentar',
+  'workspace.navAria': 'Áreas de trabajo',
+  'workspace.sell': 'Caja / Vender',
+  'workspace.products': 'Productos',
+  'workspace.customers': 'Cliente',
+  'workspace.inventory': 'Inventario',
+  'workspace.comingSoon': 'Próximamente. Este espacio estará disponible en una actualización posterior.',
 }
 
 const dictionaries: Record<Locale, MessageDict> = { en, es }

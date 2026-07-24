@@ -83,8 +83,11 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
 - [ ] **Void tickets** — UI for void once backend supports those statuses. **On hold** (2026-07-23) vs catalog (050–053).
 - [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
-- [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup.~~
-- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog (050–053).
+- [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup. Modal nav superseded by **054–056** (reuse forms/panels).~~
+- [x] ~~**POS workspace nav shell** — Feature [054](../features/054-frontend-workspace-nav-shell/README.md): row below Register header; Register/Sell + Products + Customer + Inventory (gated); Customer/Inventory coming soon. AuthGate/ShiftGate unchanged.~~
+- [ ] **Products workspace** — Feature [055](../features/055-frontend-products-workspace/README.md): Product\|Category sub-tabs; reuse CategoryPanel / ProductEditorForm; remove CashierMenu Catalog modal. Depends on **054**.
+- [ ] **Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.
+- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
 
 ## Auth & multi-store
 

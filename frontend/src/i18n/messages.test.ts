@@ -22,6 +22,7 @@ describe('i18n', () => {
     expect(translate('shift.closeTitle', 'es')).toMatch(/Cerrar turno/i)
     expect(translate('tender.cash', 'es')).toBe('EFECTIVO')
     expect(translate('cashier.catalog', 'es')).toMatch(/Productos/i)
-    expect(translate('admin.title', 'en')).toBe('Catalog')
+    expect(translate('workspace.sell', 'es')).toMatch(/Vender|Caja/i)
+    expect(translate('workspace.comingSoon', 'en')).toMatch(/Coming soon/i)
   })
 })

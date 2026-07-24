@@ -1,13 +1,16 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthGate } from '@/components/auth/AuthGate'
 import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
 import { CartItemRow, CartListHeader } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
 import { TicketTabs } from '@/components/register/TicketTabs'
+import { WorkspaceNav } from '@/components/register/WorkspaceNav'
 import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
+import { WorkspaceComingSoon } from '@/features/workspace/WorkspaceComingSoon'
+import type { WorkspaceId } from '@/features/workspace/workspaceIds'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useT } from '@/i18n/useT'
@@ -18,12 +21,13 @@ export function RegisterScreen() {
   const items = useCartStore(selectActiveItems)
   const pendingWeight = useCartStore((s) => s.pendingWeightProduct)
   const showStock = useAuthStore((s) => s.user?.enableInventory === true)
+  const [workspace, setWorkspace] = useState<WorkspaceId>('sell')
 
   useEffect(() => {
-    if (!pendingWeight) {
+    if (workspace === 'sell' && !pendingWeight) {
       requestRegisterSearchFocus()
     }
-  }, [pendingWeight])
+  }, [pendingWeight, workspace])
 
   return (
     <AuthGate>
@@ -37,26 +41,48 @@ export function RegisterScreen() {
             </div>
           </header>
 
-          <TicketTabs />
-          <SearchBar />
+          <WorkspaceNav
+            active={workspace}
+            onChange={setWorkspace}
+            showInventory={showStock}
+          />
 
-          <section className="min-h-0 flex-1 overflow-y-auto bg-white" aria-label="Cart items">
-            {items.length === 0 ? (
-              <p className="px-4 py-10 text-center text-slate-500">{t('register.emptyCart')}</p>
-            ) : (
-              <>
-                <CartListHeader showStock={showStock} />
-                <ul>
-                  {items.map((item) => (
-                    <CartItemRow key={item.productId} item={item} showStock={showStock} />
-                  ))}
-                </ul>
-              </>
-            )}
-          </section>
+          {workspace === 'sell' ? (
+            <>
+              <TicketTabs />
+              <SearchBar />
 
-          <CheckoutFooter />
-          <WeightModal />
+              <section className="min-h-0 flex-1 overflow-y-auto bg-white" aria-label="Cart items">
+                {items.length === 0 ? (
+                  <p className="px-4 py-10 text-center text-slate-500">{t('register.emptyCart')}</p>
+                ) : (
+                  <>
+                    <CartListHeader showStock={showStock} />
+                    <ul>
+                      {items.map((item) => (
+                        <CartItemRow key={item.productId} item={item} showStock={showStock} />
+                      ))}
+                    </ul>
+                  </>
+                )}
+              </section>
+
+              <CheckoutFooter />
+              <WeightModal />
+            </>
+          ) : null}
+
+          {workspace === 'products' ? (
+            <WorkspaceComingSoon titleKey="workspace.products" testId="workspace-products-stub" />
+          ) : null}
+
+          {workspace === 'customers' ? (
+            <WorkspaceComingSoon titleKey="workspace.customers" testId="workspace-customers-soon" />
+          ) : null}
+
+          {workspace === 'inventory' && showStock ? (
+            <WorkspaceComingSoon titleKey="workspace.inventory" testId="workspace-inventory-soon" />
+          ) : null}
         </div>
       </ShiftGate>
     </AuthGate>
