@@ -1,8 +1,9 @@
-import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react'
 import { searchProducts, type ProductApi } from '@/api/products'
 import { CategoryPanel } from '@/features/admin/CategoryPanel'
 import { ProductEditorForm } from '@/features/admin/ProductEditorForm'
 import { useT } from '@/i18n/useT'
+import { isAbortError } from '@/lib/fetchAbort'
 import { looksLikeBarcode, pickBestProductMatch } from '@/lib/productPricing'
 import { useAuthStore } from '@/store/useAuthStore'
 
@@ -18,6 +19,9 @@ type EditorSession =
       key: string
     }
 
+const TYPEAHEAD_MIN_CHARS = 3
+const TYPEAHEAD_MAX_RESULTS = 10
+
 export function ProductsWorkspace() {
   const t = useT()
   const enableInventory = useAuthStore((s) => s.user?.enableInventory === true)
@@ -26,6 +30,7 @@ export function ProductsWorkspace() {
   const [searching, setSearching] = useState(false)
   const [lookupError, setLookupError] = useState<string | null>(null)
   const [suggestions, setSuggestions] = useState<ProductApi[]>([])
+  const [highlightIndex, setHighlightIndex] = useState(-1)
   const [editor, setEditor] = useState<EditorSession>({ mode: 'idle' })
   const inputRef = useRef<HTMLInputElement>(null)
   const abortRef = useRef<AbortController | null>(null)
@@ -41,8 +46,9 @@ export function ProductsWorkspace() {
     abortRef.current?.abort()
     abortRef.current = null
 
-    if (editor.mode !== 'idle' || trimmed.length < 3) {
+    if (editor.mode !== 'idle' || trimmed.length < TYPEAHEAD_MIN_CHARS) {
       setSuggestions([])
+      setHighlightIndex(-1)
       return
     }
 
@@ -54,9 +60,11 @@ export function ProductsWorkspace() {
       try {
         const rows = await searchProducts(trimmed, controller.signal)
         if (cancelled || controller.signal.aborted) return
-        setSuggestions(rows.slice(0, 10))
-      } catch {
+        setSuggestions(rows.slice(0, TYPEAHEAD_MAX_RESULTS))
+        setHighlightIndex(-1)
+      } catch (err) {
         if (cancelled || controller.signal.aborted) return
+        if (isAbortError(err)) return
         setSuggestions([])
       }
     })()
@@ -67,10 +75,15 @@ export function ProductsWorkspace() {
     }
   }, [query, editor.mode])
 
+  function clearSuggestions() {
+    setSuggestions([])
+    setHighlightIndex(-1)
+  }
+
   function resetToLookup() {
     setEditor({ mode: 'idle' })
     setQuery('')
-    setSuggestions([])
+    clearSuggestions()
     setLookupError(null)
   }
 
@@ -82,7 +95,7 @@ export function ProductsWorkspace() {
       initialSkusText: '',
       key: `edit-${product.id}`,
     })
-    setSuggestions([])
+    clearSuggestions()
     setLookupError(null)
   }
 
@@ -96,11 +109,17 @@ export function ProductsWorkspace() {
       initialSkusText: barcode ? trimmed : '',
       key: `create-${trimmed}-${Date.now()}`,
     })
-    setSuggestions([])
+    clearSuggestions()
     setLookupError(null)
   }
 
-  async function submitLookup(raw: string) {
+  async function submitLookup(raw: string, highlighted?: ProductApi) {
+    if (highlighted) {
+      openEdit(highlighted)
+      setQuery('')
+      return
+    }
+
     const trimmed = raw.trim()
     if (!trimmed || searching) return
     setSearching(true)
@@ -115,7 +134,9 @@ export function ProductsWorkspace() {
       }
       setQuery('')
     } catch (err) {
-      setLookupError(err instanceof Error ? err.message : t('admin.loadFailed'))
+      if (!isAbortError(err)) {
+        setLookupError(err instanceof Error ? err.message : t('admin.loadFailed'))
+      }
     } finally {
       setSearching(false)
     }
@@ -123,8 +144,36 @@ export function ProductsWorkspace() {
 
   function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    void submitLookup(query)
+    const highlighted =
+      highlightIndex >= 0 && suggestions[highlightIndex] ? suggestions[highlightIndex] : undefined
+    void submitLookup(query, highlighted)
   }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key === 'ArrowDown' && suggestions.length > 0) {
+      event.preventDefault()
+      setHighlightIndex((i) => (i + 1) % suggestions.length)
+      return
+    }
+    if (event.key === 'ArrowUp' && suggestions.length > 0) {
+      event.preventDefault()
+      setHighlightIndex((i) => (i <= 0 ? suggestions.length - 1 : i - 1))
+      return
+    }
+    if (event.key === 'Escape') {
+      clearSuggestions()
+      return
+    }
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      const highlighted =
+        highlightIndex >= 0 && suggestions[highlightIndex] ? suggestions[highlightIndex] : undefined
+      void submitLookup(query, highlighted)
+    }
+  }
+
+  const activeDescendant =
+    highlightIndex >= 0 ? `${listboxId}-option-${highlightIndex}` : undefined
 
   return (
     <section
@@ -159,7 +208,7 @@ export function ProductsWorkspace() {
         ) : (
           <div className="mx-auto max-w-3xl space-y-4">
             {editor.mode === 'idle' ? (
-              <form onSubmit={handleSubmit} className="space-y-2" data-testid="product-lookup">
+              <form onSubmit={handleSubmit} className="relative space-y-2" data-testid="product-lookup">
                 <label className="block text-sm font-medium text-slate-700" htmlFor="product-lookup-input">
                   {t('products.lookupLabel')}
                 </label>
@@ -167,13 +216,20 @@ export function ProductsWorkspace() {
                   id="product-lookup-input"
                   ref={inputRef}
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={(e) => {
+                    setQuery(e.target.value)
+                    if (lookupError) setLookupError(null)
+                  }}
+                  onKeyDown={handleKeyDown}
                   placeholder={t('products.lookupPlaceholder')}
                   autoComplete="off"
                   role="combobox"
                   aria-expanded={suggestions.length > 0}
                   aria-controls={listboxId}
-                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600"
+                  aria-autocomplete="list"
+                  aria-activedescendant={activeDescendant}
+                  disabled={searching}
+                  className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-base text-slate-900 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600 disabled:opacity-60"
                 />
                 <p className="text-xs text-slate-500">{t('products.lookupHint')}</p>
                 {lookupError ? (
@@ -185,23 +241,35 @@ export function ProductsWorkspace() {
                   <ul
                     id={listboxId}
                     role="listbox"
+                    data-testid="product-lookup-suggestions"
                     className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm"
                   >
-                    {suggestions.map((row) => (
-                      <li key={row.id}>
-                        <button
-                          type="button"
-                          role="option"
-                          className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm hover:bg-slate-50"
-                          onClick={() => openEdit(row)}
-                        >
-                          <span className="min-w-0 truncate font-medium text-slate-900">{row.name}</span>
-                          <span className="shrink-0 text-xs text-slate-500">
-                            {row.primarySku ?? row.sku ?? t('admin.noBarcode')}
-                          </span>
-                        </button>
-                      </li>
-                    ))}
+                    {suggestions.map((row, index) => {
+                      const selected = index === highlightIndex
+                      return (
+                        <li key={row.id} role="presentation">
+                          <button
+                            type="button"
+                            id={`${listboxId}-option-${index}`}
+                            role="option"
+                            aria-selected={selected}
+                            data-testid={`product-lookup-suggestion-${row.id}`}
+                            className={`flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left text-sm ${
+                              selected
+                                ? 'bg-emerald-50 text-emerald-950'
+                                : 'text-slate-800 hover:bg-slate-50'
+                            }`}
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => openEdit(row)}
+                          >
+                            <span className="min-w-0 truncate font-medium">{row.name}</span>
+                            <span className="shrink-0 text-xs text-slate-500">
+                              {row.primarySku ?? row.sku ?? t('admin.noBarcode')}
+                            </span>
+                          </button>
+                        </li>
+                      )
+                    })}
                   </ul>
                 ) : null}
                 <button

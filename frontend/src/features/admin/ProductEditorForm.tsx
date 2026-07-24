@@ -15,6 +15,7 @@ import {
   sellingPriceFromMargin,
 } from '@/lib/productPricing'
 import { ParentPackageModal } from '@/features/admin/ParentPackageModal'
+import { isAbortError } from '@/lib/fetchAbort'
 
 type ProductEditorProps = {
   productId: string | null
@@ -79,16 +80,22 @@ export function ProductEditorForm({
 
   useEffect(() => {
     const ac = new AbortController()
+    let active = true
+    setLoading(Boolean(productId))
+    setError(null)
+
     void (async () => {
       try {
         const [cats, products] = await Promise.all([
           listCategories(ac.signal),
           listProducts(ac.signal),
         ])
+        if (!active || ac.signal.aborted) return
         setCategories(cats)
         setParents(products)
         if (productId) {
           const p = await getProduct(productId, ac.signal)
+          if (!active || ac.signal.aborted) return
           setName(p.name)
           setDescription(p.description ?? '')
           setSkusText((p.skus ?? []).join('\n'))
@@ -135,14 +142,21 @@ export function ProductEditorForm({
           setLowStockThreshold('')
           setActive(true)
         }
+        setError(null)
       } catch (err) {
-        setError(err instanceof Error ? err.message : t('admin.loadFailed'))
+        if (!active || ac.signal.aborted || isAbortError(err)) return
+        setError(err instanceof Error ? err.message : 'Failed to load catalog')
       } finally {
-        setLoading(false)
+        if (active && !ac.signal.aborted) {
+          setLoading(false)
+        }
       }
     })()
-    return () => ac.abort()
-  }, [productId, initialName, initialSkusText, t])
+    return () => {
+      active = false
+      ac.abort()
+    }
+  }, [productId, initialName, initialSkusText])
 
   function onMarginChange(raw: string) {
     setTargetMarginPct(raw)

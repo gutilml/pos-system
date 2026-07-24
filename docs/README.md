@@ -68,6 +68,8 @@ Use this table when you know the *subject*, not the feature number.
 | **POS workspace nav shell** | [054](features/054-frontend-workspace-nav-shell/README.md) | FE **054** Done — row under header; Sell + placeholders. |
 | **Products workspace** | [055](features/055-frontend-products-workspace/README.md) | FE **055** Done — Product\|Category tabs; remove Catalog modal. |
 | **Product lookup load-or-create** | [056](features/056-frontend-product-lookup-load-or-create/README.md) | FE **056** Done — scan/type → edit or create prefill. |
+| **Product lookup keyboard + load** | [057](features/057-frontend-product-lookup-keyboard-and-load/README.md) | FE **057** Done — arrow keys + abort-safe editor. |
+| **Workspace nav labels** | [058](features/058-frontend-workspace-nav-labels/README.md) | FE **058** Planned — Register / Customers copy. |
 
 ---
 
@@ -132,6 +134,8 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 054 | FE | Done | [README](features/054-frontend-workspace-nav-shell/README.md) | [spec](features/054-frontend-workspace-nav-shell/spec.md) · [plan](features/054-frontend-workspace-nav-shell/plan.md) · [tasks](features/054-frontend-workspace-nav-shell/tasks.md) |
 | 055 | FE | Done | [README](features/055-frontend-products-workspace/README.md) | [spec](features/055-frontend-products-workspace/spec.md) · [plan](features/055-frontend-products-workspace/plan.md) · [tasks](features/055-frontend-products-workspace/tasks.md) |
 | 056 | FE | Done | [README](features/056-frontend-product-lookup-load-or-create/README.md) | [spec](features/056-frontend-product-lookup-load-or-create/spec.md) · [plan](features/056-frontend-product-lookup-load-or-create/plan.md) · [tasks](features/056-frontend-product-lookup-load-or-create/tasks.md) |
+| 057 | FE | Done | [README](features/057-frontend-product-lookup-keyboard-and-load/README.md) | [spec](features/057-frontend-product-lookup-keyboard-and-load/spec.md) · [plan](features/057-frontend-product-lookup-keyboard-and-load/plan.md) · [tasks](features/057-frontend-product-lookup-keyboard-and-load/tasks.md) |
+| 058 | FE | Planned | [README](features/058-frontend-workspace-nav-labels/README.md) | [spec](features/058-frontend-workspace-nav-labels/spec.md) · [plan](features/058-frontend-workspace-nav-labels/plan.md) · [tasks](features/058-frontend-workspace-nav-labels/tasks.md) |
 
 ---
 

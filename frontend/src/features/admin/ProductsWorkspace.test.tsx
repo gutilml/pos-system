@@ -97,4 +97,51 @@ describe('ProductsWorkspace lookup', () => {
     })
     expect(screen.getByLabelText(/^Name$/i)).toHaveValue('Cola')
   })
+
+  it('ArrowDown + Enter selects highlighted suggestion for edit', async () => {
+    const user = userEvent.setup()
+    vi.mocked(searchProducts).mockResolvedValue([
+      {
+        id: 'p1',
+        name: 'Cola',
+        primarySku: '1001',
+        skus: ['1001'],
+        sellingPrice: 1.99,
+      },
+      {
+        id: 'p2',
+        name: 'Chips',
+        primarySku: '2002',
+        skus: ['2002'],
+        sellingPrice: 2.5,
+      },
+    ])
+    const { getProduct } = await import('@/api/products')
+    vi.mocked(getProduct).mockResolvedValue({
+      id: 'p2',
+      name: 'Chips',
+      primarySku: '2002',
+      skus: ['2002'],
+      sellingPrice: 2.5,
+      costPrice: 1,
+    })
+
+    render(<ProductsWorkspace />)
+    const input = screen.getByLabelText(/scan|barcode|name/i)
+    await user.type(input, 'chi')
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-lookup-suggestions')).toBeInTheDocument()
+    })
+
+    await user.keyboard('{ArrowDown}')
+    await user.keyboard('{ArrowDown}')
+    await user.keyboard('{Enter}')
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-editor')).toBeInTheDocument()
+    })
+    expect(getProduct).toHaveBeenCalledWith('p2', expect.any(AbortSignal))
+    expect(screen.getByLabelText(/^Name$/i)).toHaveValue('Chips')
+  })
 })
