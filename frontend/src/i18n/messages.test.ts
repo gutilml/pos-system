@@ -24,5 +24,6 @@ describe('i18n', () => {
     expect(translate('cashier.catalog', 'es')).toMatch(/Productos/i)
     expect(translate('workspace.sell', 'es')).toMatch(/Vender|Caja/i)
     expect(translate('workspace.comingSoon', 'en')).toMatch(/Coming soon/i)
+    expect(translate('products.lookupSubmit', 'es')).toMatch(/Buscar/i)
   })
 })

@@ -67,7 +67,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Product/category admin UI** | [053](features/053-frontend-product-category-admin/README.md) | FE **053** Done — modal Catalog; forms reused by **054–056**. |
 | **POS workspace nav shell** | [054](features/054-frontend-workspace-nav-shell/README.md) | FE **054** Done — row under header; Sell + placeholders. |
 | **Products workspace** | [055](features/055-frontend-products-workspace/README.md) | FE **055** Done — Product\|Category tabs; remove Catalog modal. |
-| **Product lookup load-or-create** | [056](features/056-frontend-product-lookup-load-or-create/README.md) | FE **056** Planned — scan/type → edit or create prefill. |
+| **Product lookup load-or-create** | [056](features/056-frontend-product-lookup-load-or-create/README.md) | FE **056** Done — scan/type → edit or create prefill. |
 
 ---
 
@@ -131,7 +131,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 053 | FE | Done (modal; nav UX → **054–056**) | [README](features/053-frontend-product-category-admin/README.md) | [spec](features/053-frontend-product-category-admin/spec.md) · [plan](features/053-frontend-product-category-admin/plan.md) · [tasks](features/053-frontend-product-category-admin/tasks.md) |
 | 054 | FE | Done | [README](features/054-frontend-workspace-nav-shell/README.md) | [spec](features/054-frontend-workspace-nav-shell/spec.md) · [plan](features/054-frontend-workspace-nav-shell/plan.md) · [tasks](features/054-frontend-workspace-nav-shell/tasks.md) |
 | 055 | FE | Done | [README](features/055-frontend-products-workspace/README.md) | [spec](features/055-frontend-products-workspace/spec.md) · [plan](features/055-frontend-products-workspace/plan.md) · [tasks](features/055-frontend-products-workspace/tasks.md) |
-| 056 | FE | Planned | [README](features/056-frontend-product-lookup-load-or-create/README.md) | [spec](features/056-frontend-product-lookup-load-or-create/spec.md) · [plan](features/056-frontend-product-lookup-load-or-create/plan.md) · [tasks](features/056-frontend-product-lookup-load-or-create/tasks.md) |
+| 056 | FE | Done | [README](features/056-frontend-product-lookup-load-or-create/README.md) | [spec](features/056-frontend-product-lookup-load-or-create/spec.md) · [plan](features/056-frontend-product-lookup-load-or-create/plan.md) · [tasks](features/056-frontend-product-lookup-load-or-create/tasks.md) |
 
 ---
 

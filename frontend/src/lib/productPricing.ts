@@ -32,3 +32,34 @@ export function round4(n: number): number {
 export function isParentPackageIncompleteError(message: string): boolean {
   return message.includes('PARENT_PACKAGE_INCOMPLETE')
 }
+
+/** Feature 056: digit-only query with length ≥ 4 is treated as a barcode. */
+export function looksLikeBarcode(query: string): boolean {
+  const trimmed = query.trim()
+  return trimmed.length >= 4 && /^\d+$/.test(trimmed)
+}
+
+type SkuLike = {
+  primarySku?: string | null
+  sku?: string | null
+  skus?: string[]
+}
+
+/**
+ * Prefer exact primarySku / sku / skus match (case-insensitive); otherwise first result.
+ */
+export function pickBestProductMatch<T extends SkuLike>(
+  query: string,
+  results: T[],
+): T | null {
+  if (results.length === 0) return null
+  const q = query.trim().toLowerCase()
+  const exact = results.find((p) => {
+    const codes = [p.primarySku, p.sku, ...(p.skus ?? [])]
+      .filter((c): c is string => Boolean(c))
+      .map((c) => c.toLowerCase())
+    return codes.includes(q)
+  })
+  return exact ?? results[0]
+}
+

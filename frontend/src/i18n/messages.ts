@@ -129,6 +129,12 @@ export type MessageKey =
   | 'workspace.inventory'
   | 'workspace.comingSoon'
   | 'products.subNavAria'
+  | 'products.lookupLabel'
+  | 'products.lookupPlaceholder'
+  | 'products.lookupHint'
+  | 'products.lookupSubmit'
+  | 'products.creatingFromLookup'
+  | 'products.editingFromLookup'
   | 'cashier.catalog'
   | 'admin.title'
   | 'admin.productsTab'
@@ -338,6 +344,12 @@ export const en: MessageDict = {
   'workspace.inventory': 'Inventory',
   'workspace.comingSoon': 'Coming soon. This workspace will be available in a later update.',
   'products.subNavAria': 'Products sections',
+  'products.lookupLabel': 'Scan or search product',
+  'products.lookupPlaceholder': 'Barcode or product name',
+  'products.lookupHint': 'Enter loads a match, or starts a new product if nothing is found.',
+  'products.lookupSubmit': 'Find / create',
+  'products.creatingFromLookup': 'New product — fill in the remaining fields, then Save.',
+  'products.editingFromLookup': 'Editing product',
 }
 
 export const es: MessageDict = {
@@ -507,6 +519,12 @@ export const es: MessageDict = {
   'workspace.inventory': 'Inventario',
   'workspace.comingSoon': 'Próximamente. Este espacio estará disponible en una actualización posterior.',
   'products.subNavAria': 'Secciones de productos',
+  'products.lookupLabel': 'Escanear o buscar producto',
+  'products.lookupPlaceholder': 'Código de barras o nombre',
+  'products.lookupHint': 'Enter carga un producto, o inicia uno nuevo si no hay coincidencia.',
+  'products.lookupSubmit': 'Buscar / crear',
+  'products.creatingFromLookup': 'Producto nuevo — completa los campos restantes y guarda.',
+  'products.editingFromLookup': 'Editando producto',
 }
 
 const dictionaries: Record<Locale, MessageDict> = { en, es }

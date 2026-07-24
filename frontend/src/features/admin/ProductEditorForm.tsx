@@ -19,6 +19,9 @@ import { ParentPackageModal } from '@/features/admin/ParentPackageModal'
 type ProductEditorProps = {
   productId: string | null
   enableInventory: boolean
+  /** Create-mode prefill (Feature 056). */
+  initialName?: string
+  initialSkusText?: string
   onSaved: () => void
   onCancel: () => void
 }
@@ -40,6 +43,8 @@ function numOrNull(raw: string): number | null {
 export function ProductEditorForm({
   productId,
   enableInventory,
+  initialName = '',
+  initialSkusText = '',
   onSaved,
   onCancel,
 }: ProductEditorProps) {
@@ -50,9 +55,9 @@ export function ProductEditorForm({
   const [categories, setCategories] = useState<CategoryApi[]>([])
   const [parents, setParents] = useState<ProductApi[]>([])
 
-  const [name, setName] = useState('')
+  const [name, setName] = useState(initialName)
   const [description, setDescription] = useState('')
-  const [skusText, setSkusText] = useState('')
+  const [skusText, setSkusText] = useState(initialSkusText)
   const [categoryId, setCategoryId] = useState('')
   const [sellByWeight, setSellByWeight] = useState(false)
   const [unitOfMeasure, setUnitOfMeasure] = useState('')
@@ -110,6 +115,25 @@ export function ProductEditorForm({
             p.lowStockThreshold != null ? String(p.lowStockThreshold) : '',
           )
           setActive(p.active !== false)
+        } else {
+          setName(initialName)
+          setSkusText(initialSkusText)
+          setDescription('')
+          setCategoryId('')
+          setSellByWeight(false)
+          setUnitOfMeasure('')
+          setParentProductId('')
+          setQtyPerPackage('')
+          setPackageUnit('')
+          setCostPrice('')
+          setCostReadOnly(false)
+          setTargetMarginPct('')
+          setSellingPrice('')
+          setWholesalePrice('0')
+          setTrackInventory(false)
+          setCurrentStock('')
+          setLowStockThreshold('')
+          setActive(true)
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : t('admin.loadFailed'))
@@ -118,7 +142,7 @@ export function ProductEditorForm({
       }
     })()
     return () => ac.abort()
-  }, [productId, t])
+  }, [productId, initialName, initialSkusText, t])
 
   function onMarginChange(raw: string) {
     setTargetMarginPct(raw)
