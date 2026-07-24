@@ -88,7 +88,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Products workspace** — Feature [055](../features/055-frontend-products-workspace/README.md): Product\|Category sub-tabs; reuse CategoryPanel / ProductEditorForm; remove CashierMenu Catalog modal. Depends on **054**.~~
 - [x] ~~**Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.~~
 - [x] ~~**Product lookup keyboard + editor load** — Feature [057](../features/057-frontend-product-lookup-keyboard-and-load/README.md): Arrow keys on suggestion list; ignore abort on editor load.~~
-- [ ] **Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).
+- [x] ~~**Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).~~
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
 
 ## Auth & multi-store

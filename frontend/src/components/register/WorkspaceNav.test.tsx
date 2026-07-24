@@ -49,6 +49,7 @@ describe('WorkspaceNav', () => {
   it('uses Spanish labels when locale is es', () => {
     setLocale('es', false)
     render(<WorkspaceNav active="sell" onChange={() => {}} showInventory={false} />)
-    expect(screen.getByTestId('workspace-sell')).toHaveTextContent(/Vender|Caja/i)
+    expect(screen.getByTestId('workspace-sell')).toHaveTextContent('Caja')
+    expect(screen.getByTestId('workspace-customers')).toHaveTextContent('Clientes')
   })
 })
