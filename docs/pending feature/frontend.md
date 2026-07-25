@@ -115,6 +115,14 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [ ] **Notify admin when sale drives stock negative** — Companion to register warning (063); out of scope for 062/063.
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 
+## Small bugs
+
+- [ ] **Friendly login failure message** — Bad credentials show raw RFC 7807 JSON in LoginForm. Feature **065**.
+- [x] ~~**Customers / Inventory list stuck on Loading** — Feature [064](../features/064-frontend-uset-stable-loading/README.md): stabilize `useT` with `useCallback` so list effects stop thrashing.~~
+- [ ] **Inventory receive: cost change should refresh prices** — Feature **066**.
+- [ ] **Customer Add payment shows "Failed to fetch"** — Re-verify after **064**; pay UX replaced by **068** modal. If still broken, debug POST `/customers/{id}/payments`.
+- [ ] **Customer balance pay modal (CASH / CARD)** — Feature **068**: Add payment button → modal amount + CASH|CARD (no CREDIT); external CARD; depends on BE **067**.
+
 ## Tooling / quality
 
 - [ ] **E2E smoke** — Open shift → scan → weight item → checkout → close shift against a running backend.
