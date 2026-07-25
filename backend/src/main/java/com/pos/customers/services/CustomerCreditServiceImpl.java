@@ -5,10 +5,12 @@ import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.StoreSettingsRepository;
+import com.pos.core.repositories.TransactionRepository;
 import com.pos.customers.dtos.CreateCustomerRequestDTO;
 import com.pos.customers.dtos.CreditLedgerEntryDTO;
 import com.pos.customers.dtos.CustomerDTO;
 import com.pos.customers.dtos.CustomerPaymentRequestDTO;
+import com.pos.customers.dtos.UpdateCustomerRequestDTO;
 import com.pos.customers.exception.CreditLimitExceededException;
 import com.pos.customers.models.CreditLedgerEntry;
 import com.pos.customers.models.CreditLedgerEntryType;
@@ -21,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -38,27 +39,29 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
     private final CustomerRepository customerRepository;
     private final CreditLedgerEntryRepository ledgerEntryRepository;
     private final StoreSettingsRepository storeSettingsRepository;
+    private final TransactionRepository transactionRepository;
 
     public CustomerCreditServiceImpl(
             CustomerRepository customerRepository,
             CreditLedgerEntryRepository ledgerEntryRepository,
-            StoreSettingsRepository storeSettingsRepository
+            StoreSettingsRepository storeSettingsRepository,
+            TransactionRepository transactionRepository
     ) {
         this.customerRepository = customerRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
         this.storeSettingsRepository = storeSettingsRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @Override
     public CustomerDTO createCustomer(CreateCustomerRequestDTO request) {
         StoreSettings store = storeSettingsRepository.findById(request.storeId())
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + request.storeId()));
-        requireCustomerCreditEnabled(store);
 
         Customer customer = new Customer();
         customer.setStore(store);
         customer.setName(request.name().trim());
-        customer.setPhone(request.phone() != null ? request.phone().trim() : null);
+        customer.setPhone(normalizePhone(request.phone()));
         customer.setCreditLimit(scaleMoney(request.creditLimit()));
         customer.setCurrentBalance(BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING));
 
@@ -67,28 +70,51 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
 
     @Override
     @Transactional(readOnly = true)
+    public CustomerDTO getCustomer(UUID id) {
+        return toCustomerDto(getCustomerEntity(id));
+    }
+
+    @Override
+    public CustomerDTO updateCustomer(UUID id, UpdateCustomerRequestDTO request) {
+        Customer customer = getCustomerEntity(id);
+        customer.setName(request.name().trim());
+        customer.setPhone(normalizePhone(request.phone()));
+        customer.setCreditLimit(scaleMoney(request.creditLimit()));
+        return toCustomerDto(customerRepository.save(customer));
+    }
+
+    @Override
+    public void deleteCustomer(UUID id) {
+        Customer customer = getCustomerEntity(id);
+        BigDecimal balance = scaleMoney(customer.getCurrentBalance());
+        if (balance.compareTo(BigDecimal.ZERO) != 0) {
+            throw new BusinessRuleException(
+                    "Cannot delete customer with outstanding balance " + balance);
+        }
+        ledgerEntryRepository.deleteByCustomerId(id);
+        transactionRepository.clearCustomerReference(id);
+        customerRepository.delete(customer);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<CustomerDTO> searchCustomers(UUID storeId, String query) {
         String trimmed = query == null ? "" : query.trim();
-        if (trimmed.isEmpty()) {
-            return Collections.emptyList();
-        }
-
-        StoreSettings store = storeSettingsRepository.findById(storeId)
+        storeSettingsRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + storeId));
-        requireCustomerCreditEnabled(store);
 
-        return customerRepository
-                .searchByStoreAndQuery(storeId, trimmed, PageRequest.of(0, SEARCH_LIMIT))
-                .stream()
-                .map(this::toCustomerDto)
-                .toList();
+        PageRequest page = PageRequest.of(0, SEARCH_LIMIT);
+        List<Customer> matches = trimmed.isEmpty()
+                ? customerRepository.findByStoreIdOrderByNameAsc(storeId, page)
+                : customerRepository.searchByStoreAndQuery(storeId, trimmed, page);
+
+        return matches.stream().map(this::toCustomerDto).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<CreditLedgerEntryDTO> getLedger(UUID customerId) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + customerId));
+        Customer customer = getCustomerEntity(customerId);
         requireCustomerCreditEnabled(customer.getStore());
 
         return ledgerEntryRepository.findByCustomerIdOrderByCreatedAtDesc(customerId).stream()
@@ -98,8 +124,7 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
 
     @Override
     public CustomerDTO payBalance(UUID customerId, CustomerPaymentRequestDTO request) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + customerId));
+        Customer customer = getCustomerEntity(customerId);
         requireCustomerCreditEnabled(customer.getStore());
 
         BigDecimal amount = scaleMoney(request.amount());
@@ -128,8 +153,7 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
 
     @Override
     public void chargeAccount(UUID customerId, BigDecimal amount, Transaction transaction) {
-        Customer customer = customerRepository.findById(customerId)
-                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + customerId));
+        Customer customer = getCustomerEntity(customerId);
         requireCustomerCreditEnabled(customer.getStore());
 
         BigDecimal chargeAmount = scaleMoney(amount);
@@ -173,6 +197,18 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         if (!isCustomerCreditEnabled(store)) {
             throw new BusinessRuleException("Customer credit is not enabled for this store");
         }
+    }
+
+    private Customer getCustomerEntity(UUID id) {
+        return customerRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + id));
+    }
+
+    private static String normalizePhone(String phone) {
+        if (phone == null || phone.isBlank()) {
+            return null;
+        }
+        return phone.trim();
     }
 
     private CustomerDTO toCustomerDto(Customer customer) {

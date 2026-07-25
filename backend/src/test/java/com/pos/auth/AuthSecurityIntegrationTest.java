@@ -102,6 +102,7 @@ class AuthSecurityIntegrationTest {
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.role").value("ADMIN"))
                 .andExpect(jsonPath("$.enableInventory").value(true))
+                .andExpect(jsonPath("$.enableCustomerCredit").value(false))
                 .andExpect(jsonPath("$.uiLocale").value("en"))
                 .andReturn();
 
@@ -113,6 +114,7 @@ class AuthSecurityIntegrationTest {
                 .andExpect(jsonPath("$.username").value("admin"))
                 .andExpect(jsonPath("$.storeId").value(store.getId().toString()))
                 .andExpect(jsonPath("$.enableInventory").value(true))
+                .andExpect(jsonPath("$.enableCustomerCredit").value(false))
                 .andExpect(jsonPath("$.uiLocale").value("en"));
 
         mockMvc.perform(get("/api/v1/products").cookie(jwtCookie))

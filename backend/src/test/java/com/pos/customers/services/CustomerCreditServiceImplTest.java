@@ -4,9 +4,11 @@ import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.StoreSettingsRepository;
+import com.pos.core.repositories.TransactionRepository;
 import com.pos.customers.dtos.CreateCustomerRequestDTO;
 import com.pos.customers.dtos.CustomerDTO;
 import com.pos.customers.dtos.CustomerPaymentRequestDTO;
+import com.pos.customers.dtos.UpdateCustomerRequestDTO;
 import com.pos.customers.exception.CreditLimitExceededException;
 import com.pos.customers.models.CreditLedgerEntry;
 import com.pos.customers.models.CreditLedgerEntryType;
@@ -49,6 +51,9 @@ class CustomerCreditServiceImplTest {
 
     @Mock
     private StoreSettingsRepository storeSettingsRepository;
+
+    @Mock
+    private TransactionRepository transactionRepository;
 
     @InjectMocks
     private CustomerCreditServiceImpl service;
@@ -165,24 +170,36 @@ class CustomerCreditServiceImplTest {
     }
 
     @Test
-    void createCustomer_requiresFeatureFlag() {
+    void createCustomer_worksWhenFeatureFlagDisabled() {
         store.getFeatures().put("enable_customer_credit", false);
         when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> {
+            Customer saved = inv.getArgument(0);
+            saved.setId(UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"));
+            return saved;
+        });
 
-        assertThatThrownBy(() -> service.createCustomer(new CreateCustomerRequestDTO(
+        CustomerDTO created = service.createCustomer(new CreateCustomerRequestDTO(
                 store.getId(),
                 "Bob",
                 "555-0100",
-                new BigDecimal("50.0000")
-        ))).isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("not enabled");
+                new BigDecimal("0.0000")
+        ));
+
+        assertThat(created.name()).isEqualTo("Bob");
+        assertThat(created.creditLimit()).isEqualByComparingTo("0.0000");
     }
 
     @Test
-    void searchCustomers_returnsEmptyListForBlankQueryWithoutHittingRepository() {
+    void searchCustomers_listsStoreCustomersForBlankQuery() {
+        when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(customerRepository.findByStoreIdOrderByNameAsc(eq(store.getId()), any(Pageable.class)))
+                .thenReturn(List.of(customer));
+
         List<CustomerDTO> results = service.searchCustomers(store.getId(), "   ");
 
-        assertThat(results).isEmpty();
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).name()).isEqualTo("Ana");
         verify(customerRepository, never()).searchByStoreAndQuery(any(), any(), any());
     }
 
@@ -203,11 +220,61 @@ class CustomerCreditServiceImplTest {
     }
 
     @Test
-    void searchCustomers_requiresFeatureFlag() {
+    void searchCustomers_worksWhenFeatureFlagDisabled() {
         store.getFeatures().put("enable_customer_credit", false);
         when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        when(customerRepository.searchByStoreAndQuery(eq(store.getId()), eq("Ana"), any(Pageable.class)))
+                .thenReturn(List.of(customer));
 
-        assertThatThrownBy(() -> service.searchCustomers(store.getId(), "Ana"))
+        List<CustomerDTO> results = service.searchCustomers(store.getId(), "Ana");
+
+        assertThat(results).hasSize(1);
+    }
+
+    @Test
+    void updateCustomer_updatesIdentityFields() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        CustomerDTO updated = service.updateCustomer(
+                customer.getId(),
+                new UpdateCustomerRequestDTO("Ana Updated", "555-9999", new BigDecimal("150.0000"))
+        );
+
+        assertThat(updated.name()).isEqualTo("Ana Updated");
+        assertThat(updated.phone()).isEqualTo("555-9999");
+        assertThat(updated.creditLimit()).isEqualByComparingTo("150.0000");
+    }
+
+    @Test
+    void deleteCustomer_removesWhenBalanceZero() {
+        customer.setCurrentBalance(BigDecimal.ZERO.setScale(4));
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        service.deleteCustomer(customer.getId());
+
+        verify(ledgerEntryRepository).deleteByCustomerId(customer.getId());
+        verify(transactionRepository).clearCustomerReference(customer.getId());
+        verify(customerRepository).delete(customer);
+    }
+
+    @Test
+    void deleteCustomer_rejectsWhenBalanceOutstanding() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        assertThatThrownBy(() -> service.deleteCustomer(customer.getId()))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("outstanding balance");
+
+        verify(customerRepository, never()).delete(any());
+    }
+
+    @Test
+    void getLedger_rejectsWhenFeatureFlagDisabled() {
+        store.getFeatures().put("enable_customer_credit", false);
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        assertThatThrownBy(() -> service.getLedger(customer.getId()))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("not enabled");
     }

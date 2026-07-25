@@ -9,4 +9,6 @@ import java.util.UUID;
 public interface CreditLedgerEntryRepository extends JpaRepository<CreditLedgerEntry, UUID> {
 
     List<CreditLedgerEntry> findByCustomerIdOrderByCreatedAtDesc(UUID customerId);
+
+    void deleteByCustomerId(UUID customerId);
 }

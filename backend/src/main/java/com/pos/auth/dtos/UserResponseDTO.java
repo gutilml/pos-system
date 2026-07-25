@@ -12,6 +12,7 @@ public record UserResponseDTO(
         String storeName,
         boolean active,
         boolean enableInventory,
+        boolean enableCustomerCredit,
         String uiLocale
 ) {
 }

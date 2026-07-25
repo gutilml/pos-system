@@ -25,4 +25,11 @@ public interface CustomerRepository extends JpaRepository<Customer, UUID> {
             @Param("q") String q,
             Pageable pageable
     );
+
+    @Query("""
+            SELECT c FROM Customer c
+            WHERE c.store.id = :storeId
+            ORDER BY c.name ASC
+            """)
+    List<Customer> findByStoreIdOrderByNameAsc(@Param("storeId") UUID storeId, Pageable pageable);
 }

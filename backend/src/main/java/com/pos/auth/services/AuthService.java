@@ -86,6 +86,7 @@ public class AuthService {
                 store == null ? null : store.getStoreName(),
                 user.isActive(),
                 isInventoryEnabled(store),
+                isCustomerCreditEnabled(store),
                 StoreSettingsServiceImpl.resolveUiLocale(store)
         );
     }
@@ -95,5 +96,12 @@ public class AuthService {
             return false;
         }
         return Boolean.TRUE.equals(store.getFeatures().get("enable_inventory"));
+    }
+
+    static boolean isCustomerCreditEnabled(StoreSettings store) {
+        if (store == null || store.getFeatures() == null) {
+            return false;
+        }
+        return Boolean.TRUE.equals(store.getFeatures().get("enable_customer_credit"));
     }
 }

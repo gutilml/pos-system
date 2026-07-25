@@ -81,6 +81,7 @@ class AuthServiceTest {
         assertThat(result.role()).isEqualTo(Role.ADMIN);
         assertThat(result.storeId()).isEqualTo(store.getId());
         assertThat(result.enableInventory()).isFalse();
+        assertThat(result.enableCustomerCredit()).isFalse();
         assertThat(result.uiLocale()).isEqualTo("en");
         verify(authCookieService).writeJwtCookie(response, "jwt-token");
     }
@@ -109,6 +110,19 @@ class AuthServiceTest {
         var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
 
         assertThat(result.enableInventory()).isTrue();
+    }
+
+    @Test
+    void login_exposesEnableCustomerCreditWhenFeatureOn() {
+        store.setFeatures(Map.of("enable_customer_credit", true));
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.enableCustomerCredit()).isTrue();
     }
 
     @Test

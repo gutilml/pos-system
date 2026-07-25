@@ -3,6 +3,7 @@ package com.pos.core.repositories;
 import com.pos.core.models.PaymentType;
 import com.pos.core.models.Transaction;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -10,6 +11,10 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
+
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE Transaction t SET t.customer = null WHERE t.customer.id = :customerId")
+    int clearCustomerReference(@Param("customerId") UUID customerId);
 
     @Query("""
             SELECT COALESCE(SUM(t.grandTotal), 0)
