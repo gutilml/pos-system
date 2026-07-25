@@ -7,10 +7,10 @@ describe('money helpers', () => {
     expect(roundMoney(1.23456)).toBe(1.2346)
   })
 
-  it('formats money for display with 2 decimals', () => {
-    expect(MONEY_DISPLAY_SCALE).toBe(2)
-    expect(formatMoney(150)).toBe('150.00')
-    expect(formatMoney(148.5)).toBe('148.50')
-    expect(formatMoney(1.999)).toBe('2.00')
+  it('formats money for display with 3 decimals', () => {
+    expect(MONEY_DISPLAY_SCALE).toBe(3)
+    expect(formatMoney(150)).toBe('150.000')
+    expect(formatMoney(148.5)).toBe('148.500')
+    expect(formatMoney(1.999)).toBe('1.999')
   })
 })

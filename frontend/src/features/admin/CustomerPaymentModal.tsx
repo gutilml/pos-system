@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useT } from '@/i18n/useT'
-import { roundMoney } from '@/lib/money'
+import { formatMoney, roundMoney } from '@/lib/money'
 
 export type CustomerPaymentMethod = 'CASH' | 'CARD'
 
@@ -72,7 +72,7 @@ export function CustomerPaymentModal({
           {t('customers.payModalTitle')}
         </h2>
         <p className="mt-2 text-sm text-slate-600">
-          {customerName} · {t('customers.balance')}: {balance.toFixed(2)}
+          {customerName} · {t('customers.balance')}: {formatMoney(balance)}
         </p>
 
         <fieldset className="mt-5">

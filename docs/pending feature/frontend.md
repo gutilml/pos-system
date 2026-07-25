@@ -48,6 +48,7 @@ Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 0
 ## Register UX polish (decisions 2026-07-22)
 
 - [x] ~~**Money display 2 decimals** — Feature 033: money UI 2 dp; math/API stay 4; qty may keep 4.~~
+- [x] ~~**Money display 3 decimals** — Feature [071](../features/071-frontend-money-display-3dp/README.md): UI `formatMoney` → 3 dp; math stays 4; supersedes **033** display scale.~~
 - [x] ~~**Search/scan focus lock** — Feature 034: focus search when no modal; restore after close / Escape.~~
 - [x] ~~**Search typeahead** — Feature 035: ≥3 chars, each keystroke, max 10; Enter/click adds; barcode Enter exact still instant.~~
 - [x] ~~**Weight modal keyboard** — Feature 032: weight field accepts physical keyboard (not readOnly).~~
