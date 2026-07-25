@@ -4,24 +4,19 @@ import type { WorkspaceId } from '@/features/workspace/workspaceIds'
 type WorkspaceNavProps = {
   active: WorkspaceId
   onChange: (workspace: WorkspaceId) => void
-  showInventory: boolean
+  /** @deprecated Feature 063 — Inventory nav is always shown (read-only when flag off). */
+  showInventory?: boolean
 }
 
-export function WorkspaceNav({ active, onChange, showInventory }: WorkspaceNavProps) {
+export function WorkspaceNav({ active, onChange }: WorkspaceNavProps) {
   const t = useT()
 
   const items: { id: WorkspaceId; label: string; testId: string }[] = [
     { id: 'sell', label: t('workspace.sell'), testId: 'workspace-sell' },
     { id: 'products', label: t('workspace.products'), testId: 'workspace-products' },
     { id: 'customers', label: t('workspace.customers'), testId: 'workspace-customers' },
+    { id: 'inventory', label: t('workspace.inventory'), testId: 'workspace-inventory' },
   ]
-  if (showInventory) {
-    items.push({
-      id: 'inventory',
-      label: t('workspace.inventory'),
-      testId: 'workspace-inventory',
-    })
-  }
 
   return (
     <nav

@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { AuthGate } from '@/components/auth/AuthGate'
 import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
-import { CartItemRow, CartListHeader } from '@/components/register/CartItemRow'
+import { CartItemRow, CartListHeader, formatCartStockDisplay } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
 import { TicketTabs } from '@/components/register/TicketTabs'
@@ -11,7 +11,7 @@ import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { ProductsWorkspace } from '@/features/admin/ProductsWorkspace'
 import { CustomersWorkspace } from '@/features/admin/CustomersWorkspace'
-import { WorkspaceComingSoon } from '@/features/workspace/WorkspaceComingSoon'
+import { InventoryWorkspace } from '@/features/admin/InventoryWorkspace'
 import type { WorkspaceId } from '@/features/workspace/workspaceIds'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -24,6 +24,17 @@ export function RegisterScreen() {
   const pendingWeight = useCartStore((s) => s.pendingWeightProduct)
   const showStock = useAuthStore((s) => s.user?.enableInventory === true)
   const [workspace, setWorkspace] = useState<WorkspaceId>('sell')
+
+  const hasNegativeStock = useMemo(
+    () =>
+      showStock &&
+      items.some((item) => {
+        if (item.trackInventory !== true) return false
+        const remaining = (item.currentStock ?? 0) - item.quantity
+        return remaining < 0
+      }),
+    [items, showStock],
+  )
 
   useEffect(() => {
     if (workspace === 'sell' && !pendingWeight) {
@@ -43,16 +54,22 @@ export function RegisterScreen() {
             </div>
           </header>
 
-          <WorkspaceNav
-            active={workspace}
-            onChange={setWorkspace}
-            showInventory={showStock}
-          />
+          <WorkspaceNav active={workspace} onChange={setWorkspace} />
 
           {workspace === 'sell' ? (
             <>
               <TicketTabs />
               <SearchBar />
+
+              {hasNegativeStock ? (
+                <p
+                  className="shrink-0 border-b border-amber-300 bg-amber-50 px-4 py-2 text-sm text-amber-950"
+                  role="status"
+                  data-testid="register-negative-stock-warning"
+                >
+                  {t('register.negativeStockWarning')}
+                </p>
+              ) : null}
 
               <section className="min-h-0 flex-1 overflow-y-auto bg-white" aria-label="Cart items">
                 {items.length === 0 ? (
@@ -62,7 +79,12 @@ export function RegisterScreen() {
                     <CartListHeader showStock={showStock} />
                     <ul>
                       {items.map((item) => (
-                        <CartItemRow key={item.productId} item={item} showStock={showStock} />
+                        <CartItemRow
+                          key={item.productId}
+                          item={item}
+                          showStock={showStock}
+                          stockDisplay={formatCartStockDisplay(item)}
+                        />
                       ))}
                     </ul>
                   </>
@@ -78,9 +100,7 @@ export function RegisterScreen() {
 
           {workspace === 'customers' ? <CustomersWorkspace /> : null}
 
-          {workspace === 'inventory' && showStock ? (
-            <WorkspaceComingSoon titleKey="workspace.inventory" testId="workspace-inventory-soon" />
-          ) : null}
+          {workspace === 'inventory' ? <InventoryWorkspace /> : null}
         </div>
       </ShiftGate>
     </AuthGate>

@@ -140,6 +140,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 060 | BE | Done | [README](features/060-backend-customer-identity-update/README.md) | [spec](features/060-backend-customer-identity-update/spec.md) · [plan](features/060-backend-customer-identity-update/plan.md) · [tasks](features/060-backend-customer-identity-update/tasks.md) |
 | 061 | FE | Done | [README](features/061-frontend-customers-workspace/README.md) | [spec](features/061-frontend-customers-workspace/spec.md) · [plan](features/061-frontend-customers-workspace/plan.md) · [tasks](features/061-frontend-customers-workspace/tasks.md) |
 | 062 | BE | Done | [README](features/062-backend-inventory-movements/README.md) | [spec](features/062-backend-inventory-movements/spec.md) · [plan](features/062-backend-inventory-movements/plan.md) · [tasks](features/062-backend-inventory-movements/tasks.md) |
+| 063 | FE | Done | [README](features/063-frontend-inventory-workspace/README.md) | [spec](features/063-frontend-inventory-workspace/spec.md) · [plan](features/063-frontend-inventory-workspace/plan.md) · [tasks](features/063-frontend-inventory-workspace/tasks.md) |
 
 ---
 

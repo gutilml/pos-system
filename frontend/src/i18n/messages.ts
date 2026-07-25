@@ -201,6 +201,29 @@ export type MessageKey =
   | 'customers.ledgerFailed'
   | 'customers.payFailed'
   | 'customers.payAmountInvalid'
+  | 'inventory.filter'
+  | 'inventory.filterPlaceholder'
+  | 'inventory.lowStockOnly'
+  | 'inventory.lowStock'
+  | 'inventory.none'
+  | 'inventory.stock'
+  | 'inventory.adjust'
+  | 'inventory.receive'
+  | 'inventory.qtyAdd'
+  | 'inventory.qtyDelta'
+  | 'inventory.qtyInvalid'
+  | 'inventory.reason'
+  | 'inventory.reasonRequired'
+  | 'inventory.unitCost'
+  | 'inventory.selling'
+  | 'inventory.wholesale'
+  | 'inventory.history'
+  | 'inventory.historyEmpty'
+  | 'inventory.loadFailed'
+  | 'inventory.saveFailed'
+  | 'inventory.saving'
+  | 'inventory.readonlyBanner'
+  | 'register.negativeStockWarning'
 
 export type MessageDict = Record<MessageKey, string>
 
@@ -287,6 +310,30 @@ export const en: MessageDict = {
   'customers.ledgerFailed': 'Could not load ledger',
   'customers.payFailed': 'Could not record payment',
   'customers.payAmountInvalid': 'Enter a payment amount greater than zero',
+  'inventory.filter': 'Search inventory',
+  'inventory.filterPlaceholder': 'Filter by name or barcode',
+  'inventory.lowStockOnly': 'Low stock only',
+  'inventory.lowStock': 'Low stock',
+  'inventory.none': 'No inventory products found',
+  'inventory.stock': 'Stock',
+  'inventory.adjust': 'Adjust',
+  'inventory.receive': 'Receive',
+  'inventory.qtyAdd': 'Quantity to add',
+  'inventory.qtyDelta': 'Quantity change (+/−)',
+  'inventory.qtyInvalid': 'Enter a valid quantity',
+  'inventory.reason': 'Reason',
+  'inventory.reasonRequired': 'Reason is required for adjustments',
+  'inventory.unitCost': 'Unit cost',
+  'inventory.selling': 'Selling price',
+  'inventory.wholesale': 'Wholesale price',
+  'inventory.history': 'Recent movements',
+  'inventory.historyEmpty': 'No movements yet',
+  'inventory.loadFailed': 'Could not load inventory',
+  'inventory.saveFailed': 'Could not save stock movement',
+  'inventory.saving': 'Saving…',
+  'inventory.readonlyBanner': 'Inventory is disabled for this store. Viewing last stock data only.',
+  'register.negativeStockWarning':
+    'One or more cart lines leave stock below zero. Sale can still complete; restock soon.',
   'register.title': 'POS Register',
   'register.emptyCart': 'Scan a barcode or search by name to start a ticket.',
   'search.placeholder': 'Scan or search products',
@@ -489,6 +536,31 @@ export const es: MessageDict = {
   'customers.ledgerFailed': 'No se pudo cargar el historial',
   'customers.payFailed': 'No se pudo registrar el pago',
   'customers.payAmountInvalid': 'Ingresa un monto de pago mayor que cero',
+  'inventory.filter': 'Buscar inventario',
+  'inventory.filterPlaceholder': 'Filtrar por nombre o código',
+  'inventory.lowStockOnly': 'Solo bajo stock',
+  'inventory.lowStock': 'Bajo stock',
+  'inventory.none': 'No se encontraron productos de inventario',
+  'inventory.stock': 'Existencia',
+  'inventory.adjust': 'Ajustar',
+  'inventory.receive': 'Recibir',
+  'inventory.qtyAdd': 'Cantidad a agregar',
+  'inventory.qtyDelta': 'Cambio de cantidad (+/−)',
+  'inventory.qtyInvalid': 'Ingresa una cantidad válida',
+  'inventory.reason': 'Motivo',
+  'inventory.reasonRequired': 'El motivo es obligatorio para ajustes',
+  'inventory.unitCost': 'Costo unitario',
+  'inventory.selling': 'Precio de venta',
+  'inventory.wholesale': 'Precio mayoreo',
+  'inventory.history': 'Movimientos recientes',
+  'inventory.historyEmpty': 'Aún no hay movimientos',
+  'inventory.loadFailed': 'No se pudo cargar el inventario',
+  'inventory.saveFailed': 'No se pudo guardar el movimiento',
+  'inventory.saving': 'Guardando…',
+  'inventory.readonlyBanner':
+    'El inventario está desactivado para esta tienda. Solo se muestra la última información.',
+  'register.negativeStockWarning':
+    'Una o más líneas dejan el stock bajo cero. La venta puede completarse; reabastece pronto.',
   'register.title': 'Caja POS',
   'register.emptyCart': 'Escanea un código o busca por nombre para iniciar un ticket.',
   'search.placeholder': 'Escanear o buscar productos',

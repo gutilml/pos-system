@@ -110,8 +110,9 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 ## Opt-in module UIs
 
-- [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true. Register cart Stock column shipped as Feature [043](../features/043-frontend-cart-stock-column/).
+- [x] ~~**Inventory screens** — Feature [063](../features/063-frontend-inventory-workspace/README.md): list/adjust/receive modal; read-only when flag off; register negative-stock warning. Depends on BE **062**. Cart Stock column was Feature [043](../features/043-frontend-cart-stock-column/).~~
 - [x] ~~**Customer credit UI** — Feature 014 checkout CREDIT + **037** assign-from-register; dedicated Customers workspace ledger/pay shipped as Feature [061](../features/061-frontend-customers-workspace/README.md).~~
+- [ ] **Notify admin when sale drives stock negative** — Companion to register warning (063); out of scope for 062/063.
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 
 ## Tooling / quality
