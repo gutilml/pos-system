@@ -157,6 +157,12 @@ export type MessageKey =
   | 'admin.parentProduct'
   | 'admin.qtyPerPackage'
   | 'admin.packageUnit'
+  | 'admin.unit.pc'
+  | 'admin.unit.kg'
+  | 'admin.unit.g'
+  | 'admin.unit.lb'
+  | 'admin.unit.L'
+  | 'admin.unit.ml'
   | 'admin.cost'
   | 'admin.marginPct'
   | 'admin.retail'
@@ -270,6 +276,12 @@ export const en: MessageDict = {
   'admin.parentProduct': 'Parent package product',
   'admin.qtyPerPackage': 'Qty per package',
   'admin.packageUnit': 'Package unit',
+  'admin.unit.pc': 'pc',
+  'admin.unit.kg': 'kg',
+  'admin.unit.g': 'g',
+  'admin.unit.lb': 'lb',
+  'admin.unit.L': 'L',
+  'admin.unit.ml': 'ml',
   'admin.cost': 'Cost',
   'admin.marginPct': 'Margin %',
   'admin.retail': 'Retail',
@@ -501,6 +513,12 @@ export const es: MessageDict = {
   'admin.parentProduct': 'Producto padre (paquete)',
   'admin.qtyPerPackage': 'Cant. por paquete',
   'admin.packageUnit': 'Unidad del paquete',
+  'admin.unit.pc': 'pza',
+  'admin.unit.kg': 'kg',
+  'admin.unit.g': 'g',
+  'admin.unit.lb': 'lb',
+  'admin.unit.L': 'L',
+  'admin.unit.ml': 'ml',
   'admin.cost': 'Costo',
   'admin.marginPct': 'Margen %',
   'admin.retail': 'Precio venta',

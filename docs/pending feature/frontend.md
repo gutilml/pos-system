@@ -83,14 +83,18 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail. **On hold** (2026-07-23) vs catalog (050–053).
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
 - [ ] **Void tickets** — UI for void once backend supports those statuses. **On hold** (2026-07-23) vs catalog (050–053).
+- [ ] **Previous closed tickets + reimburse** — Feature [073](../features/073-frontend-closed-tickets-reimburse/README.md): footer `Clear | Discount | Assign | Previous tickets | Pay`; list/review/reimburse via BE **072**. CARD reimbursements deferred.
+- [ ] **Cashier-only reimburse filter (FE)** — Companion to BE pending; after sale ownership.
 - [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
 - [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup. Modal nav superseded by **054–056** (reuse forms/panels).~~
+- [x] ~~**Product editor: category margin + cost→retail + package unit chips** — Feature [074](../features/074-frontend-product-editor-margin-units/README.md): auto margin from category; live retail from cost; remove UOM free text; package unit chip row.~~
 - [x] ~~**POS workspace nav shell** — Feature [054](../features/054-frontend-workspace-nav-shell/README.md): row below Register header; Register/Sell + Products + Customer + Inventory (gated); Customer/Inventory coming soon. AuthGate/ShiftGate unchanged.~~
 - [x] ~~**Products workspace** — Feature [055](../features/055-frontend-products-workspace/README.md): Product\|Category sub-tabs; reuse CategoryPanel / ProductEditorForm; remove CashierMenu Catalog modal. Depends on **054**.~~
 - [x] ~~**Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.~~
 - [x] ~~**Product lookup keyboard + editor load** — Feature [057](../features/057-frontend-product-lookup-keyboard-and-load/README.md): Arrow keys on suggestion list; ignore abort on editor load.~~
 - [x] ~~**Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).~~
 - [x] ~~**Customers workspace** — Feature [061](../features/061-frontend-customers-workspace/README.md): list/filter/create/edit/delete; credit ledger/pay when enabled; Assign customer header label. Depends on BE **060**.~~
+- [ ] **Customer has-credit checkbox** — Feature [075](../features/075-frontend-customer-has-credit-checkbox/README.md): optional credit per customer when store credit on; limit 0 when unchecked.
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
 
 ## Auth & multi-store

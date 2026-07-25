@@ -41,6 +41,22 @@ function numOrNull(raw: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+/** Fixed package-unit codes for chip picker (Feature 074). */
+export const PACKAGE_UNIT_CODES = ['pc', 'kg', 'g', 'lb', 'L', 'ml'] as const
+
+export type PackageUnitCode = (typeof PACKAGE_UNIT_CODES)[number]
+
+export function normalizePackageUnit(raw: string | null | undefined): string {
+  if (!raw) return ''
+  const trimmed = raw.trim()
+  const match = PACKAGE_UNIT_CODES.find((c) => c.toLowerCase() === trimmed.toLowerCase())
+  return match ?? ''
+}
+
+function roundPct(n: number): number {
+  return Math.round(n * 100) / 100
+}
+
 export function ProductEditorForm({
   productId,
   enableInventory,
@@ -61,7 +77,6 @@ export function ProductEditorForm({
   const [skusText, setSkusText] = useState(initialSkusText)
   const [categoryId, setCategoryId] = useState('')
   const [sellByWeight, setSellByWeight] = useState(false)
-  const [unitOfMeasure, setUnitOfMeasure] = useState('')
   const [parentProductId, setParentProductId] = useState('')
   const [qtyPerPackage, setQtyPerPackage] = useState('')
   const [packageUnit, setPackageUnit] = useState('')
@@ -77,6 +92,32 @@ export function ProductEditorForm({
 
   const [parentFixId, setParentFixId] = useState<string | null>(null)
   const [pendingRetry, setPendingRetry] = useState(false)
+
+  function recalcSellingFromCostAndMargin(costRaw: string, marginPctRaw: string) {
+    const cost = numOrNull(costRaw)
+    const pct = numOrNull(marginPctRaw)
+    if (pct == null || cost == null || cost < 0) return
+    try {
+      setSellingPrice(String(sellingPriceFromMargin(cost, pct / 100)))
+    } catch {
+      // leave selling while typing invalid values
+    }
+  }
+
+  function onCategoryChange(nextId: string) {
+    setCategoryId(nextId)
+    if (!nextId) return
+    const cat = categories.find((c) => c.id === nextId)
+    if (!cat) return
+    const pct = String(roundPct(cat.targetMargin * 100))
+    setTargetMarginPct(pct)
+    recalcSellingFromCostAndMargin(costPrice, pct)
+  }
+
+  function onCostChange(raw: string) {
+    setCostPrice(raw)
+    recalcSellingFromCostAndMargin(raw, targetMarginPct)
+  }
 
   useEffect(() => {
     const ac = new AbortController()
@@ -101,14 +142,13 @@ export function ProductEditorForm({
           setSkusText((p.skus ?? []).join('\n'))
           setCategoryId(p.categoryIds?.[0] ?? '')
           setSellByWeight(p.sellByWeight === true)
-          setUnitOfMeasure(p.unitOfMeasure ?? '')
           setParentProductId(p.parentProductId ?? '')
           setQtyPerPackage(
             p.qtyPerPackage != null && Number.isFinite(Number(p.qtyPerPackage))
               ? String(p.qtyPerPackage)
               : '',
           )
-          setPackageUnit(p.packageUnit ?? p.unitOfMeasure ?? '')
+          setPackageUnit(normalizePackageUnit(p.packageUnit ?? p.unitOfMeasure))
           setCostPrice(p.costPrice != null ? String(p.costPrice) : '')
           setCostReadOnly(Boolean(p.parentProductId))
           setTargetMarginPct(
@@ -128,7 +168,6 @@ export function ProductEditorForm({
           setDescription('')
           setCategoryId('')
           setSellByWeight(false)
-          setUnitOfMeasure('')
           setParentProductId('')
           setQtyPerPackage('')
           setPackageUnit('')
@@ -160,14 +199,7 @@ export function ProductEditorForm({
 
   function onMarginChange(raw: string) {
     setTargetMarginPct(raw)
-    const pct = numOrNull(raw)
-    const cost = numOrNull(costPrice)
-    if (pct == null || cost == null) return
-    try {
-      setSellingPrice(String(sellingPriceFromMargin(cost, pct / 100)))
-    } catch {
-      // leave selling as-is while typing invalid margin
-    }
+    recalcSellingFromCostAndMargin(costPrice, raw)
   }
 
   function onSellingChange(raw: string) {
@@ -190,7 +222,7 @@ export function ProductEditorForm({
       skus: parseSkus(skusText),
       categoryId: categoryId || null,
       sellByWeight,
-      unitOfMeasure: unitOfMeasure.trim() || null,
+      unitOfMeasure: null,
       parentProductId: parentProductId || null,
       qtyPerPackage: parentProductId ? null : numOrNull(qtyPerPackage),
       packageUnit: parentProductId ? null : packageUnit.trim() || null,
@@ -277,7 +309,8 @@ export function ProductEditorForm({
           {t('admin.category')}
           <select
             value={categoryId}
-            onChange={(e) => setCategoryId(e.target.value)}
+            onChange={(e) => onCategoryChange(e.target.value)}
+            data-testid="product-category"
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
           >
             <option value="">{t('admin.none')}</option>
@@ -309,15 +342,6 @@ export function ProductEditorForm({
         </div>
 
         <label className="block text-sm font-medium text-slate-700">
-          {t('admin.unitOfMeasure')}
-          <input
-            value={unitOfMeasure}
-            onChange={(e) => setUnitOfMeasure(e.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          />
-        </label>
-
-        <label className="block text-sm font-medium text-slate-700">
           {t('admin.parentProduct')}
           <select
             value={parentProductId}
@@ -340,7 +364,7 @@ export function ProductEditorForm({
         </label>
 
         {!parentProductId ? (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-3">
             <label className="block text-sm font-medium text-slate-700">
               {t('admin.qtyPerPackage')}
               <input
@@ -350,14 +374,43 @@ export function ProductEditorForm({
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
               />
             </label>
-            <label className="block text-sm font-medium text-slate-700">
-              {t('admin.packageUnit')}
-              <input
-                value={packageUnit}
-                onChange={(e) => setPackageUnit(e.target.value)}
-                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-              />
-            </label>
+            <fieldset>
+              <legend className="mb-2 text-sm font-medium text-slate-700">{t('admin.packageUnit')}</legend>
+              <div className="flex flex-wrap gap-2" data-testid="package-unit-chips">
+                {PACKAGE_UNIT_CODES.map((code) => (
+                  <label
+                    key={code}
+                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm ${
+                      packageUnit === code
+                        ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
+                        : 'border-slate-300 text-slate-800'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="package-unit"
+                      value={code}
+                      checked={packageUnit === code}
+                      onChange={() => setPackageUnit(code)}
+                      data-testid={`package-unit-${code}`}
+                      className="sr-only"
+                    />
+                    {t(
+                      (
+                        {
+                          pc: 'admin.unit.pc',
+                          kg: 'admin.unit.kg',
+                          g: 'admin.unit.g',
+                          lb: 'admin.unit.lb',
+                          L: 'admin.unit.L',
+                          ml: 'admin.unit.ml',
+                        } as const
+                      )[code],
+                    )}
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
         ) : null}
 
@@ -366,9 +419,10 @@ export function ProductEditorForm({
             {t('admin.cost')}
             <input
               value={costPrice}
-              onChange={(e) => setCostPrice(e.target.value)}
+              onChange={(e) => onCostChange(e.target.value)}
               inputMode="decimal"
               readOnly={costReadOnly}
+              data-testid="product-cost"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 read-only:bg-slate-100"
             />
           </label>
@@ -378,6 +432,7 @@ export function ProductEditorForm({
               value={targetMarginPct}
               onChange={(e) => onMarginChange(e.target.value)}
               inputMode="decimal"
+              data-testid="product-margin"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -387,6 +442,7 @@ export function ProductEditorForm({
               value={sellingPrice}
               onChange={(e) => onSellingChange(e.target.value)}
               inputMode="decimal"
+              data-testid="product-retail"
               className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
             />
           </label>
@@ -480,8 +536,4 @@ export function ProductEditorForm({
       />
     </>
   )
-}
-
-function roundPct(n: number): number {
-  return Math.round(n * 100) / 100
 }
