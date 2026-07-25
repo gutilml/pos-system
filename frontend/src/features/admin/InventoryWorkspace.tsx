@@ -2,9 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import {
   createStockMovement,
   listInventoryProducts,
-  listStockMovements,
   type InventoryProduct,
-  type StockMovement,
 } from '@/api/inventory'
 import { useT } from '@/i18n/useT'
 import { roundMoney } from '@/lib/money'
@@ -34,8 +32,6 @@ export function InventoryWorkspace() {
   const [wholesalePrice, setWholesalePrice] = useState('')
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
-
-  const [history, setHistory] = useState<StockMovement[]>([])
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -68,11 +64,6 @@ export function InventoryWorkspace() {
     setSellingPrice(String(product.sellingPrice))
     setWholesalePrice(String(product.wholesalePrice))
     setFormError(null)
-    try {
-      setHistory(await listStockMovements(product.stockedProductId))
-    } catch {
-      setHistory([])
-    }
   }
 
   function closeModal() {
@@ -362,21 +353,6 @@ export function InventoryWorkspace() {
                 >
                   {t('footer.cancel')}
                 </button>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-semibold text-slate-900">{t('inventory.history')}</h4>
-                <ul className="mt-1 max-h-32 overflow-y-auto rounded border border-slate-200 text-xs" data-testid="inventory-history">
-                  {history.map((m) => (
-                    <li key={m.id} className="border-b border-slate-100 px-2 py-1 last:border-b-0">
-                      {m.type} · {m.quantityDelta} → {m.quantityAfter}
-                      {m.reason ? ` · ${m.reason}` : ''}
-                    </li>
-                  ))}
-                  {history.length === 0 ? (
-                    <li className="px-2 py-2 text-slate-500">{t('inventory.historyEmpty')}</li>
-                  ) : null}
-                </ul>
               </div>
             </div>
           </form>

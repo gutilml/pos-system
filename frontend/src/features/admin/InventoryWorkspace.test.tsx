@@ -6,11 +6,10 @@ import { useAuthStore } from '@/store/useAuthStore'
 
 vi.mock('@/api/inventory', () => ({
   listInventoryProducts: vi.fn(),
-  listStockMovements: vi.fn(),
   createStockMovement: vi.fn(),
 }))
 
-import { listInventoryProducts, listStockMovements } from '@/api/inventory'
+import { listInventoryProducts } from '@/api/inventory'
 
 describe('InventoryWorkspace', () => {
   beforeEach(() => {
@@ -47,7 +46,6 @@ describe('InventoryWorkspace', () => {
         wholesaleMargin: 0.33,
       },
     ])
-    vi.mocked(listStockMovements).mockResolvedValue([])
   })
 
   it('loads inventory list on mount', async () => {

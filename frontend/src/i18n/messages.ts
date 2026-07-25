@@ -230,8 +230,6 @@ export type MessageKey =
   | 'inventory.unitCost'
   | 'inventory.selling'
   | 'inventory.wholesale'
-  | 'inventory.history'
-  | 'inventory.historyEmpty'
   | 'inventory.loadFailed'
   | 'inventory.saveFailed'
   | 'inventory.saving'
@@ -351,8 +349,6 @@ export const en: MessageDict = {
   'inventory.unitCost': 'Unit cost',
   'inventory.selling': 'Selling price',
   'inventory.wholesale': 'Wholesale price',
-  'inventory.history': 'Recent movements',
-  'inventory.historyEmpty': 'No movements yet',
   'inventory.loadFailed': 'Could not load inventory',
   'inventory.saveFailed': 'Could not save stock movement',
   'inventory.saving': 'Saving…',
@@ -590,8 +586,6 @@ export const es: MessageDict = {
   'inventory.unitCost': 'Costo unitario',
   'inventory.selling': 'Precio de venta',
   'inventory.wholesale': 'Precio mayoreo',
-  'inventory.history': 'Movimientos recientes',
-  'inventory.historyEmpty': 'Aún no hay movimientos',
   'inventory.loadFailed': 'No se pudo cargar el inventario',
   'inventory.saveFailed': 'No se pudo guardar el movimiento',
   'inventory.saving': 'Guardando…',
