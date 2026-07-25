@@ -117,7 +117,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 ## Small bugs
 
-- [ ] **Friendly login failure message** — Bad credentials show raw RFC 7807 JSON in LoginForm. Feature **065**.
+- [x] ~~**Friendly login failure message** — Feature [065](../features/065-frontend-login-friendly-error/README.md): Problem Details `detail` + i18n `login.invalidCredentials`.~~
 - [x] ~~**Customers / Inventory list stuck on Loading** — Feature [064](../features/064-frontend-uset-stable-loading/README.md): stabilize `useT` with `useCallback` so list effects stop thrashing.~~
 - [ ] **Inventory receive: cost change should refresh prices** — Feature **066**.
 - [ ] **Customer Add payment shows "Failed to fetch"** — Re-verify after **064**; pay UX replaced by **068** modal. If still broken, debug POST `/customers/{id}/payments`.

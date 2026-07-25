@@ -13,10 +13,30 @@ export function readCookie(name: string): string | null {
   return null
 }
 
+/** Prefer RFC 7807 `detail`, then `title`, else the raw body (Feature 065). */
+export function formatApiErrorBody(body: string): string {
+  const trimmed = body.trim()
+  if (!trimmed) return ''
+  if (trimmed.startsWith('{')) {
+    try {
+      const parsed = JSON.parse(trimmed) as { detail?: unknown; title?: unknown }
+      if (typeof parsed.detail === 'string' && parsed.detail.trim()) {
+        return parsed.detail.trim()
+      }
+      if (typeof parsed.title === 'string' && parsed.title.trim()) {
+        return parsed.title.trim()
+      }
+    } catch {
+      // fall through to raw body
+    }
+  }
+  return trimmed
+}
+
 export async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const detail = await response.text()
-    throw new Error(detail || `Request failed (${response.status})`)
+    throw new Error(formatApiErrorBody(detail) || `Request failed (${response.status})`)
   }
   if (response.status === 204 || response.status === 205) {
     return undefined as T

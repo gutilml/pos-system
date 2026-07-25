@@ -9,6 +9,7 @@ export type MessageKey =
   | 'login.submit'
   | 'login.submitting'
   | 'login.missingCredentials'
+  | 'login.invalidCredentials'
   | 'auth.checkingSession'
   | 'cashier.menu'
   | 'cashier.payIn'
@@ -235,6 +236,7 @@ export const en: MessageDict = {
   'login.submit': 'Sign in',
   'login.submitting': 'Signing in…',
   'login.missingCredentials': 'Enter username and password',
+  'login.invalidCredentials': 'Invalid username or password',
   'auth.checkingSession': 'Checking session…',
   'cashier.menu': 'Cashier',
   'cashier.payIn': 'Pay in',
@@ -461,6 +463,7 @@ export const es: MessageDict = {
   'login.submit': 'Entrar',
   'login.submitting': 'Entrando…',
   'login.missingCredentials': 'Ingresa usuario y contraseña',
+  'login.invalidCredentials': 'Usuario o contraseña incorrectos',
   'auth.checkingSession': 'Verificando sesión…',
   'cashier.menu': 'Cajero',
   'cashier.payIn': 'Entrada de efectivo',

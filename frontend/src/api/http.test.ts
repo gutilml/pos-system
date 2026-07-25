@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiFetch, parseJson, readCookie } from '@/api/http'
+import { apiFetch, formatApiErrorBody, parseJson, readCookie } from '@/api/http'
 
 describe('http helpers', () => {
   afterEach(() => {
@@ -45,5 +45,25 @@ describe('http helpers', () => {
   it('parseJson allows empty 204 bodies', async () => {
     const response = new Response(null, { status: 204 })
     await expect(parseJson<void>(response)).resolves.toBeUndefined()
+  })
+
+  it('formatApiErrorBody prefers Problem Details detail', () => {
+    expect(
+      formatApiErrorBody(
+        '{"type":"about:blank","title":"Unauthorized","status":401,"detail":"Invalid credentials","instance":"/api/v1/auth/login"}',
+      ),
+    ).toBe('Invalid credentials')
+  })
+
+  it('parseJson throws Problem Details detail on error responses', async () => {
+    const response = new Response(
+      JSON.stringify({
+        title: 'Unauthorized',
+        status: 401,
+        detail: 'Invalid credentials',
+      }),
+      { status: 401 },
+    )
+    await expect(parseJson(response)).rejects.toThrow('Invalid credentials')
   })
 })

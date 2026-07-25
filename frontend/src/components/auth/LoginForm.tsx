@@ -74,8 +74,11 @@ export function LoginForm() {
         />
 
         {(localError || error) && (
-          <p className="mt-2 text-sm text-red-600" role="alert">
-            {localError ?? error}
+          <p className="mt-2 text-sm text-red-600" role="alert" data-testid="login-error">
+            {localError ??
+              (error && /invalid credentials/i.test(error)
+                ? t('login.invalidCredentials')
+                : error)}
           </p>
         )}
 
