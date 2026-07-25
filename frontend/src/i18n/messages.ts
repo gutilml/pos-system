@@ -174,6 +174,33 @@ export type MessageKey =
   | 'admin.noCategories'
   | 'admin.categoryInvalid'
   | 'admin.delete'
+  | 'customers.new'
+  | 'customers.edit'
+  | 'customers.filter'
+  | 'customers.filterPlaceholder'
+  | 'customers.none'
+  | 'customers.noPhone'
+  | 'customers.selectHint'
+  | 'customers.name'
+  | 'customers.phone'
+  | 'customers.creditLimit'
+  | 'customers.balance'
+  | 'customers.ledger'
+  | 'customers.ledgerEmpty'
+  | 'customers.sortNewest'
+  | 'customers.sortOldest'
+  | 'customers.payAmount'
+  | 'customers.pay'
+  | 'customers.paying'
+  | 'customers.saving'
+  | 'customers.nameRequired'
+  | 'customers.loadFailed'
+  | 'customers.saveFailed'
+  | 'customers.deleteFailed'
+  | 'customers.deleteConfirm'
+  | 'customers.ledgerFailed'
+  | 'customers.payFailed'
+  | 'customers.payAmountInvalid'
 
 export type MessageDict = Record<MessageKey, string>
 
@@ -233,6 +260,33 @@ export const en: MessageDict = {
   'admin.noCategories': 'No categories yet.',
   'admin.categoryInvalid': 'Enter a name and a margin between 0 and 100%',
   'admin.delete': 'Delete',
+  'customers.new': 'New customer',
+  'customers.edit': 'Edit customer',
+  'customers.filter': 'Search customers',
+  'customers.filterPlaceholder': 'Filter by name or phone',
+  'customers.none': 'No customers found',
+  'customers.noPhone': 'No phone',
+  'customers.selectHint': 'Select a customer from the list, or create a new one.',
+  'customers.name': 'Name',
+  'customers.phone': 'Phone',
+  'customers.creditLimit': 'Credit limit',
+  'customers.balance': 'Balance',
+  'customers.ledger': 'Credit ledger',
+  'customers.ledgerEmpty': 'No ledger entries yet',
+  'customers.sortNewest': 'Newest first',
+  'customers.sortOldest': 'Oldest first',
+  'customers.payAmount': 'Payment amount',
+  'customers.pay': 'Record payment',
+  'customers.paying': 'Recording…',
+  'customers.saving': 'Saving…',
+  'customers.nameRequired': 'Name is required',
+  'customers.loadFailed': 'Could not load customers',
+  'customers.saveFailed': 'Could not save customer',
+  'customers.deleteFailed': 'Could not delete customer',
+  'customers.deleteConfirm': 'Delete this customer? This cannot be undone.',
+  'customers.ledgerFailed': 'Could not load ledger',
+  'customers.payFailed': 'Could not record payment',
+  'customers.payAmountInvalid': 'Enter a payment amount greater than zero',
   'register.title': 'POS Register',
   'register.emptyCart': 'Scan a barcode or search by name to start a ticket.',
   'search.placeholder': 'Scan or search products',
@@ -408,6 +462,33 @@ export const es: MessageDict = {
   'admin.noCategories': 'Aún no hay categorías.',
   'admin.categoryInvalid': 'Ingresa un nombre y un margen entre 0 y 100%',
   'admin.delete': 'Eliminar',
+  'customers.new': 'Cliente nuevo',
+  'customers.edit': 'Editar cliente',
+  'customers.filter': 'Buscar clientes',
+  'customers.filterPlaceholder': 'Filtrar por nombre o teléfono',
+  'customers.none': 'No se encontraron clientes',
+  'customers.noPhone': 'Sin teléfono',
+  'customers.selectHint': 'Selecciona un cliente de la lista, o crea uno nuevo.',
+  'customers.name': 'Nombre',
+  'customers.phone': 'Teléfono',
+  'customers.creditLimit': 'Límite de crédito',
+  'customers.balance': 'Saldo',
+  'customers.ledger': 'Historial de crédito',
+  'customers.ledgerEmpty': 'Aún no hay movimientos',
+  'customers.sortNewest': 'Más recientes',
+  'customers.sortOldest': 'Más antiguos',
+  'customers.payAmount': 'Monto del pago',
+  'customers.pay': 'Registrar pago',
+  'customers.paying': 'Registrando…',
+  'customers.saving': 'Guardando…',
+  'customers.nameRequired': 'El nombre es obligatorio',
+  'customers.loadFailed': 'No se pudieron cargar los clientes',
+  'customers.saveFailed': 'No se pudo guardar el cliente',
+  'customers.deleteFailed': 'No se pudo eliminar el cliente',
+  'customers.deleteConfirm': '¿Eliminar este cliente? Esta acción no se puede deshacer.',
+  'customers.ledgerFailed': 'No se pudo cargar el historial',
+  'customers.payFailed': 'No se pudo registrar el pago',
+  'customers.payAmountInvalid': 'Ingresa un monto de pago mayor que cero',
   'register.title': 'Caja POS',
   'register.emptyCart': 'Escanea un código o busca por nombre para iniciar un ticket.',
   'search.placeholder': 'Escanear o buscar productos',

@@ -46,6 +46,7 @@ describe('AssignCustomerControl', () => {
 
     render(<AssignCustomerControl />)
     expect(screen.queryByTestId('open-checkout')).not.toBeInTheDocument()
+    expect(screen.getByTestId('open-assign-customer')).toHaveTextContent('Assign customer')
 
     await user.click(screen.getByTestId('open-assign-customer'))
     expect(screen.getByTestId('assign-customer-modal')).toBeInTheDocument()
@@ -96,7 +97,7 @@ describe('AssignCustomerControl', () => {
     })
 
     render(<AssignCustomerControl />)
-    expect(screen.getByTestId('open-assign-customer')).toHaveTextContent('Cliente')
+    expect(screen.getByTestId('open-assign-customer')).toHaveTextContent('Asignar cliente')
 
     await user.click(screen.getByTestId('open-assign-customer'))
     expect(screen.getByRole('heading', { name: 'Asignar cliente' })).toBeInTheDocument()

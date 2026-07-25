@@ -7,12 +7,20 @@ describe('searchCustomers', () => {
     vi.restoreAllMocks()
   })
 
-  it('returns empty array for blank query without fetching', async () => {
-    const fetchMock = vi.fn()
+  it('fetches with empty q for store list', async () => {
+    const fetchMock = vi.fn().mockResolvedValue(
+      new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }),
+    )
     vi.stubGlobal('fetch', fetchMock)
 
     await expect(searchCustomers('   ')).resolves.toEqual([])
-    expect(fetchMock).not.toHaveBeenCalled()
+    expect(fetchMock).toHaveBeenCalledWith(
+      '/api/v1/customers/search?storeId=00000000-0000-0000-0000-000000000001&q=',
+      expect.objectContaining({ credentials: 'include' }),
+    )
   })
 
   it('calls search with storeId and q', async () => {

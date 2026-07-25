@@ -10,6 +10,7 @@ import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { ProductsWorkspace } from '@/features/admin/ProductsWorkspace'
+import { CustomersWorkspace } from '@/features/admin/CustomersWorkspace'
 import { WorkspaceComingSoon } from '@/features/workspace/WorkspaceComingSoon'
 import type { WorkspaceId } from '@/features/workspace/workspaceIds'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
@@ -75,9 +76,7 @@ export function RegisterScreen() {
 
           {workspace === 'products' ? <ProductsWorkspace /> : null}
 
-          {workspace === 'customers' ? (
-            <WorkspaceComingSoon titleKey="workspace.customers" testId="workspace-customers-soon" />
-          ) : null}
+          {workspace === 'customers' ? <CustomersWorkspace /> : null}
 
           {workspace === 'inventory' && showStock ? (
             <WorkspaceComingSoon titleKey="workspace.inventory" testId="workspace-inventory-soon" />

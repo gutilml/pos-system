@@ -13,6 +13,8 @@ export type AuthUser = {
   active: boolean
   /** Store `features.enable_inventory` from Feature 042. */
   enableInventory?: boolean
+  /** Store `features.enable_customer_credit` from Feature 060. */
+  enableCustomerCredit?: boolean
   /** Store `preferences.ui_locale` from Feature 045 (`en` | `es`). */
   uiLocale?: string
 }

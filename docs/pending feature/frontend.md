@@ -89,6 +89,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.~~
 - [x] ~~**Product lookup keyboard + editor load** — Feature [057](../features/057-frontend-product-lookup-keyboard-and-load/README.md): Arrow keys on suggestion list; ignore abort on editor load.~~
 - [x] ~~**Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).~~
+- [x] ~~**Customers workspace** — Feature [061](../features/061-frontend-customers-workspace/README.md): list/filter/create/edit/delete; credit ledger/pay when enabled; Assign customer header label. Depends on BE **060**.~~
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
 
 ## Auth & multi-store
@@ -110,7 +111,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 ## Opt-in module UIs
 
 - [ ] **Inventory screens** — Stock levels, adjustments, low-stock — only when `enable_inventory` is true. Register cart Stock column shipped as Feature [043](../features/043-frontend-cart-stock-column/).
-- [ ] **Customer credit UI** — Feature 014 shipped checkout CREDIT at sale time. Assign-from-register shipped as Feature **037**. Still missing dedicated tab pay-down / ledger screens outside checkout (design TBD).
+- [x] ~~**Customer credit UI** — Feature 014 checkout CREDIT + **037** assign-from-register; dedicated Customers workspace ledger/pay shipped as Feature [061](../features/061-frontend-customers-workspace/README.md).~~
 - [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
 
 ## Tooling / quality

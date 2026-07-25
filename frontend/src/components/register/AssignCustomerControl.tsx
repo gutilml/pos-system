@@ -34,7 +34,7 @@ export function AssignCustomerControl() {
           onClick={() => setOpen(true)}
           className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
         >
-          {customer ? t('customer.change') : t('footer.customer')}
+          {customer ? t('customer.change') : t('customer.assignTitle')}
         </button>
       </div>
 
