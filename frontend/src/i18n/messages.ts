@@ -195,7 +195,6 @@ export type MessageKey =
   | 'customers.pay'
   | 'customers.paying'
   | 'customers.payModalTitle'
-  | 'customers.payModalHint'
   | 'customers.payMethod'
   | 'customers.payExceedsBalance'
   | 'customers.saving'
@@ -301,15 +300,14 @@ export const en: MessageDict = {
   'customers.phone': 'Phone',
   'customers.creditLimit': 'Credit limit',
   'customers.balance': 'Balance',
-  'customers.ledger': 'Credit ledger',
-  'customers.ledgerEmpty': 'No ledger entries yet',
+  'customers.ledger': 'Movements',
+  'customers.ledgerEmpty': 'No movements yet',
   'customers.sortNewest': 'Newest first',
   'customers.sortOldest': 'Oldest first',
   'customers.payAmount': 'Payment amount',
   'customers.pay': 'Add payment',
   'customers.paying': 'Recording…',
   'customers.payModalTitle': 'Record customer payment',
-  'customers.payModalHint': 'Choose CASH or CARD (external terminal). Cash updates expected drawer cash.',
   'customers.payMethod': 'Payment method',
   'customers.payExceedsBalance': 'Amount cannot exceed the current balance',
   'customers.saving': 'Saving…',
@@ -533,7 +531,7 @@ export const es: MessageDict = {
   'customers.phone': 'Teléfono',
   'customers.creditLimit': 'Límite de crédito',
   'customers.balance': 'Saldo',
-  'customers.ledger': 'Historial de crédito',
+  'customers.ledger': 'Movimientos',
   'customers.ledgerEmpty': 'Aún no hay movimientos',
   'customers.sortNewest': 'Más recientes',
   'customers.sortOldest': 'Más antiguos',
@@ -541,7 +539,6 @@ export const es: MessageDict = {
   'customers.pay': 'Agregar pago',
   'customers.paying': 'Registrando…',
   'customers.payModalTitle': 'Registrar pago de cliente',
-  'customers.payModalHint': 'Elige EFECTIVO o TARJETA (terminal externo). Efectivo actualiza el efectivo esperado en caja.',
   'customers.payMethod': 'Método de pago',
   'customers.payExceedsBalance': 'El monto no puede exceder el saldo actual',
   'customers.saving': 'Guardando…',

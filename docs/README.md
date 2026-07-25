@@ -147,6 +147,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 067 | BE | Done | [README](features/067-backend-customer-payment-tender/README.md) | [spec](features/067-backend-customer-payment-tender/spec.md) · [plan](features/067-backend-customer-payment-tender/plan.md) · [tasks](features/067-backend-customer-payment-tender/tasks.md) |
 | 068 | FE | Done | [README](features/068-frontend-customer-payment-modal/README.md) | [spec](features/068-frontend-customer-payment-modal/spec.md) · [plan](features/068-frontend-customer-payment-modal/plan.md) · [tasks](features/068-frontend-customer-payment-modal/tasks.md) |
 | 069 | BE | Done | [README](features/069-backend-credit-ledger-description/README.md) | [spec](features/069-backend-credit-ledger-description/spec.md) · [plan](features/069-backend-credit-ledger-description/plan.md) · [tasks](features/069-backend-credit-ledger-description/tasks.md) |
+| 070 | FE | Done | [README](features/070-frontend-credit-ledger-movements/README.md) | [spec](features/070-frontend-credit-ledger-movements/spec.md) · [plan](features/070-frontend-credit-ledger-movements/plan.md) · [tasks](features/070-frontend-credit-ledger-movements/tasks.md) |
 
 ---
 

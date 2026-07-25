@@ -74,7 +74,6 @@ export function CustomerPaymentModal({
         <p className="mt-2 text-sm text-slate-600">
           {customerName} · {t('customers.balance')}: {balance.toFixed(2)}
         </p>
-        <p className="mt-1 text-xs text-slate-500">{t('customers.payModalHint')}</p>
 
         <fieldset className="mt-5">
           <legend className="mb-2 text-sm font-medium text-slate-700">{t('customers.payMethod')}</legend>

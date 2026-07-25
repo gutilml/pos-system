@@ -20,6 +20,7 @@ export type CreditLedgerEntry = {
   amount: number
   type: 'CHARGE' | 'PAYMENT'
   paymentMethod?: 'CASH' | 'CARD' | null
+  description: string
   createdAt: string
 }
 

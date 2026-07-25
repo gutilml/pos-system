@@ -357,9 +357,7 @@ export function CustomersWorkspace() {
                     {displayedLedger.map((entry) => (
                       <li key={entry.id} className="flex justify-between gap-2 border-b border-slate-100 px-2 py-1 last:border-b-0">
                         <span>
-                          {entry.type}
-                          {entry.paymentMethod ? ` · ${entry.paymentMethod}` : ''} ·{' '}
-                          {new Date(entry.createdAt).toLocaleString()}
+                          {entry.description} · {new Date(entry.createdAt).toLocaleString()}
                         </span>
                         <span className="font-medium">{formatMoney(Number(entry.amount))}</span>
                       </li>

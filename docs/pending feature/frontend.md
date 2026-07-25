@@ -122,6 +122,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Inventory receive: cost change should refresh prices** — Feature [066](../features/066-frontend-inventory-receive-price-preview/README.md): derive selling/wholesale from margins on cost change.~~
 - [x] ~~**Customer Add payment shows "Failed to fetch"** — Addressed by **064** (reload storm) + **068** pay modal; re-open if POST still fails without the loop.~~
 - [x] ~~**Customer balance pay modal (CASH / CARD)** — Feature [068](../features/068-frontend-customer-payment-modal/README.md): Add payment → modal amount + CASH|CARD; depends on BE **067**.~~
+- [x] ~~**Credit ledger Movements description** — Feature [070](../features/070-frontend-credit-ledger-movements/README.md): show stored locale snapshot from **069**; section titled Movements.~~
 
 ## Tooling / quality
 
