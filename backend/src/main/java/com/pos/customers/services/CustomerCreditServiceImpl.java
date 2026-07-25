@@ -1,11 +1,16 @@
 package com.pos.customers.services;
 
+import com.pos.core.dtos.shift.CashDrawerEventRequestDTO;
+import com.pos.core.dtos.shift.ShiftDTO;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
+import com.pos.core.models.CashDrawerEventType;
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.core.services.shift.ShiftService;
 import com.pos.customers.dtos.CreateCustomerRequestDTO;
 import com.pos.customers.dtos.CreditLedgerEntryDTO;
 import com.pos.customers.dtos.CustomerDTO;
@@ -40,17 +45,20 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
     private final CreditLedgerEntryRepository ledgerEntryRepository;
     private final StoreSettingsRepository storeSettingsRepository;
     private final TransactionRepository transactionRepository;
+    private final ShiftService shiftService;
 
     public CustomerCreditServiceImpl(
             CustomerRepository customerRepository,
             CreditLedgerEntryRepository ledgerEntryRepository,
             StoreSettingsRepository storeSettingsRepository,
-            TransactionRepository transactionRepository
+            TransactionRepository transactionRepository,
+            ShiftService shiftService
     ) {
         this.customerRepository = customerRepository;
         this.ledgerEntryRepository = ledgerEntryRepository;
         this.storeSettingsRepository = storeSettingsRepository;
         this.transactionRepository = transactionRepository;
+        this.shiftService = shiftService;
     }
 
     @Override
@@ -127,6 +135,11 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         Customer customer = getCustomerEntity(customerId);
         requireCustomerCreditEnabled(customer.getStore());
 
+        PaymentType method = request.paymentMethod();
+        if (method != PaymentType.CASH && method != PaymentType.CARD) {
+            throw new BusinessRuleException("Customer payment method must be CASH or CARD");
+        }
+
         BigDecimal amount = scaleMoney(request.amount());
         if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new BusinessRuleException("Payment amount must be greater than zero");
@@ -138,6 +151,8 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
                     "Payment amount " + amount + " exceeds current balance " + balance);
         }
 
+        ShiftDTO openShift = shiftService.getCurrentOpenShift(customer.getStore().getId());
+
         BigDecimal newBalance = balance.subtract(amount).setScale(MONEY_SCALE, MONEY_ROUNDING);
         customer.setCurrentBalance(newBalance);
 
@@ -146,7 +161,19 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         entry.setTransaction(null);
         entry.setAmount(amount);
         entry.setType(CreditLedgerEntryType.PAYMENT);
+        entry.setPaymentMethod(method);
         ledgerEntryRepository.save(entry);
+
+        if (method == PaymentType.CASH) {
+            shiftService.addDrawerEvent(
+                    openShift.id(),
+                    new CashDrawerEventRequestDTO(
+                            CashDrawerEventType.PAY_IN,
+                            amount,
+                            "Customer credit payment: " + customer.getName()
+                    )
+            );
+        }
 
         return toCustomerDto(customerRepository.save(customer));
     }
@@ -231,6 +258,7 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
                 transactionId,
                 entry.getAmount(),
                 entry.getType(),
+                entry.getPaymentMethod(),
                 entry.getCreatedAt()
         );
     }

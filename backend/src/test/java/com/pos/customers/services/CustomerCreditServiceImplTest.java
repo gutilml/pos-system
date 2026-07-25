@@ -1,10 +1,17 @@
 package com.pos.customers.services;
 
+import com.pos.core.dtos.shift.CashDrawerEventRequestDTO;
+import com.pos.core.dtos.shift.ShiftDTO;
 import com.pos.core.exception.BusinessRuleException;
+import com.pos.core.exception.ResourceNotFoundException;
+import com.pos.core.models.CashDrawerEventType;
+import com.pos.core.models.PaymentType;
+import com.pos.core.models.ShiftStatus;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.models.Transaction;
 import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
+import com.pos.core.services.shift.ShiftService;
 import com.pos.customers.dtos.CreateCustomerRequestDTO;
 import com.pos.customers.dtos.CustomerDTO;
 import com.pos.customers.dtos.CustomerPaymentRequestDTO;
@@ -55,11 +62,15 @@ class CustomerCreditServiceImplTest {
     @Mock
     private TransactionRepository transactionRepository;
 
+    @Mock
+    private ShiftService shiftService;
+
     @InjectMocks
     private CustomerCreditServiceImpl service;
 
     private StoreSettings store;
     private Customer customer;
+    private ShiftDTO openShift;
 
     @BeforeEach
     void setUp() {
@@ -76,6 +87,22 @@ class CustomerCreditServiceImplTest {
         customer.setName("Ana");
         customer.setCreditLimit(new BigDecimal("100.0000"));
         customer.setCurrentBalance(new BigDecimal("40.0000"));
+
+        openShift = new ShiftDTO(
+                UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                store.getId(),
+                ShiftStatus.OPEN,
+                new BigDecimal("100.0000"),
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+        );
     }
 
     @Test
@@ -139,14 +166,15 @@ class CustomerCreditServiceImplTest {
     }
 
     @Test
-    void payBalance_reducesBalanceAndWritesPaymentLedger() {
+    void payBalance_cashReducesBalanceWritesLedgerAndPayIn() {
         when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
         when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
         when(ledgerEntryRepository.save(any(CreditLedgerEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(shiftService.getCurrentOpenShift(store.getId())).thenReturn(openShift);
 
         CustomerDTO updated = service.payBalance(
                 customer.getId(),
-                new CustomerPaymentRequestDTO(new BigDecimal("15.5000"))
+                new CustomerPaymentRequestDTO(new BigDecimal("15.5000"), PaymentType.CASH)
         );
 
         assertThat(updated.currentBalance()).isEqualByComparingTo("24.5000");
@@ -156,7 +184,61 @@ class CustomerCreditServiceImplTest {
         verify(ledgerEntryRepository).save(captor.capture());
         assertThat(captor.getValue().getType()).isEqualTo(CreditLedgerEntryType.PAYMENT);
         assertThat(captor.getValue().getAmount()).isEqualByComparingTo("15.5000");
+        assertThat(captor.getValue().getPaymentMethod()).isEqualTo(PaymentType.CASH);
         assertThat(captor.getValue().getTransaction()).isNull();
+
+        ArgumentCaptor<CashDrawerEventRequestDTO> eventCaptor =
+                ArgumentCaptor.forClass(CashDrawerEventRequestDTO.class);
+        verify(shiftService).addDrawerEvent(eq(openShift.id()), eventCaptor.capture());
+        assertThat(eventCaptor.getValue().type()).isEqualTo(CashDrawerEventType.PAY_IN);
+        assertThat(eventCaptor.getValue().amount()).isEqualByComparingTo("15.5000");
+    }
+
+    @Test
+    void payBalance_cardReducesBalanceWithoutPayIn() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(ledgerEntryRepository.save(any(CreditLedgerEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(shiftService.getCurrentOpenShift(store.getId())).thenReturn(openShift);
+
+        service.payBalance(
+                customer.getId(),
+                new CustomerPaymentRequestDTO(new BigDecimal("10.0000"), PaymentType.CARD)
+        );
+
+        ArgumentCaptor<CreditLedgerEntry> captor = ArgumentCaptor.forClass(CreditLedgerEntry.class);
+        verify(ledgerEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getPaymentMethod()).isEqualTo(PaymentType.CARD);
+        verify(shiftService, never()).addDrawerEvent(any(), any());
+    }
+
+    @Test
+    void payBalance_rejectsCreditMethod() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        assertThatThrownBy(() ->
+                service.payBalance(
+                        customer.getId(),
+                        new CustomerPaymentRequestDTO(new BigDecimal("5.0000"), PaymentType.CREDIT)))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("CASH or CARD");
+
+        verify(ledgerEntryRepository, never()).save(any());
+    }
+
+    @Test
+    void payBalance_rejectsWhenNoOpenShift() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(shiftService.getCurrentOpenShift(store.getId()))
+                .thenThrow(new ResourceNotFoundException("No open shift"));
+
+        assertThatThrownBy(() ->
+                service.payBalance(
+                        customer.getId(),
+                        new CustomerPaymentRequestDTO(new BigDecimal("5.0000"), PaymentType.CASH)))
+                .isInstanceOf(ResourceNotFoundException.class);
+
+        verify(ledgerEntryRepository, never()).save(any());
     }
 
     @Test
@@ -164,7 +246,9 @@ class CustomerCreditServiceImplTest {
         when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
 
         assertThatThrownBy(() ->
-                service.payBalance(customer.getId(), new CustomerPaymentRequestDTO(new BigDecimal("40.0001"))))
+                service.payBalance(
+                        customer.getId(),
+                        new CustomerPaymentRequestDTO(new BigDecimal("40.0001"), PaymentType.CASH)))
                 .isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("exceeds current balance");
     }

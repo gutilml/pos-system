@@ -144,6 +144,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 064 | FE | Done | [README](features/064-frontend-uset-stable-loading/README.md) | [spec](features/064-frontend-uset-stable-loading/spec.md) · [plan](features/064-frontend-uset-stable-loading/plan.md) · [tasks](features/064-frontend-uset-stable-loading/tasks.md) |
 | 065 | FE | Done | [README](features/065-frontend-login-friendly-error/README.md) | [spec](features/065-frontend-login-friendly-error/spec.md) · [plan](features/065-frontend-login-friendly-error/plan.md) · [tasks](features/065-frontend-login-friendly-error/tasks.md) |
 | 066 | FE | Done | [README](features/066-frontend-inventory-receive-price-preview/README.md) | [spec](features/066-frontend-inventory-receive-price-preview/spec.md) · [plan](features/066-frontend-inventory-receive-price-preview/plan.md) · [tasks](features/066-frontend-inventory-receive-price-preview/tasks.md) |
+| 067 | BE | Done | [README](features/067-backend-customer-payment-tender/README.md) | [spec](features/067-backend-customer-payment-tender/spec.md) · [plan](features/067-backend-customer-payment-tender/plan.md) · [tasks](features/067-backend-customer-payment-tender/tasks.md) |
 
 ---
 

@@ -176,6 +176,7 @@ CREATE TABLE credit_ledger_entries (
     transaction_id UUID REFERENCES transactions(id),
     amount DECIMAL(12, 4) NOT NULL,
     type VARCHAR(20) NOT NULL, -- 'CHARGE', 'PAYMENT'
+    payment_method VARCHAR(20), -- 'CASH' | 'CARD' on PAYMENT rows (Feature 067); null on CHARGE
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 

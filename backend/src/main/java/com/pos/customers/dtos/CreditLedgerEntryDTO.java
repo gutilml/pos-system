@@ -1,5 +1,6 @@
 package com.pos.customers.dtos;
 
+import com.pos.core.models.PaymentType;
 import com.pos.customers.models.CreditLedgerEntryType;
 
 import java.math.BigDecimal;
@@ -12,6 +13,7 @@ public record CreditLedgerEntryDTO(
         UUID transactionId,
         BigDecimal amount,
         CreditLedgerEntryType type,
+        PaymentType paymentMethod,
         OffsetDateTime createdAt
 ) {
 }

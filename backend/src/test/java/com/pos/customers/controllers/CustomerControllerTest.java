@@ -1,6 +1,7 @@
 package com.pos.customers.controllers;
 
 import com.pos.core.exception.GlobalExceptionHandler;
+import com.pos.core.models.PaymentType;
 import com.pos.customers.dtos.CreateCustomerRequestDTO;
 import com.pos.customers.dtos.CreditLedgerEntryDTO;
 import com.pos.customers.dtos.CustomerDTO;
@@ -88,6 +89,7 @@ class CustomerControllerTest {
                         null,
                         new BigDecimal("25.0000"),
                         CreditLedgerEntryType.PAYMENT,
+                        PaymentType.CASH,
                         OffsetDateTime.parse("2026-07-16T12:00:00Z")
                 )
         ));
@@ -116,7 +118,7 @@ class CustomerControllerTest {
 
         mockMvc.perform(post("/api/v1/customers/{id}/payments", customerId)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"amount\": 25.0000}"))
+                        .content("{\"amount\": 25.0000, \"paymentMethod\": \"CASH\"}"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.currentBalance").value(75.0000));
     }

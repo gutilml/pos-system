@@ -59,6 +59,7 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 
 - [x] ~~**Customer credit module** — Feature 012: `Customer` + ledger, `enable_customer_credit` gate, `CREDIT` payment type on transactions, REST create/ledger/payments.~~
 - [x] ~~**Customer identity list/update/delete** — Feature [060](../features/060-backend-customer-identity-update/README.md): empty-q list, get/update/delete, identity ungated; ledger/pay still credit-gated; `enableCustomerCredit` on `/me`. Unlocks FE **061**.~~
+- [x] ~~**Customer payment tender (CASH / CARD)** — Feature [067](../features/067-backend-customer-payment-tender/README.md): paymentMethod on pay; ledger column; CASH PAY_IN → expected cash; CARD external; require open shift. Unlocks FE **068**.~~
 - [x] ~~**Customer credit UI** — Register CREDIT (**014**/**037**) + Customers workspace (**061**).~~
 - [x] ~~**Customer search API** — Feature 019: store-scoped name/phone search (`enable_customer_credit` gated), max 20 results as `CustomerDTO[]`.~~
 - [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.

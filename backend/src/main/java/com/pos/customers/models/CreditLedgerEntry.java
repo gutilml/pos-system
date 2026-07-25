@@ -1,5 +1,6 @@
 package com.pos.customers.models;
 
+import com.pos.core.models.PaymentType;
 import com.pos.core.models.Transaction;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,6 +41,11 @@ public class CreditLedgerEntry {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 20)
     private CreditLedgerEntryType type;
+
+    /** CASH or CARD on PAYMENT rows; null on CHARGE (Feature 067). */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentType paymentMethod;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -83,6 +89,14 @@ public class CreditLedgerEntry {
 
     public void setType(CreditLedgerEntryType type) {
         this.type = type;
+    }
+
+    public PaymentType getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(PaymentType paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 
     public OffsetDateTime getCreatedAt() {
