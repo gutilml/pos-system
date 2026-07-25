@@ -11,6 +11,8 @@ public record TransactionItemResponseDTO(
         BigDecimal originalUnitPrice,
         BigDecimal itemDiscountPercentage,
         BigDecimal finalUnitPrice,
-        BigDecimal lineTotal
+        BigDecimal lineTotal,
+        BigDecimal returnedQuantity,
+        BigDecimal returnableQuantity
 ) {
 }

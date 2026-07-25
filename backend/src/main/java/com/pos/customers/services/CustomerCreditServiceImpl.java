@@ -216,6 +216,37 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         customerRepository.save(customer);
     }
 
+    @Override
+    public void refundAccount(UUID customerId, BigDecimal amount, Transaction transaction) {
+        Customer customer = getCustomerEntity(customerId);
+        requireCustomerCreditEnabled(customer.getStore());
+
+        BigDecimal refundAmount = scaleMoney(amount);
+        if (refundAmount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("Refund amount must be greater than zero");
+        }
+
+        BigDecimal balance = scaleMoney(customer.getCurrentBalance());
+        if (refundAmount.compareTo(balance) > 0) {
+            throw new BusinessRuleException(
+                    "Refund amount " + refundAmount + " exceeds current balance " + balance);
+        }
+
+        BigDecimal newBalance = balance.subtract(refundAmount).setScale(MONEY_SCALE, MONEY_ROUNDING);
+        customer.setCurrentBalance(newBalance);
+
+        CreditLedgerEntry entry = new CreditLedgerEntry();
+        entry.setCustomer(customer);
+        entry.setTransaction(transaction);
+        entry.setAmount(refundAmount);
+        entry.setType(CreditLedgerEntryType.REFUND);
+        entry.setPaymentMethod(null);
+        entry.setDescription(CreditLedgerLabels.movementDescription(
+                customer.getStore(), CreditLedgerEntryType.REFUND, null));
+        ledgerEntryRepository.save(entry);
+        customerRepository.save(customer);
+    }
+
     static boolean isCustomerCreditEnabled(StoreSettings store) {
         if (store == null || store.getFeatures() == null) {
             return false;

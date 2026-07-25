@@ -31,4 +31,10 @@ public interface CustomerCreditService {
      * Charges {@code amount} to the customer's tab (increases balance) and writes a CHARGE ledger entry.
      */
     void chargeAccount(UUID customerId, BigDecimal amount, Transaction transaction);
+
+    /**
+     * Refunds {@code amount} against the customer's tab (decreases balance) and writes a REFUND ledger entry.
+     * Rejects when {@code amount} exceeds current balance.
+     */
+    void refundAccount(UUID customerId, BigDecimal amount, Transaction transaction);
 }

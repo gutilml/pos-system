@@ -11,4 +11,10 @@ public interface InventoryService {
      * Handles standard/weight deductions and parent-package yield for individual units.
      */
     void deductStock(List<TransactionItem> items);
+
+    /**
+     * Restores stock for returned line items (Feature 072). Mirrors {@link #deductStock}
+     * with positive deltas and {@code StockMovementType.RETURN}.
+     */
+    void restoreStock(List<TransactionItem> items);
 }

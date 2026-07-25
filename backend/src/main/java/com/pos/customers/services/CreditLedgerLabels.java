@@ -24,6 +24,7 @@ final class CreditLedgerLabels {
         String typeLabel = switch (type) {
             case CHARGE -> es ? "Cargo" : "Charge";
             case PAYMENT -> es ? "Pago" : "Payment";
+            case REFUND -> es ? "Reembolso" : "Refund";
         };
         if (paymentMethod == null) {
             return typeLabel;

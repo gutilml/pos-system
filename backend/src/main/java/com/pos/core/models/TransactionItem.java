@@ -47,6 +47,10 @@ public class TransactionItem {
     @Column(name = "line_total", nullable = false, precision = 12, scale = 4)
     private BigDecimal lineTotal;
 
+    /** Cumulative quantity returned via reimburse (Feature 072). */
+    @Column(name = "returned_quantity", nullable = false, precision = 10, scale = 4)
+    private BigDecimal returnedQuantity = BigDecimal.ZERO.setScale(4);
+
     public UUID getId() {
         return id;
     }
@@ -117,5 +121,13 @@ public class TransactionItem {
 
     public void setLineTotal(BigDecimal lineTotal) {
         this.lineTotal = lineTotal;
+    }
+
+    public BigDecimal getReturnedQuantity() {
+        return returnedQuantity;
+    }
+
+    public void setReturnedQuantity(BigDecimal returnedQuantity) {
+        this.returnedQuantity = returnedQuantity;
     }
 }

@@ -156,6 +156,62 @@ class InventoryServiceImplTest {
         assertThat(chips.getCurrentStock()).isEqualByComparingTo("17.0000");
     }
 
+    @Test
+    void restoreStock_childReturn_restoresFractionalPackageToParent() {
+        Product parent = new Product();
+        parent.setId(parentId);
+        parent.setName("Cola Case");
+        parent.setSellingPrice(new BigDecimal("40.0000"));
+        parent.setTrackInventory(true);
+        parent.setUnitsPerPackage(new BigDecimal("24.0000"));
+        parent.setUnitOfMeasure("unit");
+        parent.setCurrentStock(new BigDecimal("9.9583"));
+
+        Product child = new Product();
+        child.setId(childId);
+        child.setName("Cola Can");
+        child.setSellingPrice(new BigDecimal("1.9900"));
+        child.setUnitOfMeasure("unit");
+        child.setParentProduct(parent);
+        child.setTrackInventory(false);
+        child.setCurrentStock(new BigDecimal("0.0000"));
+
+        when(productRepository.findById(childId)).thenReturn(Optional.of(child));
+        when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stockMovementRepository.save(any(StockMovement.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        inventoryService.restoreStock(List.of(itemWithStore(child, "1.0000")));
+
+        assertThat(parent.getCurrentStock()).isEqualByComparingTo("10.0000");
+        ArgumentCaptor<StockMovement> move = ArgumentCaptor.forClass(StockMovement.class);
+        verify(stockMovementRepository).save(move.capture());
+        assertThat(move.getValue().getType()).isEqualTo(StockMovementType.RETURN);
+        assertThat(move.getValue().getQuantityDelta()).isEqualByComparingTo("0.0417");
+    }
+
+    @Test
+    void restoreStock_trackedProduct_addsQuantity() {
+        Product chips = new Product();
+        chips.setId(weightId);
+        chips.setName("Chips");
+        chips.setSellingPrice(new BigDecimal("2.5000"));
+        chips.setTrackInventory(true);
+        chips.setCurrentStock(new BigDecimal("17.0000"));
+
+        when(productRepository.findById(weightId)).thenReturn(Optional.of(chips));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stockMovementRepository.save(any(StockMovement.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        inventoryService.restoreStock(List.of(itemWithStore(chips, "3.0000")));
+
+        assertThat(chips.getCurrentStock()).isEqualByComparingTo("20.0000");
+        ArgumentCaptor<StockMovement> move = ArgumentCaptor.forClass(StockMovement.class);
+        verify(stockMovementRepository).save(move.capture());
+        assertThat(move.getValue().getType()).isEqualTo(StockMovementType.RETURN);
+        assertThat(move.getValue().getQuantityDelta()).isEqualByComparingTo("3.0000");
+    }
+
     private TransactionItem itemWithStore(Product product, String qty) {
         Transaction tx = new Transaction();
         tx.setStore(store);

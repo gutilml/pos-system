@@ -158,7 +158,8 @@ CREATE TABLE transaction_items (
     original_unit_price DECIMAL(12, 4) NOT NULL,
     item_discount_percentage DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
     final_unit_price DECIMAL(12, 4) NOT NULL,
-    line_total DECIMAL(12, 4) NOT NULL
+    line_total DECIMAL(12, 4) NOT NULL,
+    returned_quantity DECIMAL(10, 4) NOT NULL DEFAULT 0.0000 -- cumulative qty returned (Feature 072)
 );
 
 -- 10. TRANSACTION PAYMENTS (split tenders — one row per payment method on a receipt)
@@ -175,7 +176,7 @@ CREATE TABLE credit_ledger_entries (
     customer_id UUID NOT NULL REFERENCES customers(id),
     transaction_id UUID REFERENCES transactions(id),
     amount DECIMAL(12, 4) NOT NULL,
-    type VARCHAR(20) NOT NULL, -- 'CHARGE', 'PAYMENT'
+    type VARCHAR(20) NOT NULL, -- 'CHARGE' | 'PAYMENT' | 'REFUND'
     payment_method VARCHAR(20), -- 'CASH' | 'CARD' on PAYMENT rows (Feature 067); null on CHARGE
     description VARCHAR(120) NOT NULL, -- locale snapshot at write (Feature 069)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

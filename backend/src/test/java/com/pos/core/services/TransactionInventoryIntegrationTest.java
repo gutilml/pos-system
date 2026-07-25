@@ -15,6 +15,7 @@ import com.pos.core.repositories.StoreSettingsRepository;
 import com.pos.core.repositories.TransactionRepository;
 import com.pos.customers.repositories.CustomerRepository;
 import com.pos.customers.services.CustomerCreditService;
+import com.pos.core.services.shift.ShiftService;
 import com.pos.inventory.services.InventoryService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -59,6 +60,9 @@ class TransactionInventoryIntegrationTest {
 
     @Mock
     private CustomerCreditService customerCreditService;
+
+    @Mock
+    private ShiftService shiftService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;

@@ -94,8 +94,8 @@ public class InventoryAdminService {
         StoreSettings store = requireStore(request.storeId());
         requireInventoryEnabled(store);
 
-        if (request.type() == StockMovementType.SALE) {
-            throw new BusinessRuleException("SALE movements are created by checkout only");
+        if (request.type() == StockMovementType.SALE || request.type() == StockMovementType.RETURN) {
+            throw new BusinessRuleException("SALE and RETURN movements are created by checkout/reimburse only");
         }
 
         Product requested = productRepository.findById(request.productId())

@@ -2,15 +2,19 @@ package com.pos.core.repositories;
 
 import com.pos.core.models.PaymentType;
 import com.pos.core.models.Transaction;
+import com.pos.core.models.TransactionStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 public interface TransactionRepository extends JpaRepository<Transaction, UUID> {
+
+    List<Transaction> findByStoreIdAndStatusOrderByCreatedAtDesc(UUID storeId, TransactionStatus status);
 
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Transaction t SET t.customer = null WHERE t.customer.id = :customerId")

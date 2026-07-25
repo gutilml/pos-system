@@ -277,6 +277,54 @@ class CustomerCreditServiceImplTest {
     }
 
     @Test
+    void refundAccount_reducesBalanceWritesRefundLedgerLinkedToTransaction() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(ledgerEntryRepository.save(any(CreditLedgerEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Transaction tx = new Transaction();
+        tx.setId(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
+
+        service.refundAccount(customer.getId(), new BigDecimal("15.0000"), tx);
+
+        assertThat(customer.getCurrentBalance()).isEqualByComparingTo("25.0000");
+
+        ArgumentCaptor<CreditLedgerEntry> captor = ArgumentCaptor.forClass(CreditLedgerEntry.class);
+        verify(ledgerEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getType()).isEqualTo(CreditLedgerEntryType.REFUND);
+        assertThat(captor.getValue().getAmount()).isEqualByComparingTo("15.0000");
+        assertThat(captor.getValue().getDescription()).isEqualTo("Refund");
+        assertThat(captor.getValue().getTransaction()).isEqualTo(tx);
+        assertThat(captor.getValue().getPaymentMethod()).isNull();
+    }
+
+    @Test
+    void refundAccount_storesSpanishDescriptionWhenStoreLocaleIsEs() {
+        store.getPreferences().put("ui_locale", "es");
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(ledgerEntryRepository.save(any(CreditLedgerEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        service.refundAccount(customer.getId(), new BigDecimal("5.0000"), new Transaction());
+
+        ArgumentCaptor<CreditLedgerEntry> captor = ArgumentCaptor.forClass(CreditLedgerEntry.class);
+        verify(ledgerEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getDescription()).isEqualTo("Reembolso");
+    }
+
+    @Test
+    void refundAccount_rejectsWhenAmountExceedsBalance() {
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+
+        assertThatThrownBy(() ->
+                service.refundAccount(customer.getId(), new BigDecimal("40.0001"), new Transaction()))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("exceeds current balance");
+
+        verify(ledgerEntryRepository, never()).save(any());
+    }
+
+    @Test
     void createCustomer_worksWhenFeatureFlagDisabled() {
         store.getFeatures().put("enable_customer_credit", false);
         when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));

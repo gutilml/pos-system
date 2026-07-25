@@ -44,7 +44,10 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [x] ~~**Store settings API** — Feature 045: `preferences` JSONB + GET/PATCH `/stores/{id}/settings` + `uiLocale` on `/me`. Boolean opt-ins stay in `features`. Unlocks FE [046](../features/046-frontend-ui-locale/). Org-level prefs deferred.~~
 - [x] ~~**Product stock + inventory flag for SPA** — Feature 042: `currentStock` + `trackInventory` on `ProductDTO`; `enableInventory` on `/auth/me` (+ login). Unblocks FE [043](../features/043-frontend-cart-stock-column/).~~
 - [x] ~~**Parent package stock deduction on sale** — Feature [052](../features/052-backend-parent-stock-deduction/README.md): `Δparent = −(sold÷qtyPerPackage)`.~~
-- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.) **On hold** (2026-07-23) vs catalog work.
+- [ ] **Transaction lifecycle** — Hold / void / resume beyond create COMPLETED sale; align with schema statuses. (Stripe checkout already expects `IN_PROGRESS`/`HELD` — Feature 010.) **On hold** (2026-07-23) vs catalog work. Reimburse of COMPLETED sales shipped as Feature [072](../features/072-backend-closed-tickets-reimburse/README.md).
+- [x] ~~**Closed tickets list + reimburse (CASH / CREDIT)** — Feature [072](../features/072-backend-closed-tickets-reimburse/README.md): list/get COMPLETED; partial/full return; stock restore; CASH PAY_OUT; CREDIT ledger. Unlocks FE **073**.~~
+- [ ] **Reimburse sales that include CARD** — Out of scope for **072**; external/Stripe path TBD.
+- [ ] **Restrict reimburse to cashier’s own tickets** — After sale/shift user ownership exists.
 - [ ] **Tax source of truth** — Per-store default tax rate vs request-only `taxRate` on transactions. Candidate for `preferences.default_tax_rate` after Feature [045](../features/045-backend-store-preferences/). **On hold** (2026-07-23) vs catalog work.
 - [x] ~~**Discount engine (item + global cascade)** — Feature 015: `itemDiscountPercentage` per line, optional `globalDiscountPercentage`, `excludeFromGlobalDiscounts` on products, audit fields + `totalDiscountAmount` on transactions.~~
 
