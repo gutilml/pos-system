@@ -143,6 +143,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 063 | FE | Done | [README](features/063-frontend-inventory-workspace/README.md) | [spec](features/063-frontend-inventory-workspace/spec.md) · [plan](features/063-frontend-inventory-workspace/plan.md) · [tasks](features/063-frontend-inventory-workspace/tasks.md) |
 | 064 | FE | Done | [README](features/064-frontend-uset-stable-loading/README.md) | [spec](features/064-frontend-uset-stable-loading/spec.md) · [plan](features/064-frontend-uset-stable-loading/plan.md) · [tasks](features/064-frontend-uset-stable-loading/tasks.md) |
 | 065 | FE | Done | [README](features/065-frontend-login-friendly-error/README.md) | [spec](features/065-frontend-login-friendly-error/spec.md) · [plan](features/065-frontend-login-friendly-error/plan.md) · [tasks](features/065-frontend-login-friendly-error/tasks.md) |
+| 066 | FE | Done | [README](features/066-frontend-inventory-receive-price-preview/README.md) | [spec](features/066-frontend-inventory-receive-price-preview/spec.md) · [plan](features/066-frontend-inventory-receive-price-preview/plan.md) · [tasks](features/066-frontend-inventory-receive-price-preview/tasks.md) |
 
 ---
 

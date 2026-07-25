@@ -8,6 +8,7 @@ import {
 } from '@/api/inventory'
 import { useT } from '@/i18n/useT'
 import { roundMoney } from '@/lib/money'
+import { sellingPriceFromMargin } from '@/lib/productPricing'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 
 type ModalMode = 'adjust' | 'receive'
@@ -77,6 +78,29 @@ export function InventoryWorkspace() {
   function closeModal() {
     setModalProduct(null)
     setFormError(null)
+  }
+
+  function onReceiveUnitCostChange(raw: string) {
+    setUnitCost(raw)
+    if (!modalProduct || modalMode !== 'receive') return
+    const cost = Number(raw)
+    if (!Number.isFinite(cost) || cost < 0) return
+    const margin = modalProduct.targetMargin
+    if (margin != null && margin >= 0 && margin < 1) {
+      try {
+        setSellingPrice(String(sellingPriceFromMargin(cost, margin)))
+      } catch {
+        // leave selling while typing invalid margin/cost
+      }
+    }
+    const wholesaleMargin = modalProduct.wholesaleMargin
+    if (wholesaleMargin != null && wholesaleMargin >= 0 && wholesaleMargin < 1) {
+      try {
+        setWholesalePrice(String(sellingPriceFromMargin(cost, wholesaleMargin)))
+      } catch {
+        // leave wholesale while typing
+      }
+    }
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -273,7 +297,11 @@ export function InventoryWorkspace() {
                   type="number"
                   step="0.01"
                   value={unitCost}
-                  onChange={(e) => setUnitCost(e.target.value)}
+                  onChange={(e) =>
+                    modalMode === 'receive'
+                      ? onReceiveUnitCostChange(e.target.value)
+                      : setUnitCost(e.target.value)
+                  }
                   readOnly={modalMode === 'adjust'}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm read-only:bg-slate-100"
                 />

@@ -86,4 +86,19 @@ describe('InventoryWorkspace', () => {
     await user.click(screen.getByTestId('inventory-receive-p1'))
     expect(screen.getByTestId('inventory-movement-modal')).toBeInTheDocument()
   })
+
+  it('updates selling and wholesale when receive cost changes', async () => {
+    const user = userEvent.setup()
+    render(<InventoryWorkspace />)
+    expect(await screen.findByText('Water')).toBeInTheDocument()
+    await user.click(screen.getByTestId('inventory-receive-p1'))
+
+    const cost = screen.getByTestId('inventory-unit-cost')
+    await user.clear(cost)
+    await user.type(cost, '4')
+
+    expect(screen.getByTestId('inventory-selling')).toHaveValue(8)
+    const wholesale = screen.getByTestId('inventory-wholesale') as HTMLInputElement
+    expect(Number(wholesale.value)).toBeCloseTo(4 / (1 - 0.33), 3)
+  })
 })
