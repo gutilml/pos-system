@@ -123,6 +123,7 @@ export type MessageKey =
   | 'common.print'
   | 'common.done'
   | 'common.retry'
+  | 'common.cancel'
   | 'workspace.navAria'
   | 'workspace.sell'
   | 'workspace.products'
@@ -193,6 +194,10 @@ export type MessageKey =
   | 'customers.payAmount'
   | 'customers.pay'
   | 'customers.paying'
+  | 'customers.payModalTitle'
+  | 'customers.payModalHint'
+  | 'customers.payMethod'
+  | 'customers.payExceedsBalance'
   | 'customers.saving'
   | 'customers.nameRequired'
   | 'customers.loadFailed'
@@ -301,8 +306,12 @@ export const en: MessageDict = {
   'customers.sortNewest': 'Newest first',
   'customers.sortOldest': 'Oldest first',
   'customers.payAmount': 'Payment amount',
-  'customers.pay': 'Record payment',
+  'customers.pay': 'Add payment',
   'customers.paying': 'Recording…',
+  'customers.payModalTitle': 'Record customer payment',
+  'customers.payModalHint': 'Choose CASH or CARD (external terminal). Cash updates expected drawer cash.',
+  'customers.payMethod': 'Payment method',
+  'customers.payExceedsBalance': 'Amount cannot exceed the current balance',
   'customers.saving': 'Saving…',
   'customers.nameRequired': 'Name is required',
   'customers.loadFailed': 'Could not load customers',
@@ -440,6 +449,7 @@ export const en: MessageDict = {
   'common.print': 'Print',
   'common.done': 'Done',
   'common.retry': 'Retry',
+  'common.cancel': 'Cancel',
   'workspace.navAria': 'Workspace',
   'workspace.sell': 'Register',
   'workspace.products': 'Products',
@@ -528,8 +538,12 @@ export const es: MessageDict = {
   'customers.sortNewest': 'Más recientes',
   'customers.sortOldest': 'Más antiguos',
   'customers.payAmount': 'Monto del pago',
-  'customers.pay': 'Registrar pago',
+  'customers.pay': 'Agregar pago',
   'customers.paying': 'Registrando…',
+  'customers.payModalTitle': 'Registrar pago de cliente',
+  'customers.payModalHint': 'Elige EFECTIVO o TARJETA (terminal externo). Efectivo actualiza el efectivo esperado en caja.',
+  'customers.payMethod': 'Método de pago',
+  'customers.payExceedsBalance': 'El monto no puede exceder el saldo actual',
   'customers.saving': 'Guardando…',
   'customers.nameRequired': 'El nombre es obligatorio',
   'customers.loadFailed': 'No se pudieron cargar los clientes',
@@ -668,6 +682,7 @@ export const es: MessageDict = {
   'common.print': 'Imprimir',
   'common.done': 'Listo',
   'common.retry': 'Reintentar',
+  'common.cancel': 'Cancelar',
   'workspace.navAria': 'Áreas de trabajo',
   'workspace.sell': 'Caja',
   'workspace.products': 'Productos',

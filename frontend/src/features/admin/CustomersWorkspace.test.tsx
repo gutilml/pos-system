@@ -16,6 +16,7 @@ vi.mock('@/api/customers', () => ({
 
 import {
   getCustomerLedger,
+  payCustomerBalance,
   searchCustomers,
 } from '@/api/customers'
 
@@ -43,7 +44,7 @@ describe('CustomersWorkspace', () => {
         name: 'Ana',
         phone: '555-0100',
         creditLimit: 100,
-        currentBalance: 0,
+        currentBalance: 40,
       },
     ])
     vi.mocked(getCustomerLedger).mockResolvedValue([])
@@ -99,6 +100,33 @@ describe('CustomersWorkspace', () => {
 
     await waitFor(() => {
       expect(searchCustomers).toHaveBeenCalledWith('zzz', 'store-1')
+    })
+  })
+
+  it('opens pay modal and submits CASH payment', async () => {
+    const user = userEvent.setup()
+    vi.mocked(payCustomerBalance).mockResolvedValue({
+      id: 'cust-1',
+      storeId: 'store-1',
+      name: 'Ana',
+      phone: '555-0100',
+      creditLimit: 100,
+      currentBalance: 30,
+    })
+
+    render(<CustomersWorkspace />)
+    expect(await screen.findByText('Ana')).toBeInTheDocument()
+    await user.click(screen.getByTestId('customer-row-cust-1'))
+    await user.click(screen.getByTestId('customers-pay'))
+
+    expect(screen.getByTestId('customer-payment-modal')).toBeInTheDocument()
+    expect(screen.queryByTestId('customer-pay-method-credit')).not.toBeInTheDocument()
+
+    await user.type(screen.getByTestId('customer-pay-modal-amount'), '10')
+    await user.click(screen.getByTestId('customer-pay-modal-submit'))
+
+    await waitFor(() => {
+      expect(payCustomerBalance).toHaveBeenCalledWith('cust-1', 10, 'CASH')
     })
   })
 })

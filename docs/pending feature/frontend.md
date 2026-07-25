@@ -120,8 +120,8 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Friendly login failure message** — Feature [065](../features/065-frontend-login-friendly-error/README.md): Problem Details `detail` + i18n `login.invalidCredentials`.~~
 - [x] ~~**Customers / Inventory list stuck on Loading** — Feature [064](../features/064-frontend-uset-stable-loading/README.md): stabilize `useT` with `useCallback` so list effects stop thrashing.~~
 - [x] ~~**Inventory receive: cost change should refresh prices** — Feature [066](../features/066-frontend-inventory-receive-price-preview/README.md): derive selling/wholesale from margins on cost change.~~
-- [ ] **Customer Add payment shows "Failed to fetch"** — Re-verify after **064**; pay UX replaced by **068** modal. If still broken, debug POST `/customers/{id}/payments`.
-- [ ] **Customer balance pay modal (CASH / CARD)** — Feature **068**: Add payment button → modal amount + CASH|CARD (no CREDIT); external CARD; depends on BE **067**.
+- [x] ~~**Customer Add payment shows "Failed to fetch"** — Addressed by **064** (reload storm) + **068** pay modal; re-open if POST still fails without the loop.~~
+- [x] ~~**Customer balance pay modal (CASH / CARD)** — Feature [068](../features/068-frontend-customer-payment-modal/README.md): Add payment → modal amount + CASH|CARD; depends on BE **067**.~~
 
 ## Tooling / quality
 

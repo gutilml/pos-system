@@ -9,6 +9,7 @@ import {
   type CreditLedgerEntry,
   type CustomerSearchResult,
 } from '@/api/customers'
+import { CustomerPaymentModal, type CustomerPaymentMethod } from '@/features/admin/CustomerPaymentModal'
 import { useT } from '@/i18n/useT'
 import { formatMoney, roundMoney } from '@/lib/money'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
@@ -36,7 +37,7 @@ export function CustomersWorkspace() {
 
   const [ledger, setLedger] = useState<CreditLedgerEntry[]>([])
   const [ledgerNewestFirst, setLedgerNewestFirst] = useState(true)
-  const [payAmount, setPayAmount] = useState('')
+  const [payModalOpen, setPayModalOpen] = useState(false)
   const [paying, setPaying] = useState(false)
 
   const refreshList = useCallback(
@@ -71,7 +72,7 @@ export function CustomersWorkspace() {
     setBalance(0)
     setFormError(null)
     setLedger([])
-    setPayAmount('')
+    setPayModalOpen(false)
     setLedgerNewestFirst(true)
   }
 
@@ -89,7 +90,7 @@ export function CustomersWorkspace() {
     setCreditLimit(String(customer.creditLimit))
     setBalance(Number(customer.currentBalance))
     setFormError(null)
-    setPayAmount('')
+    setPayModalOpen(false)
     setLedgerNewestFirst(true)
     if (enableCredit) {
       try {
@@ -158,22 +159,19 @@ export function CustomersWorkspace() {
     }
   }
 
-  async function handlePay() {
+  async function handlePay(amount: number, method: CustomerPaymentMethod) {
     if (!selectedId || !enableCredit) return
-    const amount = roundMoney(Number(payAmount))
-    if (!(amount > 0)) {
-      setFormError(t('customers.payAmountInvalid'))
-      return
-    }
     setPaying(true)
     setFormError(null)
     try {
-      const updated = await payCustomerBalance(selectedId, amount)
-      setPayAmount('')
+      const updated = await payCustomerBalance(selectedId, amount, method)
+      setPayModalOpen(false)
       await refreshList(query.trim())
       await selectCustomer(updated)
     } catch (err) {
-      setFormError(err instanceof Error ? err.message : t('customers.payFailed'))
+      const message = err instanceof Error ? err.message : t('customers.payFailed')
+      setFormError(message)
+      throw err instanceof Error ? err : new Error(message)
     } finally {
       setPaying(false)
     }
@@ -359,7 +357,9 @@ export function CustomersWorkspace() {
                     {displayedLedger.map((entry) => (
                       <li key={entry.id} className="flex justify-between gap-2 border-b border-slate-100 px-2 py-1 last:border-b-0">
                         <span>
-                          {entry.type} · {new Date(entry.createdAt).toLocaleString()}
+                          {entry.type}
+                          {entry.paymentMethod ? ` · ${entry.paymentMethod}` : ''} ·{' '}
+                          {new Date(entry.createdAt).toLocaleString()}
                         </span>
                         <span className="font-medium">{formatMoney(Number(entry.amount))}</span>
                       </li>
@@ -369,30 +369,15 @@ export function CustomersWorkspace() {
                     ) : null}
                   </ul>
 
-                  <div className="flex flex-wrap items-end gap-2">
-                    <div className="min-w-[8rem] flex-1">
-                      <label className="text-sm font-medium text-slate-700" htmlFor="customer-pay-amount">
-                        {t('customers.payAmount')}
-                      </label>
-                      <input
-                        id="customer-pay-amount"
-                        data-testid="customer-pay-amount"
-                        type="number"
-                        step="0.01"
-                        min="0.01"
-                        value={payAmount}
-                        onChange={(e) => setPayAmount(e.target.value)}
-                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
-                      />
-                    </div>
+                  <div className="flex flex-wrap items-center gap-2">
                     <button
                       type="button"
                       data-testid="customers-pay"
-                      disabled={paying}
-                      onClick={() => void handlePay()}
+                      disabled={paying || balance <= 0}
+                      onClick={() => setPayModalOpen(true)}
                       className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-60"
                     >
-                      {paying ? t('customers.paying') : t('customers.pay')}
+                      {t('customers.pay')}
                     </button>
                   </div>
                 </div>
@@ -401,6 +386,15 @@ export function CustomersWorkspace() {
           )}
         </div>
       </div>
+
+      <CustomerPaymentModal
+        open={payModalOpen && !!selectedId}
+        customerName={name}
+        balance={balance}
+        submitting={paying}
+        onClose={() => setPayModalOpen(false)}
+        onSubmit={handlePay}
+      />
     </section>
   )
 }

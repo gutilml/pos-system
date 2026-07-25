@@ -19,6 +19,7 @@ export type CreditLedgerEntry = {
   transactionId: string | null
   amount: number
   type: 'CHARGE' | 'PAYMENT'
+  paymentMethod?: 'CASH' | 'CARD' | null
   createdAt: string
 }
 
@@ -90,11 +91,12 @@ export async function getCustomerLedger(id: string): Promise<CreditLedgerEntry[]
 export async function payCustomerBalance(
   id: string,
   amount: number,
+  paymentMethod: 'CASH' | 'CARD',
 ): Promise<CustomerSearchResult> {
   const response = await apiFetch(`${API_BASE}/customers/${id}/payments`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ amount }),
+    body: JSON.stringify({ amount, paymentMethod }),
   })
   return parseJson<CustomerSearchResult>(response)
 }
