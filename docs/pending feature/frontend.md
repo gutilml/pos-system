@@ -88,6 +88,8 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
 - [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup. Modal nav superseded by **054–056** (reuse forms/panels).~~
 - [x] ~~**Product editor: category margin + cost→retail + package unit chips** — Feature [074](../features/074-frontend-product-editor-margin-units/README.md): auto margin from category; live retail from cost; remove UOM free text; package unit chip row.~~
+- [x] ~~**Product editor: searchable category + inline add** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): search filter; last option **→ Add category ←**; inline create.~~
+- [x] ~~**Product editor: child / parent UX** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): searchable parent; cost from parent + child margin; inventory locked off; weight UOM chips.~~
 - [x] ~~**POS workspace nav shell** — Feature [054](../features/054-frontend-workspace-nav-shell/README.md): row below Register header; Register/Sell + Products + Customer + Inventory (gated); Customer/Inventory coming soon. AuthGate/ShiftGate unchanged.~~
 - [x] ~~**Products workspace** — Feature [055](../features/055-frontend-products-workspace/README.md): Product\|Category sub-tabs; reuse CategoryPanel / ProductEditorForm; remove CashierMenu Catalog modal. Depends on **054**.~~
 - [x] ~~**Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.~~
@@ -122,6 +124,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 
 ## Small bugs
 
+- [x] ~~**Weight product save: unitOfMeasure required but no UI** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): weight UOM chips + send `unitOfMeasure` (074 regression).~~
 - [x] ~~**Hide recent movements in inventory receive/adjust modal** — Modal is for posting movements only; history remains available via inventory APIs if needed later.~~
 - [x] ~~**Friendly login failure message** — Feature [065](../features/065-frontend-login-friendly-error/README.md): Problem Details `detail` + i18n `login.invalidCredentials`.~~
 - [x] ~~**Customers / Inventory list stuck on Loading** — Feature [064](../features/064-frontend-uset-stable-loading/README.md): stabilize `useT` with `useCallback` so list effects stop thrashing.~~

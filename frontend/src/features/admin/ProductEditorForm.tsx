@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import {
   createProduct,
   getProduct,
@@ -7,14 +7,17 @@ import {
   type ProductApi,
   type ProductRequestBody,
 } from '@/api/products'
-import { listCategories, type CategoryApi } from '@/api/categories'
+import { createCategory, listCategories, type CategoryApi } from '@/api/categories'
 import { useT } from '@/i18n/useT'
+import type { MessageKey } from '@/i18n/messages'
 import {
+  childCostFromParentPreview,
   isParentPackageIncompleteError,
   marginFromCostAndPrice,
   sellingPriceFromMargin,
 } from '@/lib/productPricing'
 import { ParentPackageModal } from '@/features/admin/ParentPackageModal'
+import { SearchableSelect } from '@/features/admin/SearchableSelect'
 import { isAbortError } from '@/lib/fetchAbort'
 
 type ProductEditorProps = {
@@ -41,10 +44,19 @@ function numOrNull(raw: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-/** Fixed package-unit codes for chip picker (Feature 074). */
+/** Fixed package-unit codes for chip picker (Feature 074 / 076). */
 export const PACKAGE_UNIT_CODES = ['pc', 'kg', 'g', 'lb', 'L', 'ml'] as const
 
 export type PackageUnitCode = (typeof PACKAGE_UNIT_CODES)[number]
+
+const UNIT_LABEL_KEYS: Record<PackageUnitCode, MessageKey> = {
+  pc: 'admin.unit.pc',
+  kg: 'admin.unit.kg',
+  g: 'admin.unit.g',
+  lb: 'admin.unit.lb',
+  L: 'admin.unit.L',
+  ml: 'admin.unit.ml',
+}
 
 export function normalizePackageUnit(raw: string | null | undefined): string {
   if (!raw) return ''
@@ -55,6 +67,50 @@ export function normalizePackageUnit(raw: string | null | undefined): string {
 
 function roundPct(n: number): number {
   return Math.round(n * 100) / 100
+}
+
+function UnitChips({
+  name,
+  value,
+  onChange,
+  testId,
+  legend,
+}: {
+  name: string
+  value: string
+  onChange: (code: string) => void
+  testId: string
+  legend: string
+}) {
+  const t = useT()
+  return (
+    <fieldset>
+      <legend className="mb-2 text-sm font-medium text-slate-700">{legend}</legend>
+      <div className="flex flex-wrap gap-2" data-testid={testId}>
+        {PACKAGE_UNIT_CODES.map((code) => (
+          <label
+            key={code}
+            className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm ${
+              value === code
+                ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
+                : 'border-slate-300 text-slate-800'
+            }`}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={code}
+              checked={value === code}
+              onChange={() => onChange(code)}
+              data-testid={`${testId}-${code}`}
+              className="sr-only"
+            />
+            {t(UNIT_LABEL_KEYS[code])}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  )
 }
 
 export function ProductEditorForm({
@@ -80,6 +136,7 @@ export function ProductEditorForm({
   const [parentProductId, setParentProductId] = useState('')
   const [qtyPerPackage, setQtyPerPackage] = useState('')
   const [packageUnit, setPackageUnit] = useState('')
+  const [unitOfMeasure, setUnitOfMeasure] = useState('')
   const [costPrice, setCostPrice] = useState('')
   const [targetMarginPct, setTargetMarginPct] = useState('')
   const [sellingPrice, setSellingPrice] = useState('')
@@ -90,8 +147,36 @@ export function ProductEditorForm({
   const [active, setActive] = useState(true)
   const [costReadOnly, setCostReadOnly] = useState(false)
 
+  const [addingCategory, setAddingCategory] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [newCategoryMarginPct, setNewCategoryMarginPct] = useState('30')
+  const [categoryCreateError, setCategoryCreateError] = useState<string | null>(null)
+  const [creatingCategory, setCreatingCategory] = useState(false)
+
   const [parentFixId, setParentFixId] = useState<string | null>(null)
   const [pendingRetry, setPendingRetry] = useState(false)
+
+  const categoryOptions = useMemo(
+    () =>
+      categories.map((c) => ({
+        id: c.id,
+        label: `${c.name} (${roundPct(c.targetMargin * 100)}%)`,
+        searchText: c.name,
+      })),
+    [categories],
+  )
+
+  const parentOptions = useMemo(
+    () =>
+      parents
+        .filter((p) => p.id !== productId)
+        .map((p) => ({
+          id: p.id,
+          label: p.name,
+          searchText: `${p.name} ${p.primarySku ?? p.sku ?? ''} ${(p.skus ?? []).join(' ')}`,
+        })),
+    [parents, productId],
+  )
 
   function recalcSellingFromCostAndMargin(costRaw: string, marginPctRaw: string) {
     const cost = numOrNull(costRaw)
@@ -104,6 +189,24 @@ export function ProductEditorForm({
     }
   }
 
+  function applyDerivedCostFromParent(
+    parentId: string,
+    childUnit: string,
+    marginPctRaw: string,
+  ) {
+    const parent = parents.find((p) => p.id === parentId)
+    if (!parent) return
+    const qty = parent.qtyPerPackage
+    const parentCost = parent.costPrice
+    if (qty == null || parentCost == null) return
+    const parentUnit = parent.packageUnit ?? parent.unitOfMeasure ?? ''
+    const derived = childCostFromParentPreview(parentCost, qty, parentUnit, childUnit || parentUnit)
+    if (derived == null) return
+    const costRaw = String(derived)
+    setCostPrice(costRaw)
+    recalcSellingFromCostAndMargin(costRaw, marginPctRaw)
+  }
+
   function onCategoryChange(nextId: string) {
     setCategoryId(nextId)
     if (!nextId) return
@@ -114,6 +217,46 @@ export function ProductEditorForm({
     recalcSellingFromCostAndMargin(costPrice, pct)
   }
 
+  function onParentChange(nextId: string) {
+    setParentProductId(nextId)
+    setCostReadOnly(Boolean(nextId))
+    if (!nextId) {
+      setCostReadOnly(false)
+      return
+    }
+    setTrackInventory(false)
+    setCurrentStock('')
+    setLowStockThreshold('')
+    const parent = parents.find((p) => p.id === nextId)
+    let nextUom = unitOfMeasure
+    if (sellByWeight && parent) {
+      const pref = normalizePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
+      if (pref) {
+        nextUom = pref
+        setUnitOfMeasure(pref)
+      }
+    }
+    applyDerivedCostFromParent(nextId, nextUom || packageUnit, targetMarginPct)
+  }
+
+  function onSellByWeightChange(checked: boolean) {
+    setSellByWeight(checked)
+    if (checked && parentProductId) {
+      const parent = parents.find((p) => p.id === parentProductId)
+      if (parent) {
+        const pref = normalizePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
+        if (pref) setUnitOfMeasure(pref)
+      }
+    }
+  }
+
+  function onUnitOfMeasureChange(code: string) {
+    setUnitOfMeasure(code)
+    if (parentProductId) {
+      applyDerivedCostFromParent(parentProductId, code, targetMarginPct)
+    }
+  }
+
   function onCostChange(raw: string) {
     setCostPrice(raw)
     recalcSellingFromCostAndMargin(raw, targetMarginPct)
@@ -121,7 +264,7 @@ export function ProductEditorForm({
 
   useEffect(() => {
     const ac = new AbortController()
-    let active = true
+    let activeLoad = true
     setLoading(Boolean(productId))
     setError(null)
 
@@ -131,12 +274,12 @@ export function ProductEditorForm({
           listCategories(ac.signal),
           listProducts(ac.signal),
         ])
-        if (!active || ac.signal.aborted) return
+        if (!activeLoad || ac.signal.aborted) return
         setCategories(cats)
         setParents(products)
         if (productId) {
           const p = await getProduct(productId, ac.signal)
-          if (!active || ac.signal.aborted) return
+          if (!activeLoad || ac.signal.aborted) return
           setName(p.name)
           setDescription(p.description ?? '')
           setSkusText((p.skus ?? []).join('\n'))
@@ -148,7 +291,8 @@ export function ProductEditorForm({
               ? String(p.qtyPerPackage)
               : '',
           )
-          setPackageUnit(normalizePackageUnit(p.packageUnit ?? p.unitOfMeasure))
+          setPackageUnit(normalizePackageUnit(p.packageUnit))
+          setUnitOfMeasure(normalizePackageUnit(p.unitOfMeasure ?? p.packageUnit))
           setCostPrice(p.costPrice != null ? String(p.costPrice) : '')
           setCostReadOnly(Boolean(p.parentProductId))
           setTargetMarginPct(
@@ -156,7 +300,7 @@ export function ProductEditorForm({
           )
           setSellingPrice(String(p.sellingPrice))
           setWholesalePrice(p.wholesalePrice != null ? String(p.wholesalePrice) : '0')
-          setTrackInventory(p.trackInventory === true)
+          setTrackInventory(p.parentProductId ? false : p.trackInventory === true)
           setCurrentStock(p.currentStock != null ? String(p.currentStock) : '')
           setLowStockThreshold(
             p.lowStockThreshold != null ? String(p.lowStockThreshold) : '',
@@ -171,6 +315,7 @@ export function ProductEditorForm({
           setParentProductId('')
           setQtyPerPackage('')
           setPackageUnit('')
+          setUnitOfMeasure('')
           setCostPrice('')
           setCostReadOnly(false)
           setTargetMarginPct('')
@@ -181,18 +326,19 @@ export function ProductEditorForm({
           setLowStockThreshold('')
           setActive(true)
         }
+        setAddingCategory(false)
         setError(null)
       } catch (err) {
-        if (!active || ac.signal.aborted || isAbortError(err)) return
+        if (!activeLoad || ac.signal.aborted || isAbortError(err)) return
         setError(err instanceof Error ? err.message : 'Failed to load catalog')
       } finally {
-        if (active && !ac.signal.aborted) {
+        if (activeLoad && !ac.signal.aborted) {
           setLoading(false)
         }
       }
     })()
     return () => {
-      active = false
+      activeLoad = false
       ac.abort()
     }
   }, [productId, initialName, initialSkusText])
@@ -214,31 +360,65 @@ export function ProductEditorForm({
     }
   }
 
+  async function handleCreateCategory(e: FormEvent) {
+    e.preventDefault()
+    const margin = Number(newCategoryMarginPct) / 100
+    if (!newCategoryName.trim() || !Number.isFinite(margin) || margin < 0 || margin >= 1) {
+      setCategoryCreateError(t('admin.categoryInvalid'))
+      return
+    }
+    setCreatingCategory(true)
+    setCategoryCreateError(null)
+    try {
+      const created = await createCategory({
+        name: newCategoryName.trim(),
+        targetMargin: margin,
+      })
+      setCategories((prev) => [...prev, created])
+      setAddingCategory(false)
+      setNewCategoryName('')
+      setNewCategoryMarginPct('30')
+      const pct = String(roundPct(created.targetMargin * 100))
+      setCategoryId(created.id)
+      setTargetMarginPct(pct)
+      recalcSellingFromCostAndMargin(costPrice, pct)
+    } catch (err) {
+      setCategoryCreateError(err instanceof Error ? err.message : t('admin.saveFailed'))
+    } finally {
+      setCreatingCategory(false)
+    }
+  }
+
   function buildBody(): ProductRequestBody {
     const marginPct = numOrNull(targetMarginPct)
+    const hasParent = Boolean(parentProductId)
+    const track = enableInventory && !hasParent && trackInventory
     return {
       name: name.trim(),
       description: description.trim() || null,
       skus: parseSkus(skusText),
       categoryId: categoryId || null,
       sellByWeight,
-      unitOfMeasure: null,
+      unitOfMeasure: sellByWeight ? unitOfMeasure.trim() || null : null,
       parentProductId: parentProductId || null,
-      qtyPerPackage: parentProductId ? null : numOrNull(qtyPerPackage),
-      packageUnit: parentProductId ? null : packageUnit.trim() || null,
+      qtyPerPackage: hasParent ? null : numOrNull(qtyPerPackage),
+      packageUnit: hasParent ? null : packageUnit.trim() || null,
       costPrice: costReadOnly ? null : numOrNull(costPrice),
       targetMargin: marginPct != null ? marginPct / 100 : null,
       sellingPrice: numOrNull(sellingPrice),
       wholesalePrice: numOrNull(wholesalePrice) ?? 0,
-      trackInventory: enableInventory ? trackInventory : false,
-      currentStock: enableInventory && trackInventory ? numOrNull(currentStock) : null,
-      lowStockThreshold:
-        enableInventory && trackInventory ? numOrNull(lowStockThreshold) : null,
+      trackInventory: track,
+      currentStock: track ? numOrNull(currentStock) : null,
+      lowStockThreshold: track ? numOrNull(lowStockThreshold) : null,
       active,
     }
   }
 
   async function persist() {
+    if (sellByWeight && !unitOfMeasure.trim()) {
+      setError(t('admin.unitOfMeasureRequired'))
+      return
+    }
     setSaving(true)
     setError(null)
     try {
@@ -305,29 +485,85 @@ export function ProductEditorForm({
           />
         </label>
 
-        <label className="block text-sm font-medium text-slate-700">
-          {t('admin.category')}
-          <select
-            value={categoryId}
-            onChange={(e) => onCategoryChange(e.target.value)}
-            data-testid="product-category"
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+        {addingCategory ? (
+          <div
+            className="space-y-2 rounded-lg border border-emerald-200 bg-emerald-50/50 p-3"
+            data-testid="inline-category-create"
           >
-            <option value="">{t('admin.none')}</option>
-            {categories.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name} ({roundPct(c.targetMargin * 100)}%)
-              </option>
-            ))}
-          </select>
-        </label>
+            <p className="text-sm font-semibold text-slate-800">{t('admin.addCategory')}</p>
+            <label className="block text-sm font-medium text-slate-700">
+              {t('admin.categoryName')}
+              <input
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                data-testid="inline-category-name"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              />
+            </label>
+            <label className="block text-sm font-medium text-slate-700">
+              {t('admin.marginPct')}
+              <input
+                value={newCategoryMarginPct}
+                onChange={(e) => setNewCategoryMarginPct(e.target.value)}
+                inputMode="decimal"
+                data-testid="inline-category-margin"
+                className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
+              />
+            </label>
+            {categoryCreateError ? (
+              <p className="text-sm text-red-600" role="alert">
+                {categoryCreateError}
+              </p>
+            ) : null}
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAddingCategory(false)
+                  setCategoryCreateError(null)
+                }}
+                className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm"
+              >
+                {t('footer.cancel')}
+              </button>
+              <button
+                type="button"
+                data-testid="inline-category-save"
+                disabled={creatingCategory}
+                onClick={(e) => void handleCreateCategory(e)}
+                className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-50"
+              >
+                {creatingCategory ? t('common.loading') : t('admin.save')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <SearchableSelect
+            label={t('admin.category')}
+            value={categoryId}
+            options={categoryOptions}
+            noneLabel={t('admin.none')}
+            searchPlaceholder={t('admin.searchCategory')}
+            testId="product-category"
+            onChange={onCategoryChange}
+            actionLabel={t('admin.addCategoryOption')}
+            actionTestId="category-add-option"
+            onAction={() => {
+              setAddingCategory(true)
+              setNewCategoryName('')
+              setNewCategoryMarginPct('30')
+              setCategoryCreateError(null)
+            }}
+          />
+        )}
 
         <div className="flex flex-wrap gap-4 text-sm">
           <label className="inline-flex items-center gap-2">
             <input
               type="checkbox"
               checked={sellByWeight}
-              onChange={(e) => setSellByWeight(e.target.checked)}
+              onChange={(e) => onSellByWeightChange(e.target.checked)}
+              data-testid="product-sell-by-weight"
             />
             {t('admin.sellByWeight')}
           </label>
@@ -341,27 +577,15 @@ export function ProductEditorForm({
           </label>
         </div>
 
-        <label className="block text-sm font-medium text-slate-700">
-          {t('admin.parentProduct')}
-          <select
-            value={parentProductId}
-            onChange={(e) => {
-              const next = e.target.value
-              setParentProductId(next)
-              setCostReadOnly(Boolean(next))
-            }}
-            className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
-          >
-            <option value="">{t('admin.none')}</option>
-            {parents
-              .filter((p) => p.id !== productId)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-          </select>
-        </label>
+        <SearchableSelect
+          label={t('admin.parentProduct')}
+          value={parentProductId}
+          options={parentOptions}
+          noneLabel={t('admin.none')}
+          searchPlaceholder={t('admin.searchParent')}
+          testId="product-parent"
+          onChange={onParentChange}
+        />
 
         {!parentProductId ? (
           <div className="space-y-3">
@@ -374,44 +598,24 @@ export function ProductEditorForm({
                 className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2"
               />
             </label>
-            <fieldset>
-              <legend className="mb-2 text-sm font-medium text-slate-700">{t('admin.packageUnit')}</legend>
-              <div className="flex flex-wrap gap-2" data-testid="package-unit-chips">
-                {PACKAGE_UNIT_CODES.map((code) => (
-                  <label
-                    key={code}
-                    className={`inline-flex cursor-pointer items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-sm ${
-                      packageUnit === code
-                        ? 'border-emerald-600 bg-emerald-50 text-emerald-900'
-                        : 'border-slate-300 text-slate-800'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="package-unit"
-                      value={code}
-                      checked={packageUnit === code}
-                      onChange={() => setPackageUnit(code)}
-                      data-testid={`package-unit-${code}`}
-                      className="sr-only"
-                    />
-                    {t(
-                      (
-                        {
-                          pc: 'admin.unit.pc',
-                          kg: 'admin.unit.kg',
-                          g: 'admin.unit.g',
-                          lb: 'admin.unit.lb',
-                          L: 'admin.unit.L',
-                          ml: 'admin.unit.ml',
-                        } as const
-                      )[code],
-                    )}
-                  </label>
-                ))}
-              </div>
-            </fieldset>
+            <UnitChips
+              name="package-unit"
+              value={packageUnit}
+              onChange={setPackageUnit}
+              testId="package-unit-chips"
+              legend={t('admin.packageUnit')}
+            />
           </div>
+        ) : null}
+
+        {sellByWeight ? (
+          <UnitChips
+            name="sell-unit"
+            value={unitOfMeasure}
+            onChange={onUnitOfMeasureChange}
+            testId="unit-of-measure-chips"
+            legend={t('admin.unitOfMeasure')}
+          />
         ) : null}
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -466,11 +670,13 @@ export function ProductEditorForm({
               <input
                 type="checkbox"
                 checked={trackInventory}
+                disabled={Boolean(parentProductId)}
                 onChange={(e) => setTrackInventory(e.target.checked)}
+                data-testid="product-track-inventory"
               />
               {t('admin.trackInventory')}
             </label>
-            {trackInventory ? (
+            {trackInventory && !parentProductId ? (
               <div className="mt-2 grid grid-cols-2 gap-3">
                 <label className="block text-sm font-medium text-slate-700">
                   {t('admin.stock')}
@@ -496,7 +702,7 @@ export function ProductEditorForm({
         ) : null}
 
         {error ? (
-          <p className="text-sm text-red-600" role="alert">
+          <p className="text-sm text-red-600" role="alert" data-testid="product-editor-error">
             {error}
           </p>
         ) : null}
@@ -512,6 +718,7 @@ export function ProductEditorForm({
           <button
             type="submit"
             disabled={saving}
+            data-testid="product-save"
             className="rounded-lg bg-emerald-700 px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
           >
             {saving ? t('common.loading') : t('admin.save')}

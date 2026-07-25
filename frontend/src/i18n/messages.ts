@@ -168,11 +168,17 @@ export type MessageKey =
   | 'admin.barcodes'
   | 'admin.barcodesHint'
   | 'admin.category'
+  | 'admin.searchCategory'
+  | 'admin.addCategoryOption'
+  | 'admin.addCategory'
+  | 'admin.categoryName'
   | 'admin.none'
   | 'admin.sellByWeight'
   | 'admin.active'
   | 'admin.unitOfMeasure'
+  | 'admin.unitOfMeasureRequired'
   | 'admin.parentProduct'
+  | 'admin.searchParent'
   | 'admin.qtyPerPackage'
   | 'admin.packageUnit'
   | 'admin.unit.pc'
@@ -287,11 +293,17 @@ export const en: MessageDict = {
   'admin.barcodes': 'Barcodes',
   'admin.barcodesHint': 'One per line or comma-separated (optional)',
   'admin.category': 'Category',
+  'admin.searchCategory': 'Search categories…',
+  'admin.addCategoryOption': '→ Add category ←',
+  'admin.addCategory': 'Add category',
+  'admin.categoryName': 'Category name',
   'admin.none': 'None',
   'admin.sellByWeight': 'Sell by weight / bulk',
   'admin.active': 'Active',
   'admin.unitOfMeasure': 'Unit of measure',
+  'admin.unitOfMeasureRequired': 'Select a unit of measure when sell by weight is on',
   'admin.parentProduct': 'Parent package product',
+  'admin.searchParent': 'Search parent products…',
   'admin.qtyPerPackage': 'Qty per package',
   'admin.packageUnit': 'Package unit',
   'admin.unit.pc': 'pc',
@@ -543,11 +555,17 @@ export const es: MessageDict = {
   'admin.barcodes': 'Códigos de barras',
   'admin.barcodesHint': 'Uno por línea o separados por coma (opcional)',
   'admin.category': 'Categoría',
+  'admin.searchCategory': 'Buscar categorías…',
+  'admin.addCategoryOption': '→ Agregar categoría ←',
+  'admin.addCategory': 'Agregar categoría',
+  'admin.categoryName': 'Nombre de categoría',
   'admin.none': 'Ninguna',
   'admin.sellByWeight': 'Venta por peso / granel',
   'admin.active': 'Activo',
   'admin.unitOfMeasure': 'Unidad de medida',
+  'admin.unitOfMeasureRequired': 'Elige una unidad de medida cuando la venta es por peso',
   'admin.parentProduct': 'Producto padre (paquete)',
+  'admin.searchParent': 'Buscar producto padre…',
   'admin.qtyPerPackage': 'Cant. por paquete',
   'admin.packageUnit': 'Unidad del paquete',
   'admin.unit.pc': 'pza',

@@ -153,6 +153,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 073 | FE | Done | [README](features/073-frontend-closed-tickets-reimburse/README.md) | [spec](features/073-frontend-closed-tickets-reimburse/spec.md) · [plan](features/073-frontend-closed-tickets-reimburse/plan.md) · [tasks](features/073-frontend-closed-tickets-reimburse/tasks.md) |
 | 074 | FE | Done | [README](features/074-frontend-product-editor-margin-units/README.md) | [spec](features/074-frontend-product-editor-margin-units/spec.md) · [plan](features/074-frontend-product-editor-margin-units/plan.md) · [tasks](features/074-frontend-product-editor-margin-units/tasks.md) |
 | 075 | FE | Done | [README](features/075-frontend-customer-has-credit-checkbox/README.md) | [spec](features/075-frontend-customer-has-credit-checkbox/spec.md) · [plan](features/075-frontend-customer-has-credit-checkbox/plan.md) · [tasks](features/075-frontend-customer-has-credit-checkbox/tasks.md) |
+| 076 | FE | Done | [README](features/076-frontend-product-editor-category-parent-ux/README.md) | [spec](features/076-frontend-product-editor-category-parent-ux/spec.md) · [plan](features/076-frontend-product-editor-category-parent-ux/plan.md) · [tasks](features/076-frontend-product-editor-category-parent-ux/tasks.md) |
 
 ---
 

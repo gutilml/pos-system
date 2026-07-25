@@ -5,6 +5,8 @@ import {
   marginFromCostAndPrice,
   pickBestProductMatch,
   sellingPriceFromMargin,
+  childCostFromParentPreview,
+  conversionFactor,
 } from '@/lib/productPricing'
 
 describe('productPricing', () => {
@@ -42,5 +44,23 @@ describe('productPricing', () => {
     expect(pickBestProductMatch('7501', rows)?.id).toBe('2')
     expect(pickBestProductMatch('zzz', rows)?.id).toBe('1')
     expect(pickBestProductMatch('x', [])).toBeNull()
+  })
+
+  it('conversionFactor converts mass units', () => {
+    expect(conversionFactor('kg', 'g')).toBe(1000)
+    expect(conversionFactor('g', 'kg')).toBe(0.001)
+    expect(conversionFactor('kg', 'kg')).toBe(1)
+  })
+
+  it('childCostFromParentPreview same unit divides by qty', () => {
+    expect(childCostFromParentPreview(24, 24, 'pc', 'pc')).toBe(1)
+  })
+
+  it('childCostFromParentPreview kg parent to g child', () => {
+    expect(childCostFromParentPreview(100, 1, 'kg', 'g')).toBe(100000)
+  })
+
+  it('childCostFromParentPreview falls back when units incompatible', () => {
+    expect(childCostFromParentPreview(24, 12, 'pc', 'kg')).toBe(2)
   })
 })
