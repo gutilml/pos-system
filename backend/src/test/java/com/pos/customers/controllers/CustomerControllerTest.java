@@ -90,6 +90,7 @@ class CustomerControllerTest {
                         new BigDecimal("25.0000"),
                         CreditLedgerEntryType.PAYMENT,
                         PaymentType.CASH,
+                        "Payment · Cash",
                         OffsetDateTime.parse("2026-07-16T12:00:00Z")
                 )
         ));

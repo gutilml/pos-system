@@ -80,6 +80,9 @@ class CustomerCreditServiceImplTest {
         Map<String, Boolean> features = new LinkedHashMap<>();
         features.put("enable_customer_credit", true);
         store.setFeatures(features);
+        Map<String, Object> preferences = new LinkedHashMap<>();
+        preferences.put("ui_locale", "en");
+        store.setPreferences(preferences);
 
         customer = new Customer();
         customer.setId(UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"));
@@ -123,7 +126,26 @@ class CustomerCreditServiceImplTest {
         verify(ledgerEntryRepository).save(captor.capture());
         assertThat(captor.getValue().getType()).isEqualTo(CreditLedgerEntryType.CHARGE);
         assertThat(captor.getValue().getAmount()).isEqualByComparingTo("60.0000");
+        assertThat(captor.getValue().getDescription()).isEqualTo("Charge");
         assertThat(captor.getValue().getTransaction()).isEqualTo(tx);
+    }
+
+    @Test
+    void payBalance_storesSpanishDescriptionWhenStoreLocaleIsEs() {
+        store.getPreferences().put("ui_locale", "es");
+        when(customerRepository.findById(customer.getId())).thenReturn(Optional.of(customer));
+        when(customerRepository.save(any(Customer.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(ledgerEntryRepository.save(any(CreditLedgerEntry.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(shiftService.getCurrentOpenShift(store.getId())).thenReturn(openShift);
+
+        service.payBalance(
+                customer.getId(),
+                new CustomerPaymentRequestDTO(new BigDecimal("5.0000"), PaymentType.CARD)
+        );
+
+        ArgumentCaptor<CreditLedgerEntry> captor = ArgumentCaptor.forClass(CreditLedgerEntry.class);
+        verify(ledgerEntryRepository).save(captor.capture());
+        assertThat(captor.getValue().getDescription()).isEqualTo("Pago · Tarjeta");
     }
 
     @Test
@@ -185,6 +207,7 @@ class CustomerCreditServiceImplTest {
         assertThat(captor.getValue().getType()).isEqualTo(CreditLedgerEntryType.PAYMENT);
         assertThat(captor.getValue().getAmount()).isEqualByComparingTo("15.5000");
         assertThat(captor.getValue().getPaymentMethod()).isEqualTo(PaymentType.CASH);
+        assertThat(captor.getValue().getDescription()).isEqualTo("Payment · Cash");
         assertThat(captor.getValue().getTransaction()).isNull();
 
         ArgumentCaptor<CashDrawerEventRequestDTO> eventCaptor =

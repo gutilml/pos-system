@@ -47,6 +47,10 @@ public class CreditLedgerEntry {
     @Column(name = "payment_method", length = 20)
     private PaymentType paymentMethod;
 
+    /** Human label frozen in store UI locale at creation (Feature 069). */
+    @Column(name = "description", nullable = false, length = 120)
+    private String description;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
@@ -97,6 +101,14 @@ public class CreditLedgerEntry {
 
     public void setPaymentMethod(PaymentType paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public OffsetDateTime getCreatedAt() {

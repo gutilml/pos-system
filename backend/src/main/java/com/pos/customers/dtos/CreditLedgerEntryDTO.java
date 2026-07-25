@@ -14,6 +14,7 @@ public record CreditLedgerEntryDTO(
         BigDecimal amount,
         CreditLedgerEntryType type,
         PaymentType paymentMethod,
+        String description,
         OffsetDateTime createdAt
 ) {
 }

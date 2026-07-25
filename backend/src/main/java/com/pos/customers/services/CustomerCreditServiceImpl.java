@@ -162,6 +162,8 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         entry.setAmount(amount);
         entry.setType(CreditLedgerEntryType.PAYMENT);
         entry.setPaymentMethod(method);
+        entry.setDescription(CreditLedgerLabels.movementDescription(
+                customer.getStore(), CreditLedgerEntryType.PAYMENT, method));
         ledgerEntryRepository.save(entry);
 
         if (method == PaymentType.CASH) {
@@ -208,6 +210,8 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
         entry.setTransaction(transaction);
         entry.setAmount(chargeAmount);
         entry.setType(CreditLedgerEntryType.CHARGE);
+        entry.setDescription(CreditLedgerLabels.movementDescription(
+                customer.getStore(), CreditLedgerEntryType.CHARGE, null));
         ledgerEntryRepository.save(entry);
         customerRepository.save(customer);
     }
@@ -259,6 +263,7 @@ public class CustomerCreditServiceImpl implements CustomerCreditService {
                 entry.getAmount(),
                 entry.getType(),
                 entry.getPaymentMethod(),
+                entry.getDescription(),
                 entry.getCreatedAt()
         );
     }

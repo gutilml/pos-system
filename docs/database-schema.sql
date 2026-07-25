@@ -177,6 +177,7 @@ CREATE TABLE credit_ledger_entries (
     amount DECIMAL(12, 4) NOT NULL,
     type VARCHAR(20) NOT NULL, -- 'CHARGE', 'PAYMENT'
     payment_method VARCHAR(20), -- 'CASH' | 'CARD' on PAYMENT rows (Feature 067); null on CHARGE
+    description VARCHAR(120) NOT NULL, -- locale snapshot at write (Feature 069)
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
