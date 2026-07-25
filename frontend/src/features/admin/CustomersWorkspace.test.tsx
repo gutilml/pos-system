@@ -129,4 +129,14 @@ describe('CustomersWorkspace', () => {
       expect(payCustomerBalance).toHaveBeenCalledWith('cust-1', 10, 'CASH')
     })
   })
+
+  it('gates credit limit behind has-credit checkbox on create', async () => {
+    const user = userEvent.setup()
+    render(<CustomersWorkspace />)
+    await user.click(screen.getByTestId('customers-new'))
+    expect(screen.getByTestId('customer-has-credit')).not.toBeChecked()
+    expect(screen.queryByTestId('customer-credit-limit')).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('customer-has-credit'))
+    expect(screen.getByTestId('customer-credit-limit')).toBeInTheDocument()
+  })
 })

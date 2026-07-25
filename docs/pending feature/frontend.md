@@ -94,7 +94,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [x] ~~**Product lookup keyboard + editor load** — Feature [057](../features/057-frontend-product-lookup-keyboard-and-load/README.md): Arrow keys on suggestion list; ignore abort on editor load.~~
 - [x] ~~**Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).~~
 - [x] ~~**Customers workspace** — Feature [061](../features/061-frontend-customers-workspace/README.md): list/filter/create/edit/delete; credit ledger/pay when enabled; Assign customer header label. Depends on BE **060**.~~
-- [ ] **Customer has-credit checkbox** — Feature [075](../features/075-frontend-customer-has-credit-checkbox/README.md): optional credit per customer when store credit on; limit 0 when unchecked.
+- [x] ~~**Customer has-credit checkbox** — Feature [075](../features/075-frontend-customer-has-credit-checkbox/README.md): optional credit per customer when store credit on; limit 0 when unchecked.~~
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
 
 ## Auth & multi-store

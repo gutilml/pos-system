@@ -152,7 +152,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 072 | BE | Planned | [README](features/072-backend-closed-tickets-reimburse/README.md) | [spec](features/072-backend-closed-tickets-reimburse/spec.md) · [plan](features/072-backend-closed-tickets-reimburse/plan.md) · [tasks](features/072-backend-closed-tickets-reimburse/tasks.md) |
 | 073 | FE | Planned | [README](features/073-frontend-closed-tickets-reimburse/README.md) | [spec](features/073-frontend-closed-tickets-reimburse/spec.md) · [plan](features/073-frontend-closed-tickets-reimburse/plan.md) · [tasks](features/073-frontend-closed-tickets-reimburse/tasks.md) |
 | 074 | FE | Done | [README](features/074-frontend-product-editor-margin-units/README.md) | [spec](features/074-frontend-product-editor-margin-units/spec.md) · [plan](features/074-frontend-product-editor-margin-units/plan.md) · [tasks](features/074-frontend-product-editor-margin-units/tasks.md) |
-| 075 | FE | Planned | [README](features/075-frontend-customer-has-credit-checkbox/README.md) | [spec](features/075-frontend-customer-has-credit-checkbox/spec.md) · [plan](features/075-frontend-customer-has-credit-checkbox/plan.md) · [tasks](features/075-frontend-customer-has-credit-checkbox/tasks.md) |
+| 075 | FE | Done | [README](features/075-frontend-customer-has-credit-checkbox/README.md) | [spec](features/075-frontend-customer-has-credit-checkbox/spec.md) · [plan](features/075-frontend-customer-has-credit-checkbox/plan.md) · [tasks](features/075-frontend-customer-has-credit-checkbox/tasks.md) |
 
 ---
 

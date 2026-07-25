@@ -31,6 +31,7 @@ export function CustomersWorkspace() {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [creditLimit, setCreditLimit] = useState('0')
+  const [hasCredit, setHasCredit] = useState(false)
   const [balance, setBalance] = useState(0)
   const [formError, setFormError] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
@@ -69,6 +70,7 @@ export function CustomersWorkspace() {
     setName('')
     setPhone('')
     setCreditLimit('0')
+    setHasCredit(false)
     setBalance(0)
     setFormError(null)
     setLedger([])
@@ -87,12 +89,15 @@ export function CustomersWorkspace() {
     setSelectedId(customer.id)
     setName(customer.name)
     setPhone(customer.phone ?? '')
+    const bal = Number(customer.currentBalance)
+    const limit = Number(customer.creditLimit)
     setCreditLimit(String(customer.creditLimit))
-    setBalance(Number(customer.currentBalance))
+    setHasCredit(limit > 0 || bal > 0)
+    setBalance(bal)
     setFormError(null)
     setPayModalOpen(false)
     setLedgerNewestFirst(true)
-    if (enableCredit) {
+    if (enableCredit && (limit > 0 || bal > 0)) {
       try {
         const entries = await getCustomerLedger(customer.id)
         setLedger(entries)
@@ -112,7 +117,12 @@ export function CustomersWorkspace() {
       setFormError(t('customers.nameRequired'))
       return
     }
-    const limit = enableCredit ? roundMoney(Number(creditLimit) || 0) : 0
+    if (enableCredit && !hasCredit && balance > 0) {
+      setFormError(t('customers.cannotDisableCreditWithBalance'))
+      return
+    }
+    const limit =
+      enableCredit && hasCredit ? roundMoney(Number(creditLimit) || 0) : 0
     setSaving(true)
     setFormError(null)
     try {
@@ -129,7 +139,7 @@ export function CustomersWorkspace() {
         const updated = await updateCustomer(selectedId, {
           name: trimmedName,
           phone: phone.trim() || null,
-          creditLimit: enableCredit ? limit : roundMoney(Number(creditLimit) || 0),
+          creditLimit: limit,
         })
         await refreshList(query.trim())
         await selectCustomer(updated)
@@ -289,22 +299,42 @@ export function CustomersWorkspace() {
 
               {enableCredit ? (
                 <>
-                  <div>
-                    <label className="text-sm font-medium text-slate-700" htmlFor="customer-credit-limit">
-                      {t('customers.creditLimit')}
-                    </label>
+                  <label className="flex items-center gap-2 text-sm text-slate-700">
                     <input
-                      id="customer-credit-limit"
-                      data-testid="customer-credit-limit"
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={creditLimit}
-                      onChange={(e) => setCreditLimit(e.target.value)}
-                      className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                      type="checkbox"
+                      data-testid="customer-has-credit"
+                      checked={hasCredit}
+                      onChange={(e) => {
+                        const next = e.target.checked
+                        if (!next && balance > 0) {
+                          setFormError(t('customers.cannotDisableCreditWithBalance'))
+                          return
+                        }
+                        setHasCredit(next)
+                        if (!next) setCreditLimit('0')
+                        setFormError(null)
+                      }}
                     />
-                  </div>
-                  {mode === 'edit' ? (
+                    {t('customers.hasCredit')}
+                  </label>
+                  {hasCredit ? (
+                    <div>
+                      <label className="text-sm font-medium text-slate-700" htmlFor="customer-credit-limit">
+                        {t('customers.creditLimit')}
+                      </label>
+                      <input
+                        id="customer-credit-limit"
+                        data-testid="customer-credit-limit"
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={creditLimit}
+                        onChange={(e) => setCreditLimit(e.target.value)}
+                        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                      />
+                    </div>
+                  ) : null}
+                  {mode === 'edit' && hasCredit ? (
                     <p className="text-sm text-slate-700" data-testid="customer-balance">
                       {t('customers.balance')}: <span className="font-semibold">{formatMoney(balance)}</span>
                     </p>
@@ -340,7 +370,7 @@ export function CustomersWorkspace() {
                 ) : null}
               </div>
 
-              {enableCredit && mode === 'edit' && selectedId ? (
+              {enableCredit && hasCredit && mode === 'edit' && selectedId ? (
                 <div className="space-y-3 border-t border-slate-200 pt-3" data-testid="customers-credit-section">
                   <div className="flex items-center justify-between gap-2">
                     <h4 className="text-sm font-semibold text-slate-900">{t('customers.ledger')}</h4>

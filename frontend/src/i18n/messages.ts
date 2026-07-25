@@ -192,6 +192,8 @@ export type MessageKey =
   | 'customers.name'
   | 'customers.phone'
   | 'customers.creditLimit'
+  | 'customers.hasCredit'
+  | 'customers.cannotDisableCreditWithBalance'
   | 'customers.balance'
   | 'customers.ledger'
   | 'customers.ledgerEmpty'
@@ -311,6 +313,8 @@ export const en: MessageDict = {
   'customers.name': 'Name',
   'customers.phone': 'Phone',
   'customers.creditLimit': 'Credit limit',
+  'customers.hasCredit': 'Has credit',
+  'customers.cannotDisableCreditWithBalance': 'Cannot turn off credit while the customer has a balance',
   'customers.balance': 'Balance',
   'customers.ledger': 'Movements',
   'customers.ledgerEmpty': 'No movements yet',
@@ -548,6 +552,8 @@ export const es: MessageDict = {
   'customers.name': 'Nombre',
   'customers.phone': 'Teléfono',
   'customers.creditLimit': 'Límite de crédito',
+  'customers.hasCredit': 'Con crédito',
+  'customers.cannotDisableCreditWithBalance': 'No se puede quitar el crédito mientras el cliente tenga saldo',
   'customers.balance': 'Saldo',
   'customers.ledger': 'Movimientos',
   'customers.ledgerEmpty': 'Aún no hay movimientos',
