@@ -139,6 +139,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 059 | BE | Done | [README](features/059-backend-product-target-margin-backfill/README.md) | [spec](features/059-backend-product-target-margin-backfill/spec.md) · [plan](features/059-backend-product-target-margin-backfill/plan.md) · [tasks](features/059-backend-product-target-margin-backfill/tasks.md) |
 | 060 | BE | Done | [README](features/060-backend-customer-identity-update/README.md) | [spec](features/060-backend-customer-identity-update/spec.md) · [plan](features/060-backend-customer-identity-update/plan.md) · [tasks](features/060-backend-customer-identity-update/tasks.md) |
 | 061 | FE | Done | [README](features/061-frontend-customers-workspace/README.md) | [spec](features/061-frontend-customers-workspace/spec.md) · [plan](features/061-frontend-customers-workspace/plan.md) · [tasks](features/061-frontend-customers-workspace/tasks.md) |
+| 062 | BE | Done | [README](features/062-backend-inventory-movements/README.md) | [spec](features/062-backend-inventory-movements/spec.md) · [plan](features/062-backend-inventory-movements/plan.md) · [tasks](features/062-backend-inventory-movements/tasks.md) |
 
 ---
 

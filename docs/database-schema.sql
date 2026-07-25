@@ -32,6 +32,7 @@ CREATE TABLE products (
     selling_price DECIMAL(12, 4) NOT NULL,
     wholesale_price DECIMAL(12, 4) DEFAULT 0.0000,
     target_margin DECIMAL(5, 4), -- nullable product override (Feature 050); hierarchy: product → category → store
+    wholesale_margin DECIMAL(5, 4), -- calculated 1 - (cost/wholesale) when both > 0 (Feature 062)
 
     -- Inventory & Unit Rules
     track_inventory BOOLEAN DEFAULT false,
@@ -66,6 +67,27 @@ CREATE TABLE product_skus (
 CREATE UNIQUE INDEX uq_product_skus_code_ci ON product_skus (LOWER(code));
 CREATE INDEX idx_product_skus_product_id ON product_skus (product_id);
 CREATE UNIQUE INDEX uq_product_skus_one_primary ON product_skus (product_id) WHERE is_primary = true;
+
+-- 4c. STOCK_MOVEMENTS (Feature 062 — inventory audit trail)
+CREATE TABLE stock_movements (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    store_id UUID NOT NULL REFERENCES store_settings(id),
+    product_id UUID NOT NULL REFERENCES products(id),
+    type VARCHAR(20) NOT NULL, -- RECEIVING | ADJUSTMENT | SALE
+    quantity_delta DECIMAL(12, 4) NOT NULL,
+    quantity_after DECIMAL(12, 4) NOT NULL,
+    unit_cost_before DECIMAL(12, 4),
+    unit_cost_after DECIMAL(12, 4),
+    selling_before DECIMAL(12, 4),
+    selling_after DECIMAL(12, 4),
+    wholesale_before DECIMAL(12, 4),
+    wholesale_after DECIMAL(12, 4),
+    reason VARCHAR(255),
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_stock_movements_product_created ON stock_movements (product_id, created_at DESC);
+CREATE INDEX idx_stock_movements_store_created ON stock_movements (store_id, created_at DESC);
 
 -- 5. PRODUCT_CATEGORY (Junction Table for Multi-Category Margin Selection)
 CREATE TABLE product_category (

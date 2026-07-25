@@ -16,6 +16,7 @@ import com.pos.core.pricing.ProductPricing;
 import com.pos.core.repositories.CategoryRepository;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.ProductSkuRepository;
+import com.pos.inventory.services.InventoryAdminService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -154,6 +155,7 @@ public class ProductServiceImpl implements ProductService {
                 ? ProductPricing.scaleMoney(request.wholesalePrice())
                 : (product.getWholesalePrice() != null ? product.getWholesalePrice() : BigDecimal.ZERO);
         product.setWholesalePrice(wholesale);
+        product.setWholesaleMargin(InventoryAdminService.computeWholesaleMargin(costPrice, wholesale));
 
         resolveAndApplyPricing(product, request, categories, costPrice);
 

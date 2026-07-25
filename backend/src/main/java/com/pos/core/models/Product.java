@@ -52,6 +52,10 @@ public class Product {
     @Column(name = "target_margin", precision = 5, scale = 4)
     private BigDecimal targetMargin;
 
+    /** Calculated wholesale margin 1 - (cost/wholesale) when both positive (Feature 062). */
+    @Column(name = "wholesale_margin", precision = 5, scale = 4)
+    private BigDecimal wholesaleMargin;
+
     @Column(name = "track_inventory")
     private Boolean trackInventory = false;
 
@@ -157,6 +161,14 @@ public class Product {
 
     public void setTargetMargin(BigDecimal targetMargin) {
         this.targetMargin = targetMargin;
+    }
+
+    public BigDecimal getWholesaleMargin() {
+        return wholesaleMargin;
+    }
+
+    public void setWholesaleMargin(BigDecimal wholesaleMargin) {
+        this.wholesaleMargin = wholesaleMargin;
     }
 
     public Boolean getTrackInventory() {

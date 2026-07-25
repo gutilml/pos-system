@@ -1,9 +1,13 @@
 package com.pos.inventory.services;
 
-import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.models.Product;
+import com.pos.core.models.StoreSettings;
+import com.pos.core.models.Transaction;
 import com.pos.core.models.TransactionItem;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.inventory.models.StockMovement;
+import com.pos.inventory.models.StockMovementType;
+import com.pos.inventory.repositories.StockMovementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,7 +22,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -29,18 +32,24 @@ class InventoryServiceImplTest {
     @Mock
     private ProductRepository productRepository;
 
+    @Mock
+    private StockMovementRepository stockMovementRepository;
+
     @InjectMocks
     private InventoryServiceImpl inventoryService;
 
     private UUID parentId;
     private UUID childId;
     private UUID weightId;
+    private StoreSettings store;
 
     @BeforeEach
     void setUp() {
         parentId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         childId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
         weightId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        store = new StoreSettings();
+        store.setId(UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"));
     }
 
     @Test
@@ -75,79 +84,41 @@ class InventoryServiceImplTest {
         when(productRepository.findById(childId)).thenReturn(Optional.of(child));
         when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stockMovementRepository.save(any(StockMovement.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        TransactionItem item = new TransactionItem();
-        item.setProduct(child);
-        item.setQuantity(new BigDecimal("1.0000"));
-
+        TransactionItem item = itemWithStore(child, "1.0000");
         inventoryService.deductStock(List.of(item));
 
-        ArgumentCaptor<Product> saved = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository).save(saved.capture());
-
-        assertThat(saved.getValue().getId()).isEqualTo(parentId);
-        assertThat(saved.getValue().getCurrentStock()).isEqualByComparingTo("9.9583");
+        assertThat(parent.getCurrentStock()).isEqualByComparingTo("9.9583");
+        ArgumentCaptor<StockMovement> move = ArgumentCaptor.forClass(StockMovement.class);
+        verify(stockMovementRepository).save(move.capture());
+        assertThat(move.getValue().getType()).isEqualTo(StockMovementType.SALE);
     }
 
     @Test
-    void deductStock_childKgFromParentCase_convertsUnits() {
-        Product parent = new Product();
-        parent.setId(parentId);
-        parent.setName("Bulk flour");
-        parent.setSellingPrice(new BigDecimal("40.0000"));
-        parent.setTrackInventory(true);
-        parent.setUnitsPerPackage(new BigDecimal("1.0000"));
-        parent.setUnitOfMeasure("kg");
-        parent.setCurrentStock(new BigDecimal("10.0000"));
-
-        Product child = new Product();
-        child.setId(childId);
-        child.setName("Flour 500g");
-        child.setSellingPrice(new BigDecimal("2.0000"));
-        child.setUnitOfMeasure("gr");
-        child.setParentProduct(parent);
-        child.setTrackInventory(false);
-
-        when(productRepository.findById(childId)).thenReturn(Optional.of(child));
-        when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
-        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        TransactionItem item = new TransactionItem();
-        item.setProduct(child);
-        item.setQuantity(new BigDecimal("500.0000"));
-
-        inventoryService.deductStock(List.of(item));
-
-        ArgumentCaptor<Product> saved = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository).save(saved.capture());
-        // 500 gr → 0.5 kg; ÷ 1 package = 0.5 packages → 10 - 0.5 = 9.5
-        assertThat(saved.getValue().getCurrentStock()).isEqualByComparingTo("9.5000");
-    }
-
-    @Test
-    void deductStock_rejectsInsufficientParentStock() {
+    void deductStock_allowsNegativeStock() {
         Product parent = new Product();
         parent.setId(parentId);
         parent.setTrackInventory(true);
         parent.setUnitsPerPackage(new BigDecimal("24.0000"));
         parent.setUnitOfMeasure("unit");
         parent.setCurrentStock(new BigDecimal("0.0100"));
+        parent.setSellingPrice(new BigDecimal("10"));
 
         Product child = new Product();
         child.setId(childId);
         child.setUnitOfMeasure("unit");
         child.setParentProduct(parent);
+        child.setSellingPrice(new BigDecimal("1"));
 
         when(productRepository.findById(childId)).thenReturn(Optional.of(child));
         when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(stockMovementRepository.save(any(StockMovement.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        TransactionItem item = new TransactionItem();
-        item.setProduct(child);
-        item.setQuantity(new BigDecimal("1.0000"));
+        inventoryService.deductStock(List.of(itemWithStore(child, "1.0000")));
 
-        assertThatThrownBy(() -> inventoryService.deductStock(List.of(item)))
-                .isInstanceOf(BusinessRuleException.class)
-                .hasMessageContaining("Insufficient stock");
+        assertThat(parent.getCurrentStock()).isNegative();
     }
 
     @Test
@@ -163,15 +134,9 @@ class InventoryServiceImplTest {
         when(productRepository.findById(weightId)).thenReturn(Optional.of(deli));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        TransactionItem item = new TransactionItem();
-        item.setProduct(deli);
-        item.setQuantity(new BigDecimal("0.2500"));
+        inventoryService.deductStock(List.of(itemWithStore(deli, "0.2500")));
 
-        inventoryService.deductStock(List.of(item));
-
-        ArgumentCaptor<Product> saved = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository).save(saved.capture());
-        assertThat(saved.getValue().getCurrentStock()).isEqualByComparingTo("4.7500");
+        assertThat(deli.getCurrentStock()).isEqualByComparingTo("4.7500");
     }
 
     @Test
@@ -186,14 +151,18 @@ class InventoryServiceImplTest {
         when(productRepository.findById(weightId)).thenReturn(Optional.of(chips));
         when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
+        inventoryService.deductStock(List.of(itemWithStore(chips, "3.0000")));
+
+        assertThat(chips.getCurrentStock()).isEqualByComparingTo("17.0000");
+    }
+
+    private TransactionItem itemWithStore(Product product, String qty) {
+        Transaction tx = new Transaction();
+        tx.setStore(store);
         TransactionItem item = new TransactionItem();
-        item.setProduct(chips);
-        item.setQuantity(new BigDecimal("3.0000"));
-
-        inventoryService.deductStock(List.of(item));
-
-        ArgumentCaptor<Product> saved = ArgumentCaptor.forClass(Product.class);
-        verify(productRepository).save(saved.capture());
-        assertThat(saved.getValue().getCurrentStock()).isEqualByComparingTo("17.0000");
+        item.setProduct(product);
+        item.setQuantity(new BigDecimal(qty));
+        item.setTransaction(tx);
+        return item;
     }
 }

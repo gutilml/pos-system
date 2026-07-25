@@ -3,9 +3,13 @@ package com.pos.inventory.services;
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.Product;
+import com.pos.core.models.StoreSettings;
 import com.pos.core.models.TransactionItem;
 import com.pos.core.pricing.ProductPricing;
 import com.pos.core.repositories.ProductRepository;
+import com.pos.inventory.models.StockMovement;
+import com.pos.inventory.models.StockMovementType;
+import com.pos.inventory.repositories.StockMovementRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,9 +25,14 @@ public class InventoryServiceImpl implements InventoryService {
     public static final RoundingMode STOCK_ROUNDING = RoundingMode.HALF_UP;
 
     private final ProductRepository productRepository;
+    private final StockMovementRepository stockMovementRepository;
 
-    public InventoryServiceImpl(ProductRepository productRepository) {
+    public InventoryServiceImpl(
+            ProductRepository productRepository,
+            StockMovementRepository stockMovementRepository
+    ) {
         this.productRepository = productRepository;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     @Override
@@ -42,11 +51,12 @@ public class InventoryServiceImpl implements InventoryService {
                             "Product not found: " + item.getProduct().getId()));
 
             BigDecimal quantity = item.getQuantity().setScale(STOCK_SCALE, STOCK_ROUNDING);
+            StoreSettings store = item.getTransaction() != null ? item.getTransaction().getStore() : null;
 
             if (product.getParentProduct() != null) {
-                deductParentPackage(product, quantity);
+                deductParentPackage(product, quantity, store);
             } else if (Boolean.TRUE.equals(product.getTrackInventory())) {
-                deductFromProduct(product, quantity);
+                deductFromProduct(product, quantity, store);
             }
         }
     }
@@ -66,7 +76,7 @@ public class InventoryServiceImpl implements InventoryService {
         return calculateParentPackageDeduction(quantitySold, unitsPerPackage);
     }
 
-    private void deductParentPackage(Product child, BigDecimal quantitySold) {
+    private void deductParentPackage(Product child, BigDecimal quantitySold, StoreSettings store) {
         Product parent = productRepository.findById(child.getParentProduct().getId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Parent product not found: " + child.getParentProduct().getId()));
@@ -85,24 +95,38 @@ public class InventoryServiceImpl implements InventoryService {
         BigDecimal soldInParentUnit = ProductPricing.convertQuantity(
                 quantitySold, childUnit, parent.getUnitOfMeasure());
         BigDecimal deduction = calculateParentPackageDeduction(soldInParentUnit, parent.getUnitsPerPackage());
-        applyDeduction(parent, deduction, true);
+        applySaleDeduction(parent, deduction, store);
         productRepository.save(parent);
     }
 
-    private void deductFromProduct(Product product, BigDecimal quantity) {
-        applyDeduction(product, quantity, true);
+    private void deductFromProduct(Product product, BigDecimal quantity, StoreSettings store) {
+        applySaleDeduction(product, quantity, store);
         productRepository.save(product);
     }
 
-    private void applyDeduction(Product product, BigDecimal deduction, boolean rejectInsufficient) {
+    /** Feature 062: sales may drive stock negative; always record a SALE movement when store is known. */
+    private void applySaleDeduction(Product product, BigDecimal deduction, StoreSettings store) {
         BigDecimal current = product.getCurrentStock() != null
                 ? product.getCurrentStock()
                 : BigDecimal.ZERO.setScale(STOCK_SCALE, STOCK_ROUNDING);
         BigDecimal next = current.subtract(deduction).setScale(STOCK_SCALE, STOCK_ROUNDING);
-        if (rejectInsufficient && next.compareTo(BigDecimal.ZERO) < 0) {
-            throw new BusinessRuleException(
-                    "Insufficient stock for product " + product.getId() + ": have " + current + ", need " + deduction);
-        }
         product.setCurrentStock(next);
+
+        if (store != null) {
+            StockMovement movement = new StockMovement();
+            movement.setStore(store);
+            movement.setProduct(product);
+            movement.setType(StockMovementType.SALE);
+            movement.setQuantityDelta(deduction.negate());
+            movement.setQuantityAfter(next);
+            movement.setUnitCostBefore(product.getCostPrice());
+            movement.setUnitCostAfter(product.getCostPrice());
+            movement.setSellingBefore(product.getSellingPrice());
+            movement.setSellingAfter(product.getSellingPrice());
+            movement.setWholesaleBefore(product.getWholesalePrice());
+            movement.setWholesaleAfter(product.getWholesalePrice());
+            movement.setReason(null);
+            stockMovementRepository.save(movement);
+        }
     }
 }

@@ -62,7 +62,9 @@ Paired frontend Phase A: 018, 020, 022, 023 (see `docs/pending feature/frontend.
 - [x] ~~**Customer credit UI** — Register CREDIT (**014**/**037**) + Customers workspace (**061**).~~
 - [x] ~~**Customer search API** — Feature 019: store-scoped name/phone search (`enable_customer_credit` gated), max 20 results as `CustomerDTO[]`.~~
 - [ ] **Multi-tier / customer pricing** — Feature 015 shipped percentage discount cascade; customer-specific or tier-based price lists still not designed.
-- [ ] **Inventory admin APIs** — Stock adjustments, receiving, low-stock reporting (checkout deduction already exists when enabled). Register read-path for stock/flag shipped as Feature [042](../features/042-backend-product-stock-inventory-flag/).
+- [x] ~~**Inventory admin APIs** — Feature [062](../features/062-backend-inventory-movements/README.md): movements receive/adjust, history, wholesale_margin, sale may go negative. Unlocks FE **063**.~~
+- [ ] **Notify admin/restock owner when sale drives stock negative** — Out of scope for 062/063 (register warning only on FE).
+- [ ] **When inventory disabled: optional delete/purge inventory data?** — Open question; Inventory tab stays read-only with last data (063).
 
 ## Platform / ops
 
