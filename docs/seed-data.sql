@@ -166,7 +166,7 @@ INSERT INTO categories (id, name, target_margin) VALUES
 
 INSERT INTO products (
     id, name, description,
-    cost_price, selling_price,
+    cost_price, selling_price, target_margin,
     track_inventory, current_stock, low_stock_threshold,
     sell_by_weight, unit_of_measure,
     is_individual_unit, is_active, exclude_from_global_discounts
@@ -175,7 +175,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000201',
         'Bottled Water 500ml',
         'Still water, single bottle',
-        3.5000, 8.0000,
+        3.5000, 8.0000, 0.5625,
         true, 120.0000, 20.0000,
         false, 'unit',
         false, true, false
@@ -184,7 +184,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000202',
         'Cola 355ml',
         'Soft drink can',
-        6.0000, 14.0000,
+        6.0000, 14.0000, 0.5714,
         true, 80.0000, 15.0000,
         false, 'unit',
         false, true, false
@@ -193,7 +193,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000203',
         'White Bread Loaf',
         'Packaged sliced bread',
-        18.0000, 32.0000,
+        18.0000, 32.0000, 0.4375,
         true, 40.0000, 8.0000,
         false, 'unit',
         false, true, false
@@ -202,7 +202,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000204',
         'Milk 1L',
         'Whole milk carton',
-        16.0000, 28.0000,
+        16.0000, 28.0000, 0.4286,
         true, 50.0000, 10.0000,
         false, 'unit',
         false, true, false
@@ -211,7 +211,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000205',
         'Eggs Dozen',
         'Grade A large eggs',
-        35.0000, 55.0000,
+        35.0000, 55.0000, 0.3636,
         true, 30.0000, 6.0000,
         false, 'unit',
         false, true, false
@@ -220,7 +220,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000206',
         'Instant Coffee 200g',
         'Jarred instant coffee',
-        55.0000, 95.0000,
+        55.0000, 95.0000, 0.4211,
         true, 25.0000, 5.0000,
         false, 'unit',
         false, true, false
@@ -229,7 +229,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000207',
         'Dish Soap 750ml',
         'Liquid dish detergent',
-        22.0000, 42.0000,
+        22.0000, 42.0000, 0.4762,
         true, 35.0000, 8.0000,
         false, 'unit',
         false, true, false
@@ -238,7 +238,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000208',
         'Tomatoes (bulk)',
         'Sold by weight at the scale',
-        18.0000, 35.0000,
+        18.0000, 35.0000, 0.4857,
         true, 40.0000, 5.0000,
         true, 'gr',
         false, true, false
@@ -247,7 +247,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000209',
         'Rice (bulk)',
         'Loose rice sold by weight',
-        12.0000, 22.0000,
+        12.0000, 22.0000, 0.4545,
         true, 100.0000, 10.0000,
         true, 'gr',
         false, true, false
@@ -256,7 +256,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000210',
         'Prepaid Phone Top-up 100',
         'Excluded from store-wide % discounts',
-        95.0000, 100.0000,
+        95.0000, 100.0000, 0.0500,
         false, 0.0000, 0.0000,
         false, 'unit',
         false, true, true
@@ -266,7 +266,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000211',
         'Cola 600ml',
         'Soft drink bottle',
-        8.0000, 18.0000,
+        8.0000, 18.0000, 0.5556,
         true, 60.0000, 12.0000,
         false, 'unit',
         false, true, false
@@ -275,7 +275,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000212',
         'Cola Zero 355ml',
         'Sugar-free soft drink can',
-        6.5000, 14.0000,
+        6.5000, 14.0000, 0.5357,
         true, 55.0000, 10.0000,
         false, 'unit',
         false, true, false
@@ -284,7 +284,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000213',
         'Diet Cola 355ml',
         'Diet soft drink can',
-        6.5000, 14.0000,
+        6.5000, 14.0000, 0.5357,
         true, 45.0000, 10.0000,
         false, 'unit',
         false, true, false
@@ -293,7 +293,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000214',
         'Milk 2L',
         'Whole milk carton, family size',
-        28.0000, 48.0000,
+        28.0000, 48.0000, 0.4167,
         true, 35.0000, 8.0000,
         false, 'unit',
         false, true, false
@@ -302,7 +302,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000215',
         'Chocolate Milk 1L',
         'Flavored milk carton',
-        18.0000, 32.0000,
+        18.0000, 32.0000, 0.4375,
         true, 28.0000, 6.0000,
         false, 'unit',
         false, true, false
@@ -311,7 +311,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000216',
         'Bottled Water 1L',
         'Still water, large bottle',
-        5.0000, 12.0000,
+        5.0000, 12.0000, 0.5833,
         true, 90.0000, 15.0000,
         false, 'unit',
         false, true, false
@@ -320,7 +320,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000217',
         'Sparkling Water 500ml',
         'Carbonated water bottle',
-        4.5000, 10.0000,
+        4.5000, 10.0000, 0.5500,
         true, 70.0000, 12.0000,
         false, 'unit',
         false, true, false
@@ -329,7 +329,7 @@ INSERT INTO products (
         '00000000-0000-0000-0000-000000000218',
         'Instant Coffee 100g',
         'Small jar instant coffee',
-        32.0000, 55.0000,
+        32.0000, 55.0000, 0.4182,
         true, 40.0000, 8.0000,
         false, 'unit',
         false, true, false

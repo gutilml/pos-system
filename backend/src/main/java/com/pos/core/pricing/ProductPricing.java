@@ -73,6 +73,26 @@ public final class ProductPricing {
     }
 
     /**
+     * If {@code current} is null and both prices are positive with cost &le; selling,
+     * return derived margin; otherwise return {@code current} unchanged (including null).
+     */
+    public static BigDecimal backfillTargetMargin(BigDecimal cost, BigDecimal selling, BigDecimal current) {
+        if (current != null) {
+            return current;
+        }
+        if (cost == null || selling == null) {
+            return null;
+        }
+        if (cost.compareTo(BigDecimal.ZERO) <= 0 || selling.compareTo(BigDecimal.ZERO) <= 0) {
+            return null;
+        }
+        if (cost.compareTo(selling) > 0) {
+            return null;
+        }
+        return marginFromCostAndPrice(cost, selling);
+    }
+
+    /**
      * Child unit cost from parent package cost.
      * Same unit: parentCost / qtyPerPackage.
      * kg parent → gr child: (parentCost / qty) / 1000.

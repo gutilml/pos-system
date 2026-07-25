@@ -91,7 +91,52 @@ class ProductServiceImplTest {
 
         assertThat(created.sellingPrice()).isEqualByComparingTo("100.0000");
         assertThat(created.costPrice()).isEqualByComparingTo("70.0000");
+        assertThat(created.targetMargin()).isEqualByComparingTo("0.3000");
         assertThat(created.primarySku()).isEqualTo("SKU-M");
+    }
+
+    @Test
+    void create_derivesTargetMarginFromCostAndSellingWhenMissing() {
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> {
+            Product product = invocation.getArgument(0);
+            product.setId(UUID.fromString("44444444-4444-4444-4444-444444444444"));
+            return product;
+        });
+
+        ProductDTO created = productService.create(
+                req(List.of("SKU-W"), "Bottled Water", new BigDecimal("3.5000"), new BigDecimal("8.0000"), null));
+
+        assertThat(created.targetMargin()).isEqualByComparingTo("0.5625");
+        assertThat(created.sellingPrice()).isEqualByComparingTo("8.0000");
+    }
+
+    @Test
+    void update_backfillsTargetMarginWhenNullAndCostSellingPresent() {
+        UUID id = UUID.fromString("77777777-7777-7777-7777-777777777777");
+        Product existing = new Product();
+        existing.setId(id);
+        existing.setName("Legacy Product");
+        existing.setCostPrice(new BigDecimal("3.5000"));
+        existing.setSellingPrice(new BigDecimal("8.0000"));
+        existing.setTargetMargin(null);
+        existing.setActive(true);
+        existing.setSellByWeight(false);
+        existing.setExcludeFromGlobalDiscounts(false);
+
+        when(productRepository.findById(id)).thenReturn(Optional.of(existing));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ProductRequestDTO request = new ProductRequestDTO(
+                null, null, "Legacy Product Renamed", null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, null, null
+        );
+
+        ProductDTO updated = productService.update(id, request);
+
+        assertThat(updated.name()).isEqualTo("Legacy Product Renamed");
+        assertThat(updated.targetMargin()).isEqualByComparingTo("0.5625");
+        assertThat(updated.sellingPrice()).isEqualByComparingTo("8.0000");
+        assertThat(updated.costPrice()).isEqualByComparingTo("3.5000");
     }
 
     @Test

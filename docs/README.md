@@ -136,6 +136,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 056 | FE | Done | [README](features/056-frontend-product-lookup-load-or-create/README.md) | [spec](features/056-frontend-product-lookup-load-or-create/spec.md) · [plan](features/056-frontend-product-lookup-load-or-create/plan.md) · [tasks](features/056-frontend-product-lookup-load-or-create/tasks.md) |
 | 057 | FE | Done | [README](features/057-frontend-product-lookup-keyboard-and-load/README.md) | [spec](features/057-frontend-product-lookup-keyboard-and-load/spec.md) · [plan](features/057-frontend-product-lookup-keyboard-and-load/plan.md) · [tasks](features/057-frontend-product-lookup-keyboard-and-load/tasks.md) |
 | 058 | FE | Done | [README](features/058-frontend-workspace-nav-labels/README.md) | [spec](features/058-frontend-workspace-nav-labels/spec.md) · [plan](features/058-frontend-workspace-nav-labels/plan.md) · [tasks](features/058-frontend-workspace-nav-labels/tasks.md) |
+| 059 | BE | Done | [README](features/059-backend-product-target-margin-backfill/README.md) | [spec](features/059-backend-product-target-margin-backfill/spec.md) · [plan](features/059-backend-product-target-margin-backfill/plan.md) · [tasks](features/059-backend-product-target-margin-backfill/tasks.md) |
 
 ---
 

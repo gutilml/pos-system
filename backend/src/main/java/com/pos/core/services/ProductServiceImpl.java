@@ -198,31 +198,37 @@ public class ProductServiceImpl implements ProductService {
             ProductPricing.assertValidMargin(request.targetMargin());
             product.setTargetMargin(ProductPricing.scaleMoney(request.targetMargin()));
             product.setSellingPrice(ProductPricing.scaleMoney(request.sellingPrice()));
-            return;
-        }
-
-        if (request.targetMargin() != null) {
+        } else if (request.targetMargin() != null) {
             ProductPricing.assertValidMargin(request.targetMargin());
             product.setTargetMargin(ProductPricing.scaleMoney(request.targetMargin()));
             product.setSellingPrice(ProductPricing.sellingPriceFromMargin(costPrice, product.getTargetMargin()));
-            return;
-        }
-
-        if (request.sellingPrice() != null) {
+        } else if (request.sellingPrice() != null) {
             BigDecimal selling = ProductPricing.scaleMoney(request.sellingPrice());
             product.setSellingPrice(selling);
             if (costPrice.compareTo(BigDecimal.ZERO) > 0 && selling.compareTo(BigDecimal.ZERO) > 0) {
                 product.setTargetMargin(ProductPricing.marginFromCostAndPrice(costPrice, selling));
             }
-            return;
+        } else {
+            BigDecimal effective = firstNonNull(product.getTargetMargin(), categoryMargin, storeDefault);
+            if (effective != null) {
+                product.setSellingPrice(ProductPricing.sellingPriceFromMargin(costPrice, effective));
+            } else if (product.getSellingPrice() == null) {
+                throw new BusinessRuleException(
+                        "sellingPrice is required when no margin is available (product/category/store)");
+            }
+            // else: keep existing sellingPrice; ensureStoredTargetMargin may persist derived margin
         }
 
-        BigDecimal effective = firstNonNull(product.getTargetMargin(), categoryMargin, storeDefault);
-        if (effective == null) {
-            throw new BusinessRuleException(
-                    "sellingPrice is required when no margin is available (product/category/store)");
+        ensureStoredTargetMargin(product, costPrice);
+    }
+
+    /** Persist derived target_margin when missing and cost + selling allow it. */
+    private void ensureStoredTargetMargin(Product product, BigDecimal costPrice) {
+        BigDecimal selling = product.getSellingPrice();
+        BigDecimal filled = ProductPricing.backfillTargetMargin(costPrice, selling, product.getTargetMargin());
+        if (filled != null && product.getTargetMargin() == null) {
+            product.setTargetMargin(filled);
         }
-        product.setSellingPrice(ProductPricing.sellingPriceFromMargin(costPrice, effective));
     }
 
     private void applyParentLink(Product product, ProductRequestDTO request) {
