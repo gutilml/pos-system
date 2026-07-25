@@ -83,7 +83,7 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail. **On hold** (2026-07-23) vs catalog (050–053).
 - [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
 - [ ] **Void tickets** — UI for void once backend supports those statuses. **On hold** (2026-07-23) vs catalog (050–053).
-- [ ] **Previous closed tickets + reimburse** — Feature [073](../features/073-frontend-closed-tickets-reimburse/README.md): footer `Clear | Discount | Assign | Previous tickets | Pay`; list/review/reimburse via BE **072**. CARD reimbursements deferred.
+- [x] ~~**Previous closed tickets + reimburse** — Feature [073](../features/073-frontend-closed-tickets-reimburse/README.md): footer `Clear | Discount | Assign | Previous tickets | Pay`; list/review/reimburse via BE **072**. CARD reimbursements deferred.~~
 - [ ] **Cashier-only reimburse filter (FE)** — Companion to BE pending; after sale ownership.
 - [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
 - [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup. Modal nav superseded by **054–056** (reuse forms/panels).~~

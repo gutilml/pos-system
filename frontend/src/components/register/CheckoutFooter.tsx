@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { CheckoutModal } from '@/components/checkout/CheckoutModal'
+import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
+import { ClosedTicketsModal } from '@/components/register/ClosedTicketsModal'
 import { fractionToDisplayPercent, parseDisplayPercentToFraction } from '@/lib/discountPricing'
 import { formatMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
@@ -14,7 +16,7 @@ import {
 } from '@/store/useCartStore'
 
 /**
- * Pay opens the checkout modal. Global discount is a button between Clear and Pay (Feature 040).
+ * Footer actions: Clear | Discount | Assign customer | Previous tickets | Pay (Feature 073).
  */
 export function CheckoutFooter() {
   const t = useT()
@@ -27,6 +29,7 @@ export function CheckoutFooter() {
 
   const [checkoutOpen, setCheckoutOpen] = useState(false)
   const [discountOpen, setDiscountOpen] = useState(false)
+  const [ticketsOpen, setTicketsOpen] = useState(false)
   const [globalDraft, setGlobalDraft] = useState(() => fractionToDisplayPercent(globalDiscount))
 
   const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
@@ -47,6 +50,9 @@ export function CheckoutFooter() {
     setGlobalDiscountPercentage(parseDisplayPercentToFraction(globalDraft))
     closeDiscount()
   }
+
+  const actionBtn =
+    'min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-100'
 
   return (
     <>
@@ -74,28 +80,33 @@ export function CheckoutFooter() {
           </p>
         ) : null}
 
-        <div className="flex gap-3">
-          <button
-            type="button"
-            onClick={() => clearCart()}
-            className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
-          >
+        <div className="flex gap-2" data-testid="checkout-footer-actions">
+          <button type="button" onClick={() => clearCart()} className={actionBtn} data-testid="footer-clear">
             {t('footer.clear')}
           </button>
           <button
             type="button"
             data-testid="open-global-discount"
             onClick={openDiscount}
-            className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-3 font-medium text-slate-700 active:bg-slate-100"
+            className={actionBtn}
           >
             {globalDiscount > 0 ? `${t('footer.discount')} ${activePctLabel}%` : t('footer.discount')}
+          </button>
+          <AssignCustomerControl />
+          <button
+            type="button"
+            data-testid="open-previous-tickets"
+            onClick={() => setTicketsOpen(true)}
+            className={actionBtn}
+          >
+            {t('footer.previousTickets')}
           </button>
           <button
             type="button"
             disabled={items.length === 0}
             onClick={() => setCheckoutOpen(true)}
             data-testid="open-checkout"
-            className="flex-[2] rounded-lg bg-emerald-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
+            className="min-w-0 flex-1 rounded-lg bg-emerald-700 px-2 py-2.5 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:bg-slate-300 active:bg-emerald-800"
           >
             {t('footer.pay')}
           </button>
@@ -142,7 +153,7 @@ export function CheckoutFooter() {
                 type="button"
                 data-testid="apply-global-discount"
                 onClick={applyDiscount}
-                className="flex-[2] rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white"
+                className="flex-1 rounded-xl bg-emerald-700 px-4 py-3 font-semibold text-white"
               >
                 {t('footer.applyDiscount')}
               </button>
@@ -150,6 +161,8 @@ export function CheckoutFooter() {
           </div>
         </div>
       ) : null}
+
+      <ClosedTicketsModal open={ticketsOpen} onClose={() => setTicketsOpen(false)} />
 
       <CheckoutModal
         open={checkoutOpen}

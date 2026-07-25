@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AuthGate } from '@/components/auth/AuthGate'
-import { AssignCustomerControl } from '@/components/register/AssignCustomerControl'
 import { CartItemRow, CartListHeader, formatCartStockDisplay } from '@/components/register/CartItemRow'
 import { CheckoutFooter } from '@/components/register/CheckoutFooter'
 import { SearchBar } from '@/components/register/SearchBar'
@@ -48,10 +47,7 @@ export function RegisterScreen() {
         <div className="flex h-dvh max-h-dvh flex-col bg-slate-100 text-slate-900">
           <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-slate-900 px-4 py-3 text-white">
             <h1 className="text-lg font-semibold tracking-tight">{t('register.title')}</h1>
-            <div className="flex items-center gap-2">
-              <AssignCustomerControl />
-              <CashierMenu />
-            </div>
+            <CashierMenu />
           </header>
 
           <WorkspaceNav active={workspace} onChange={setWorkspace} />

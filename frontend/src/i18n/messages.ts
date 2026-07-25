@@ -36,10 +36,28 @@ export type MessageKey =
   | 'footer.customer'
   | 'footer.clear'
   | 'footer.discount'
+  | 'footer.previousTickets'
   | 'footer.pay'
   | 'footer.globalDiscountLabel'
   | 'footer.applyDiscount'
   | 'footer.cancel'
+  | 'closedTickets.title'
+  | 'closedTickets.detailTitle'
+  | 'closedTickets.back'
+  | 'closedTickets.loading'
+  | 'closedTickets.empty'
+  | 'closedTickets.loadFailed'
+  | 'closedTickets.ticketId'
+  | 'closedTickets.payments'
+  | 'closedTickets.lineProduct'
+  | 'closedTickets.returnable'
+  | 'closedTickets.returned'
+  | 'closedTickets.returnQty'
+  | 'closedTickets.cardNotReimbursable'
+  | 'closedTickets.reimburse'
+  | 'closedTickets.reimbursing'
+  | 'closedTickets.reimburseFailed'
+  | 'closedTickets.success'
   | 'customer.change'
   | 'customer.assignTitle'
   | 'customer.assignHint'
@@ -372,10 +390,29 @@ export const en: MessageDict = {
   'footer.customer': 'Customer',
   'footer.clear': 'Clear',
   'footer.discount': 'Discount',
+  'footer.previousTickets': 'Previous tickets',
   'footer.pay': 'Pay',
   'footer.globalDiscountLabel': 'Global Discount %',
   'footer.applyDiscount': 'Apply',
   'footer.cancel': 'Cancel',
+  'closedTickets.title': 'Previous tickets',
+  'closedTickets.detailTitle': 'Ticket detail',
+  'closedTickets.back': 'Back to list',
+  'closedTickets.loading': 'Loading tickets…',
+  'closedTickets.empty': 'No completed tickets yet.',
+  'closedTickets.loadFailed': 'Could not load tickets',
+  'closedTickets.ticketId': 'Ticket',
+  'closedTickets.payments': 'Payments',
+  'closedTickets.lineProduct': 'Product',
+  'closedTickets.returnable': 'Returnable',
+  'closedTickets.returned': 'Already returned',
+  'closedTickets.returnQty': 'Return qty',
+  'closedTickets.cardNotReimbursable':
+    'This ticket includes a card payment and cannot be reimbursed here yet.',
+  'closedTickets.reimburse': 'Reimburse',
+  'closedTickets.reimbursing': 'Reimbursing…',
+  'closedTickets.reimburseFailed': 'Reimburse failed',
+  'closedTickets.success': 'Reimburse completed.',
   'customer.change': 'Change customer',
   'customer.assignTitle': 'Assign customer',
   'customer.assignHint': 'Attach a store-credit customer to this ticket before Pay.',
@@ -610,10 +647,29 @@ export const es: MessageDict = {
   'footer.customer': 'Cliente',
   'footer.clear': 'Limpiar',
   'footer.discount': 'Descuento',
+  'footer.previousTickets': 'Tickets anteriores',
   'footer.pay': 'Cobrar',
   'footer.globalDiscountLabel': 'Descuento global %',
   'footer.applyDiscount': 'Aplicar',
   'footer.cancel': 'Cancelar',
+  'closedTickets.title': 'Tickets anteriores',
+  'closedTickets.detailTitle': 'Detalle del ticket',
+  'closedTickets.back': 'Volver a la lista',
+  'closedTickets.loading': 'Cargando tickets…',
+  'closedTickets.empty': 'Aún no hay tickets completados.',
+  'closedTickets.loadFailed': 'No se pudieron cargar los tickets',
+  'closedTickets.ticketId': 'Ticket',
+  'closedTickets.payments': 'Pagos',
+  'closedTickets.lineProduct': 'Producto',
+  'closedTickets.returnable': 'Retornable',
+  'closedTickets.returned': 'Ya devuelto',
+  'closedTickets.returnQty': 'Cant. a devolver',
+  'closedTickets.cardNotReimbursable':
+    'Este ticket incluye un pago con tarjeta y aún no se puede reembolsar aquí.',
+  'closedTickets.reimburse': 'Reembolsar',
+  'closedTickets.reimbursing': 'Reembolsando…',
+  'closedTickets.reimburseFailed': 'Error al reembolsar',
+  'closedTickets.success': 'Reembolso completado.',
   'customer.change': 'Cambiar cliente',
   'customer.assignTitle': 'Asignar cliente',
   'customer.assignHint': 'Asigna un cliente con crédito de tienda a este ticket antes de cobrar.',

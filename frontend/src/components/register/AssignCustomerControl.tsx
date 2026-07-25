@@ -9,6 +9,7 @@ import {
   useCartStore,
 } from '@/store/useCartStore'
 
+/** Footer control to assign/change the active ticket customer (Feature 073). */
 export function AssignCustomerControl() {
   const t = useT()
   const customer = useCartStore(selectActiveCustomer)
@@ -22,9 +23,12 @@ export function AssignCustomerControl() {
 
   return (
     <>
-      <div className="flex items-center gap-2" data-testid="assign-customer-control">
+      <div className="flex min-w-0 flex-1 items-center gap-1" data-testid="assign-customer-control">
         {customer ? (
-          <p className="hidden max-w-[12rem] truncate text-sm text-slate-200 sm:block" data-testid="header-customer">
+          <p
+            className="hidden max-w-[5rem] truncate text-xs text-slate-600 sm:block"
+            data-testid="header-customer"
+          >
             {customer.name}
           </p>
         ) : null}
@@ -32,7 +36,7 @@ export function AssignCustomerControl() {
           type="button"
           data-testid="open-assign-customer"
           onClick={() => setOpen(true)}
-          className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-700"
+          className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-100"
         >
           {customer ? t('customer.change') : t('customer.assignTitle')}
         </button>
