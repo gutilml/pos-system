@@ -33,6 +33,17 @@ describe('ProductEditorForm Feature 076', () => {
         qtyPerPackage: 24,
         packageUnit: 'pc',
         primarySku: '7501',
+        categoryIds: ['cat-1'],
+      },
+      {
+        id: 'parent-kg',
+        name: 'Bulk flour sack',
+        sellingPrice: 100,
+        costPrice: 70,
+        qtyPerPackage: 1,
+        packageUnit: 'kg',
+        primarySku: '7502',
+        categoryIds: ['cat-2'],
       },
     ])
   })
@@ -126,6 +137,50 @@ describe('ProductEditorForm Feature 076', () => {
     expect(screen.getByTestId('product-cost')).toHaveAttribute('readonly')
     expect(screen.getByTestId('product-track-inventory')).toBeDisabled()
     expect(screen.getByTestId('product-track-inventory')).not.toBeChecked()
+  })
+
+  it('disables sell-by-weight and copies category when parent unit is pc', async () => {
+    const user = userEvent.setup()
+    render(
+      <ProductEditorForm
+        productId={null}
+        enableInventory={false}
+        onSaved={() => undefined}
+        onCancel={() => undefined}
+      />,
+    )
+    await waitFor(() => expect(listProducts).toHaveBeenCalled())
+    await user.click(screen.getByTestId('product-sell-by-weight'))
+    expect(screen.getByTestId('product-sell-by-weight')).toBeChecked()
+
+    await user.click(screen.getByTestId('product-parent'))
+    await user.click(within(screen.getByTestId('product-parent-menu')).getByText('Goma Luky osito'))
+
+    expect(screen.getByTestId('product-sell-by-weight')).not.toBeChecked()
+    expect(screen.getByTestId('product-sell-by-weight')).toBeDisabled()
+    expect(screen.getByTestId('product-category')).toHaveTextContent(/Drinks/)
+    expect(screen.getByTestId('product-margin')).toHaveValue('30')
+  })
+
+  it('keeps sell-by-weight enabled when parent unit is kg', async () => {
+    const user = userEvent.setup()
+    render(
+      <ProductEditorForm
+        productId={null}
+        enableInventory={false}
+        onSaved={() => undefined}
+        onCancel={() => undefined}
+      />,
+    )
+    await waitFor(() => expect(listProducts).toHaveBeenCalled())
+    await user.click(screen.getByTestId('product-parent'))
+    await user.click(within(screen.getByTestId('product-parent-menu')).getByText('Bulk flour sack'))
+
+    expect(screen.getByTestId('product-sell-by-weight')).not.toBeDisabled()
+    expect(screen.getByTestId('product-category')).toHaveTextContent(/Botana a granel/)
+    await user.click(screen.getByTestId('product-sell-by-weight'))
+    expect(screen.getByTestId('product-sell-by-weight')).toBeChecked()
+    expect(screen.getByTestId('unit-of-measure-chips')).toBeInTheDocument()
   })
 
   it('sends unitOfMeasure when sell by weight on save', async () => {

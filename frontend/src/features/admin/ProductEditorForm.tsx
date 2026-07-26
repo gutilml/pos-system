@@ -62,7 +62,15 @@ export function normalizePackageUnit(raw: string | null | undefined): string {
   if (!raw) return ''
   const trimmed = raw.trim()
   const match = PACKAGE_UNIT_CODES.find((c) => c.toLowerCase() === trimmed.toLowerCase())
-  return match ?? ''
+  if (match) return match
+  // Spanish chip label sometimes stored as pza → pc (Feature 098)
+  if (trimmed.toLowerCase() === 'pza') return 'pc'
+  return ''
+}
+
+/** Parent package unit is piece/count pc (Feature 098). */
+export function isPiecePackageUnit(raw: string | null | undefined): boolean {
+  return normalizePackageUnit(raw) === 'pc'
 }
 
 function roundPct(n: number): number {
@@ -228,18 +236,42 @@ export function ProductEditorForm({
     setCurrentStock('')
     setLowStockThreshold('')
     const parent = parents.find((p) => p.id === nextId)
+    if (!parent) return
+
+    let marginForCost = targetMarginPct
+    const parentCat = parent.categoryIds?.[0]
+    if (parentCat) {
+      setCategoryId(parentCat)
+      const cat = categories.find((c) => c.id === parentCat)
+      if (cat) {
+        marginForCost = String(roundPct(cat.targetMargin * 100))
+        setTargetMarginPct(marginForCost)
+      }
+    }
+
+    const parentPc = isPiecePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
     let nextUom = unitOfMeasure
-    if (sellByWeight && parent) {
+    if (parentPc) {
+      setSellByWeight(false)
+      nextUom = ''
+      setUnitOfMeasure('')
+    } else if (sellByWeight) {
       const pref = normalizePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
       if (pref) {
         nextUom = pref
         setUnitOfMeasure(pref)
       }
     }
-    applyDerivedCostFromParent(nextId, nextUom || packageUnit, targetMarginPct)
+    applyDerivedCostFromParent(nextId, nextUom || packageUnit, marginForCost)
   }
 
   function onSellByWeightChange(checked: boolean) {
+    if (checked && parentProductId) {
+      const parent = parents.find((p) => p.id === parentProductId)
+      if (parent && isPiecePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)) {
+        return
+      }
+    }
     setSellByWeight(checked)
     if (checked && parentProductId) {
       const parent = parents.find((p) => p.id === parentProductId)
@@ -249,6 +281,11 @@ export function ProductEditorForm({
       }
     }
   }
+
+  const selectedParent = parents.find((p) => p.id === parentProductId)
+  const parentBlocksWeight = Boolean(
+    selectedParent && isPiecePackageUnit(selectedParent.packageUnit ?? selectedParent.unitOfMeasure),
+  )
 
   function onUnitOfMeasureChange(code: string) {
     setUnitOfMeasure(code)
@@ -284,8 +321,14 @@ export function ProductEditorForm({
           setDescription(p.description ?? '')
           setSkusText((p.skus ?? []).join('\n'))
           setCategoryId(p.categoryIds?.[0] ?? '')
-          setSellByWeight(p.sellByWeight === true)
           setParentProductId(p.parentProductId ?? '')
+          const linkedParent = p.parentProductId
+            ? products.find((x) => x.id === p.parentProductId)
+            : undefined
+          const blockWeight =
+            linkedParent != null &&
+            isPiecePackageUnit(linkedParent.packageUnit ?? linkedParent.unitOfMeasure)
+          setSellByWeight(blockWeight ? false : p.sellByWeight === true)
           setQtyPerPackage(
             p.qtyPerPackage != null && Number.isFinite(Number(p.qtyPerPackage))
               ? String(p.qtyPerPackage)
@@ -415,6 +458,10 @@ export function ProductEditorForm({
   }
 
   async function persist() {
+    if (parentBlocksWeight && sellByWeight) {
+      setError(t('admin.parentPcNoWeight'))
+      return
+    }
     if (sellByWeight && !unitOfMeasure.trim()) {
       setError(t('admin.unitOfMeasureRequired'))
       return
@@ -484,6 +531,16 @@ export function ProductEditorForm({
             className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-sm"
           />
         </label>
+
+        <SearchableSelect
+          label={t('admin.parentProduct')}
+          value={parentProductId}
+          options={parentOptions}
+          noneLabel={t('admin.none')}
+          searchPlaceholder={t('admin.searchParent')}
+          testId="product-parent"
+          onChange={onParentChange}
+        />
 
         {addingCategory ? (
           <div
@@ -562,6 +619,7 @@ export function ProductEditorForm({
             <input
               type="checkbox"
               checked={sellByWeight}
+              disabled={parentBlocksWeight}
               onChange={(e) => onSellByWeightChange(e.target.checked)}
               data-testid="product-sell-by-weight"
             />
@@ -576,16 +634,6 @@ export function ProductEditorForm({
             {t('admin.active')}
           </label>
         </div>
-
-        <SearchableSelect
-          label={t('admin.parentProduct')}
-          value={parentProductId}
-          options={parentOptions}
-          noneLabel={t('admin.none')}
-          searchPlaceholder={t('admin.searchParent')}
-          testId="product-parent"
-          onChange={onParentChange}
-        />
 
         {!parentProductId ? (
           <div className="space-y-3">

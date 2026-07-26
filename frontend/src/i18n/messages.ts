@@ -211,6 +211,7 @@ export type MessageKey =
   | 'admin.active'
   | 'admin.unitOfMeasure'
   | 'admin.unitOfMeasureRequired'
+  | 'admin.parentPcNoWeight'
   | 'admin.parentProduct'
   | 'admin.searchParent'
   | 'admin.qtyPerPackage'
@@ -344,6 +345,7 @@ export const en: MessageDict = {
   'admin.active': 'Active',
   'admin.unitOfMeasure': 'Unit of measure',
   'admin.unitOfMeasureRequired': 'Select a unit of measure when sell by weight is on',
+  'admin.parentPcNoWeight': 'Sell by weight is not allowed when the parent package unit is pc',
   'admin.parentProduct': 'Parent package product',
   'admin.searchParent': 'Search parent products…',
   'admin.qtyPerPackage': 'Qty per package',
@@ -647,6 +649,7 @@ export const es: MessageDict = {
   'admin.active': 'Activo',
   'admin.unitOfMeasure': 'Unidad de medida',
   'admin.unitOfMeasureRequired': 'Elige una unidad de medida cuando la venta es por peso',
+  'admin.parentPcNoWeight': 'No se permite venta por peso cuando la unidad del paquete padre es pc',
   'admin.parentProduct': 'Producto padre (paquete)',
   'admin.searchParent': 'Buscar producto padre…',
   'admin.qtyPerPackage': 'Cant. por paquete',
