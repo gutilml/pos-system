@@ -75,5 +75,6 @@ describe('CashierMenu', () => {
     expect(screen.queryByTestId('pay-in-menu-item')).not.toBeInTheDocument()
     expect(screen.queryByTestId('pay-out-menu-item')).not.toBeInTheDocument()
     expect(screen.getByTestId('close-shift-menu-item')).toBeDisabled()
+    expect(screen.getByTestId('shift-history-menu-item')).toBeInTheDocument()
   })
 })

@@ -17,6 +17,8 @@ export type AuthUser = {
   enableCustomerCredit?: boolean
   /** Store `preferences.ui_locale` from Feature 045 (`en` | `es`). */
   uiLocale?: string
+  /** Store `preferences.default_tax_rate` from Feature 088 (fraction 0–1). */
+  defaultTaxRate?: number | null
 }
 
 export async function fetchCsrf(): Promise<string> {

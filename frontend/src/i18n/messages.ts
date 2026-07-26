@@ -19,6 +19,12 @@ export type MessageKey =
   | 'cashier.loggingOut'
   | 'cashier.language'
   | 'cashier.languageSaveFailed'
+  | 'cashier.taxRate'
+  | 'cashier.taxRateSave'
+  | 'cashier.taxRateSaving'
+  | 'cashier.taxRateInvalid'
+  | 'cashier.taxRateSaveFailed'
+  | 'cashier.shiftHistory'
   | 'register.title'
   | 'register.emptyCart'
   | 'search.placeholder'
@@ -46,7 +52,11 @@ export type MessageKey =
   | 'closedTickets.back'
   | 'closedTickets.loading'
   | 'closedTickets.empty'
+  | 'closedTickets.emptyOwn'
+  | 'closedTickets.ownHint'
+  | 'closedTickets.allHint'
   | 'closedTickets.loadFailed'
+  | 'closedTickets.reimburseForbidden'
   | 'closedTickets.ticketId'
   | 'closedTickets.payments'
   | 'closedTickets.lineProduct'
@@ -97,6 +107,27 @@ export type MessageKey =
   | 'shift.checking'
   | 'shift.checkFailedTitle'
   | 'shift.checkFailedBody'
+  | 'shiftHistory.title'
+  | 'shiftHistory.detailTitle'
+  | 'shiftHistory.back'
+  | 'shiftHistory.loading'
+  | 'shiftHistory.empty'
+  | 'shiftHistory.loadFailed'
+  | 'shiftHistory.status'
+  | 'shiftHistory.startingCash'
+  | 'shiftHistory.expectedCash'
+  | 'shiftHistory.actualCash'
+  | 'shiftHistory.discrepancy'
+  | 'shiftHistory.openedAt'
+  | 'shiftHistory.closedAt'
+  | 'shiftHistory.events'
+  | 'shiftHistory.noEvents'
+  | 'shiftHistory.totalCash'
+  | 'shiftHistory.totalCard'
+  | 'shiftHistory.totalCredit'
+  | 'shiftHistory.totalSales'
+  | 'shiftHistory.statusOpen'
+  | 'shiftHistory.statusClosed'
   | 'drawer.title'
   | 'drawer.hint'
   | 'drawer.type'
@@ -280,6 +311,12 @@ export const en: MessageDict = {
   'cashier.loggingOut': 'Logging out…',
   'cashier.language': 'Language',
   'cashier.languageSaveFailed': 'Failed to save language',
+  'cashier.taxRate': 'Tax rate',
+  'cashier.taxRateSave': 'Save',
+  'cashier.taxRateSaving': 'Saving…',
+  'cashier.taxRateInvalid': 'Enter a tax rate between 0 and 100',
+  'cashier.taxRateSaveFailed': 'Failed to save tax rate',
+  'cashier.shiftHistory': 'Shift history',
   'cashier.catalog': 'Products & categories',
   'admin.title': 'Catalog',
   'admin.productsTab': 'Products',
@@ -412,7 +449,11 @@ export const en: MessageDict = {
   'closedTickets.back': 'Back to list',
   'closedTickets.loading': 'Loading tickets…',
   'closedTickets.empty': 'No completed tickets yet.',
+  'closedTickets.emptyOwn': 'You have no completed tickets yet.',
+  'closedTickets.ownHint': 'Your tickets — only sales you created are listed.',
+  'closedTickets.allHint': 'All store tickets',
   'closedTickets.loadFailed': 'Could not load tickets',
+  'closedTickets.reimburseForbidden': 'You can only reimburse your own tickets.',
   'closedTickets.ticketId': 'Ticket',
   'closedTickets.payments': 'Payments',
   'closedTickets.lineProduct': 'Product',
@@ -464,6 +505,27 @@ export const en: MessageDict = {
   'shift.checking': 'Checking shift status…',
   'shift.checkFailedTitle': 'Unable to check shift',
   'shift.checkFailedBody': 'Something went wrong while loading shift status.',
+  'shiftHistory.title': 'Shift history',
+  'shiftHistory.detailTitle': 'Shift detail',
+  'shiftHistory.back': 'Back to list',
+  'shiftHistory.loading': 'Loading shifts…',
+  'shiftHistory.empty': 'No shifts yet.',
+  'shiftHistory.loadFailed': 'Could not load shifts',
+  'shiftHistory.status': 'Status',
+  'shiftHistory.startingCash': 'Starting cash',
+  'shiftHistory.expectedCash': 'Expected cash',
+  'shiftHistory.actualCash': 'Counted cash',
+  'shiftHistory.discrepancy': 'Discrepancy',
+  'shiftHistory.openedAt': 'Opened',
+  'shiftHistory.closedAt': 'Closed',
+  'shiftHistory.events': 'Drawer events',
+  'shiftHistory.noEvents': 'No pay-in / pay-out events.',
+  'shiftHistory.totalCash': 'Cash sales',
+  'shiftHistory.totalCard': 'Card sales',
+  'shiftHistory.totalCredit': 'Credit sales',
+  'shiftHistory.totalSales': 'Sales total',
+  'shiftHistory.statusOpen': 'Open',
+  'shiftHistory.statusClosed': 'Closed',
   'drawer.title': 'Cash Drawer',
   'drawer.hint': 'Record cash added to or removed from the till. This updates expected cash at close.',
   'drawer.type': 'Type',
@@ -542,6 +604,12 @@ export const es: MessageDict = {
   'cashier.loggingOut': 'Cerrando sesión…',
   'cashier.language': 'Idioma',
   'cashier.languageSaveFailed': 'No se pudo guardar el idioma',
+  'cashier.taxRate': 'Tasa de impuesto',
+  'cashier.taxRateSave': 'Guardar',
+  'cashier.taxRateSaving': 'Guardando…',
+  'cashier.taxRateInvalid': 'Ingresa una tasa entre 0 y 100',
+  'cashier.taxRateSaveFailed': 'No se pudo guardar la tasa de impuesto',
+  'cashier.shiftHistory': 'Historial de turnos',
   'cashier.catalog': 'Productos y categorías',
   'admin.title': 'Catálogo',
   'admin.productsTab': 'Productos',
@@ -675,7 +743,11 @@ export const es: MessageDict = {
   'closedTickets.back': 'Volver a la lista',
   'closedTickets.loading': 'Cargando tickets…',
   'closedTickets.empty': 'Aún no hay tickets completados.',
+  'closedTickets.emptyOwn': 'Aún no tienes tickets completados.',
+  'closedTickets.ownHint': 'Tus tickets — solo se listan las ventas que creaste.',
+  'closedTickets.allHint': 'Todos los tickets de la tienda',
   'closedTickets.loadFailed': 'No se pudieron cargar los tickets',
+  'closedTickets.reimburseForbidden': 'Solo puedes reembolsar tus propios tickets.',
   'closedTickets.ticketId': 'Ticket',
   'closedTickets.payments': 'Pagos',
   'closedTickets.lineProduct': 'Producto',
@@ -727,6 +799,27 @@ export const es: MessageDict = {
   'shift.checking': 'Verificando estado del turno…',
   'shift.checkFailedTitle': 'No se pudo verificar el turno',
   'shift.checkFailedBody': 'Ocurrió un error al cargar el estado del turno.',
+  'shiftHistory.title': 'Historial de turnos',
+  'shiftHistory.detailTitle': 'Detalle del turno',
+  'shiftHistory.back': 'Volver a la lista',
+  'shiftHistory.loading': 'Cargando turnos…',
+  'shiftHistory.empty': 'Aún no hay turnos.',
+  'shiftHistory.loadFailed': 'No se pudieron cargar los turnos',
+  'shiftHistory.status': 'Estado',
+  'shiftHistory.startingCash': 'Efectivo inicial',
+  'shiftHistory.expectedCash': 'Efectivo esperado',
+  'shiftHistory.actualCash': 'Efectivo contado',
+  'shiftHistory.discrepancy': 'Diferencia',
+  'shiftHistory.openedAt': 'Apertura',
+  'shiftHistory.closedAt': 'Cierre',
+  'shiftHistory.events': 'Movimientos del cajón',
+  'shiftHistory.noEvents': 'Sin entradas ni salidas.',
+  'shiftHistory.totalCash': 'Ventas en efectivo',
+  'shiftHistory.totalCard': 'Ventas con tarjeta',
+  'shiftHistory.totalCredit': 'Ventas a crédito',
+  'shiftHistory.totalSales': 'Total de ventas',
+  'shiftHistory.statusOpen': 'Abierto',
+  'shiftHistory.statusClosed': 'Cerrado',
   'drawer.title': 'Cajón de efectivo',
   'drawer.hint': 'Registra efectivo agregado o retirado. Esto actualiza el efectivo esperado al cierre.',
   'drawer.type': 'Tipo',

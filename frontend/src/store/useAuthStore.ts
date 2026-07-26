@@ -23,6 +23,8 @@ type AuthState = {
   logout: () => Promise<void>
   clearError: () => void
   setLocaleAndPersist: (locale: Locale) => Promise<void>
+  /** Persist store `preferences.default_tax_rate` (fraction 0–1) and hydrate cart. */
+  setTaxRateAndPersist: (taxRateFraction: number) => Promise<void>
 }
 
 export function selectStoreId(state: AuthState): string {
@@ -32,6 +34,14 @@ export function selectStoreId(state: AuthState): string {
 function applyDocumentLang(user: AuthUser | null) {
   if (typeof document === 'undefined') return
   document.documentElement.lang = normalizeLocale(user?.uiLocale)
+}
+
+/** Feature 089: hydrate cart tax from store default on /me and login. */
+function applyStoreTaxRate(user: AuthUser | null) {
+  if (!user) return
+  const rate = user.defaultTaxRate
+  if (rate == null || !Number.isFinite(Number(rate))) return
+  useCartStore.getState().setTaxRate(Math.max(0, Number(rate)))
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -47,6 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await fetchCsrf()
       const user = await fetchMe()
       applyDocumentLang(user)
+      applyStoreTaxRate(user)
       set({ user, status: 'authenticated', error: null })
     } catch {
       applyDocumentLang(null)
@@ -59,6 +70,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     try {
       const user = await loginRequest(username, password)
       applyDocumentLang(user)
+      applyStoreTaxRate(user)
       set({ user, status: 'authenticated', error: null })
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Login failed'
@@ -106,6 +118,38 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     } catch (error) {
       applyDocumentLang(previous)
       set({ user: previous })
+      throw error
+    }
+  },
+
+  setTaxRateAndPersist: async (taxRateFraction) => {
+    const { user } = get()
+    const storeId = user?.storeId
+    if (!user || !storeId) {
+      throw new Error('Not authenticated')
+    }
+    if (!Number.isFinite(taxRateFraction) || taxRateFraction < 0 || taxRateFraction > 1) {
+      throw new Error('Invalid tax rate')
+    }
+    const previous = user
+    const previousCartRate = useCartStore.getState().taxRate
+    const optimistic = { ...user, defaultTaxRate: taxRateFraction }
+    set({ user: optimistic, error: null })
+    useCartStore.getState().setTaxRate(taxRateFraction)
+    try {
+      const updated = await patchStoreSettings(storeId, {
+        preferences: { default_tax_rate: taxRateFraction },
+      })
+      const raw = updated.preferences?.default_tax_rate
+      const nextRate =
+        raw != null && Number.isFinite(Number(raw))
+          ? Math.max(0, Number(raw))
+          : taxRateFraction
+      set({ user: { ...user, defaultTaxRate: nextRate } })
+      useCartStore.getState().setTaxRate(nextRate)
+    } catch (error) {
+      set({ user: previous })
+      useCartStore.getState().setTaxRate(previousCartRate)
       throw error
     }
   },
