@@ -12,16 +12,10 @@ Whenever you complete, partially complete, or discover work for this POS system,
 
 ## How to update
 
-1. **Done:** Change `[ ]` to `[x]` **and** wrap the full item text in markdown strikethrough so completed work is easy to scan past:
-
-   ```markdown
-   - [x] ~~**Short title** — Feature NNN: brief note.~~
-   ```
-
-   For Phase A (or similar) status table cells that are done, strikethrough the status text the same way (`~~**Done** — …~~`).
+1. **Done:** **Delete** the item from this list. Shipped work is recorded in `docs/features/00N-*/` and the catalog in `docs/README.md` — do not leave `[x]` / strikethrough rows here.
 
 2. **Partial:** Leave `[ ]` (no strikethrough) but add a one-line note under the item describing what remains.
 3. **New gaps:** Append new unchecked items when implementation reveals follow-ups (do not invent scope the user did not discuss).
-4. **Promoted:** If an item becomes a formal `docs/features/00N-*` triad, note that path next to the item and keep `[ ]` (no strikethrough) until shipped, then apply the Done pattern above.
+4. **Promoted:** If an item becomes a formal `docs/features/00N-*` triad, note that path next to the item and keep `[ ]` until shipped, then **delete** it from this list.
 
 Do this in the same session as the feature work—do not wait for the user to ask. Still respect frontend/backend separation for code commits; doc updates to these pending files may ship with the side that completed the work.

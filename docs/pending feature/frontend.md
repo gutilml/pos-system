@@ -4,100 +4,36 @@ Discussion list. Not scheduled work — capture gaps and follow-ups to decide la
 
 **Maintenance:** Update this file whenever frontend work is shipped or a new frontend gap is found.
 
-**Done pattern (easy scan):** When an item is fully complete, use `[x]` **and** wrap the item text in markdown strikethrough:
+**When an item ships:** **delete it** from this list (history lives in `docs/features/` + the catalog in `docs/README.md`).
 
-```markdown
-- [x] ~~**Short title** — Feature NNN: brief note.~~
-```
+Open / deferred / on-hold items stay `[ ]`. Partials stay `[ ]` with a one-line note of what remains. Promoted-but-not-shipped items stay `[ ]` with a triad path note.
 
-Open / deferred / on-hold items stay `[ ]` with **no** strikethrough. Partials stay `[ ]` with a one-line note of what remains. Promoted-but-not-shipped items stay `[ ]` with a triad path note.
+## Phase A — live register wire-up
 
-## Phase A — live register wire-up (planned triads)
-
-Frontend slice of Phase A (small features, FE/BE separated). Pair with backend 017 → 019 → 021:
-
-| # | Feature folder | Status |
-|---|----------------|--------|
-| 018 | `docs/features/018-frontend-shift-gate-hydration/` | ~~**Done** — honest ShiftGate (no fail-open on API error)~~ |
-| 020 | `docs/features/020-frontend-customer-search-wireup/` | ~~**Done** — `storeId` + live search~~ |
-| 022 | `docs/features/022-frontend-live-product-catalog/` | ~~**Done** — replace `mockProducts` with live search~~ |
-| 023 | `docs/features/023-frontend-external-terminal-card/` | ~~**Done** — CARD = mark paid on Pay; Stripe QR off happy path~~ |
+Phase A register wire-up features are shipped. Paired backend: 017, 019, 021.
 
 **Stripe-in-POS:** ON HOLD (2026-07-17). Keep Feature 011 code. External terminal + mark paid on Complete. Do not schedule Stripe QR / status-poll as Phase A work.
 
 ## Wire-up to live backend
 
-- [x] ~~**Replace mock catalog** — Feature 022: `SearchBar` uses `GET /products/search`; `mockProducts.ts` removed.~~
-- [ ] **Complete Sale → `POST /api/v1/transactions`** — Card path and split-pay **Pay** modal (Feature 014) both POST transactions. Legacy single-amount cash path removed; remaining gap is richer error/toast UX when POST fails.
-- [x] ~~**Dev API proxy** — Feature 011: Vite `server.proxy` forwards `/api` → `http://localhost:8080`.~~
-- [x] ~~**`GET /api/v1/shifts/current` dependency** — Feature 018: `fetchCurrentShift(storeId)` + ShiftGate Retry on API failure (no fail-open). Backend Feature 017.~~
+- [ ] **Complete Sale → checkout error UX** — Card path and split-pay **Pay** modal (Feature 014) both POST transactions. Remaining gap: richer error/toast UX when `POST /api/v1/transactions` fails.
 - [ ] **`GET /api/v1/transactions/{id}/status`** — Feature 011 polls this for Stripe QR auto-complete. **On hold with Stripe-in-POS** — not required while CARD is external-terminal + mark-paid-on-Complete.
-- [x] ~~**Adopt `payments[]` transaction payload** — Feature 014: `createTransaction` + CheckoutModal send Feature 013 `payments[]` (+ `customerId` when credit is used).~~
-- [x] ~~**`GET /api/v1/customers/search`** — Feature 020: `searchCustomers` sends `storeId` + `q` (Feature 019 backend).~~
 
 ## Payments (frontend)
 
-- [x] ~~**Stripe QR checkout modal + polling** — Feature 011 shipped; **keep in codebase**. Stripe-in-POS path **ON HOLD (2026-07-17)** for small-store design (external card terminal).~~
-- [x] ~~**Split payments + store-tab assignment UI** — Feature 014: CheckoutModal tenders, CREDIT customer interception, `payments[]` checkout POST.~~
-- [x] ~~**Cash / multi-tender Complete Sale persistence** — Feature 014 Pay → Complete Transaction POSTs and closes the ticket on success.~~
-- [x] ~~**CARD tender = mark paid on Pay (external terminal)** — Feature 023: Card button POSTs `COMPLETED` + CARD tender (no Stripe QR). Pay modal CARD tenders unchanged. Stripe client code kept (ON HOLD).~~
 - [ ] **Split-pay CARD → Stripe session** — **ON HOLD** with Stripe-in-POS; revive when integrated card is re-enabled.
-- [x] ~~**Pay modal redesign (CASH / CARD / CREDIT split, no over-tender)** — Feature 036: remove footer Card; split CASH/CARD/CREDIT; no overpay; CREDIT needs customer; PAY + Print and pay.~~
-- [x] ~~**Assign customer from selling screen** — Feature 037: attach/clear customer on open ticket before Pay.~~
+- [ ] **CARD reimburse UI** — triad: [`085-frontend-card-reimburse`](../features/085-frontend-card-reimburse/README.md). **Deferred**; depends on BE **084**.
 
-## Register UX polish (decisions 2026-07-22)
+## Shift UX
 
-- [x] ~~**Money display 2 decimals** — Feature 033: money UI 2 dp; math/API stay 4; qty may keep 4.~~
-- [x] ~~**Money display 3 decimals** — Feature [071](../features/071-frontend-money-display-3dp/README.md): UI `formatMoney` → 3 dp; math stays 4; supersedes **033** display scale.~~
-- [x] ~~**Search/scan focus lock** — Feature 034: focus search when no modal; restore after close / Escape.~~
-- [x] ~~**Search typeahead** — Feature 035: ≥3 chars, each keystroke, max 10; Enter/click adds; barcode Enter exact still instant.~~
-- [x] ~~**Weight modal keyboard** — Feature 032: weight field accepts physical keyboard (not readOnly).~~
-
-## Register UX polish (review 2026-07-23)
-
-Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Remaining; PAY disabled until Remaining = 0). Promoted to FE-only triads (keep `[ ]` until shipped):
-
-- [x] ~~**Cart line chrome** — Feature 038: hide SKU/unit price; headers Product · Qty · Discount · Subtotal; Item % in Discount. Stock = 043.~~
-- [x] ~~**Cart header column alignment** — Feature 044: shared fixed grid tracks so Qty/Stock/Discount/Subtotal headers sit over their cells.~~
-- [x] ~~**Footer totals: Total only** — Feature 039: remove Subtotal/Tax from footer; keep Total (+ Discount saved when useful).~~
-- [x] ~~**Global discount as footer button** — Feature 040: Discount between Clear and Pay opens global % entry.~~
-- [x] ~~**Pay modal layout (split tenders)** — Feature 041: amount left + method stack; Remaining emphasized; PAY when Remaining = 0 (036 math unchanged).~~
-- [x] ~~**Cart Stock column** — Feature 043: when `enableInventory`, Stock between Qty and Discount; `displayStock = currentStock − line qty`; "—" if not tracking; hide when inventory off.~~
-- [x] ~~**UI locale EN/ES (store preference)** — Feature 046: hydrate from `/me.uiLocale`; CashierMenu EN/ES; PATCH store preferences (DB). Depends on BE 045. No localStorage as source of truth.~~
-- [x] ~~**Pay three amount fields (Option A)** — Feature [047](../features/047-frontend-pay-three-amount-fields/README.md): always-visible CASH/CARD/CREDIT amounts; live Remaining; no overpay; no Add tender / tender list; CREDIT blur → customer gate.~~
-- [x] ~~**UI locale coverage polish** — Feature [048](../features/048-frontend-ui-locale-coverage/README.md): (1) `AssignCustomerControl` + `CustomerSearch` EN/ES; (2) TicketTabs “+ New Ticket” → ES “Ticket nuevo”; (3) cart Stock header → **Inv**.~~
-- [x] ~~**UI locale remaining chrome** — Feature [049](../features/049-frontend-ui-locale-remaining-chrome/README.md): Pay credit-gate/tenders, Close Shift, Pay in/out, Weight, sale/close tickets, auth/shift gates.~~
-
-## Shift UX polish
-
+- [ ] **Shift opener/closer labels** — triad: [`080-frontend-shift-user-labels`](../features/080-frontend-shift-user-labels/README.md). Optional polish; depends on BE **079**.
 - [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Feature 026 prefers `/me.storeId` via `selectStoreId`; constant remains as unauthenticated/fallback until multi-store picker.
-- [x] ~~**Cash drawer pay-in / pay-out UI** — Feature 031: Cashier menu Pay in/out → `DrawerEventModal` → `POST /shifts/{id}/events` (Feature 007).~~
-- [x] ~~**Post-close discrepancy ticket** — Feature 024: after blind close, `ShiftCloseTicket` shows API expected/actual/discrepancy; Print via `window.print`; Done → Open Shift gate. No manager auth.~~
-- [x] ~~**Post-close ticket CARD + CREDIT totals** — Feature 030: blind count kept; ticket sales summary shows CASH / CARD / CREDIT (store tab) + sales grand total from Feature 029.~~
+- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. Not yet a numbered triad.
 
 ## Register / cart
 
-- [x] ~~**Multi SKU/barcode per product (UX)** — Feature 028: register consumes `skus` / `primarySku`; cart shows primary when present; name-only OK. Admin SKU list UI still deferred.~~
-- [x] ~~**Item and global discount UI** — Feature 016: per-line item `%`, footer global `%`, backend-aligned cascade math (`discountPricing.ts`), strikethrough + “No Global %” badge, API payload fields on Pay and Card checkout.~~
-- [ ] **Tax rate from store settings** — Today cart `taxRate` is local state; load from backend when Feature [045](../features/045-backend-store-preferences/) preferences (e.g. `default_tax_rate`) ship. **On hold** (2026-07-23) vs catalog (050–053).
-- [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail. **On hold** (2026-07-23) vs catalog (050–053).
-- [x] ~~**Open / held tickets (tabs)** — Feature 009: multi-ticket Zustand + `TicketTabs` (client-side hold/switch). Void / server-backed held tickets still pending.~~
-- [ ] **Void tickets** — UI for void once backend supports those statuses. **On hold** (2026-07-23) vs catalog (050–053).
-- [x] ~~**Previous closed tickets + reimburse** — Feature [073](../features/073-frontend-closed-tickets-reimburse/README.md): footer `Clear | Discount | Assign | Previous tickets | Pay`; list/review/reimburse via BE **072**. CARD reimbursements deferred.~~
-- [ ] **Cashier-only reimburse filter (FE)** — Companion to BE pending; after sale ownership.
-- [x] ~~**Receipt / print** — Pay-path browser print covered by Feature 036 Print and pay. Standalone/historical reprint & hardware printers still TBD.~~
-- [x] ~~**Product / category admin UI** — Feature [053](../features/053-frontend-product-category-admin/README.md): Cashier → Catalog modal; products + categories; parent package popup. Modal nav superseded by **054–056** (reuse forms/panels).~~
-- [x] ~~**Product editor: category margin + cost→retail + package unit chips** — Feature [074](../features/074-frontend-product-editor-margin-units/README.md): auto margin from category; live retail from cost; remove UOM free text; package unit chip row.~~
-- [x] ~~**Product editor: searchable category + inline add** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): search filter; last option **→ Add category ←**; inline create.~~
-- [x] ~~**Product editor: child / parent UX** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): searchable parent; cost from parent + child margin; inventory locked off; weight UOM chips.~~
-- [x] ~~**POS workspace nav shell** — Feature [054](../features/054-frontend-workspace-nav-shell/README.md): row below Register header; Register/Sell + Products + Customer + Inventory (gated); Customer/Inventory coming soon. AuthGate/ShiftGate unchanged.~~
-- [x] ~~**Products workspace** — Feature [055](../features/055-frontend-products-workspace/README.md): Product\|Category sub-tabs; reuse CategoryPanel / ProductEditorForm; remove CashierMenu Catalog modal. Depends on **054**.~~
-- [x] ~~**Product lookup load-or-create** — Feature [056](../features/056-frontend-product-lookup-load-or-create/README.md): Product tab scan/type → edit if found, else create with barcode/name prefill. Depends on **055**.~~
-- [x] ~~**Product lookup keyboard + editor load** — Feature [057](../features/057-frontend-product-lookup-keyboard-and-load/README.md): Arrow keys on suggestion list; ignore abort on editor load.~~
-- [x] ~~**Workspace nav label polish** — Feature [058](../features/058-frontend-workspace-nav-labels/README.md): Register (not Register/Sell); Customers (plural).~~
-- [x] ~~**Customers workspace** — Feature [061](../features/061-frontend-customers-workspace/README.md): list/filter/create/edit/delete; credit ledger/pay when enabled; Assign customer header label. Depends on BE **060**.~~
-- [x] ~~**Customer has-credit checkbox** — Feature [075](../features/075-frontend-customer-has-credit-checkbox/README.md): optional credit per customer when store credit on; limit 0 when unchecked.~~
-- [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. **On hold** (2026-07-23) vs catalog redesign (**054–056**).
+- [ ] **Offline / API error toasts** — Consistent handling when open/close/checkout/product calls fail.
+- [ ] **Void / hold tickets UI** — triad: [`083-frontend-transaction-lifecycle`](../features/083-frontend-transaction-lifecycle/README.md). **Deferred**; depends on BE **082**. May replace or complement client-only TicketTabs (**009**).
 
 ## Auth & multi-store
 
@@ -107,31 +43,15 @@ Follow-ups from live Pay / cart review (mock: method buttons + Grand total / Rem
 - Roles ADMIN + CASHIER; **equal permissions for now** (no role-gated UI yet).
 - Single store for now; drop `DEFAULT_STORE_ID` hardcode in favor of store from auth/config once BE exposes it on `/me` (or keep seed UUID until then).
 - User management **UI deferred** until user CRUD API exists.
-- Shift ↔ user linking **deferred (Option C)** — Auth v1 login only; shift gate stays store-scoped until a later follow-up.
+- Shift ↔ user linking: follow-up FE **080** after BE **079**.
 
-- [x] ~~**Login / logout UI (v1)** — Feature 026: LoginForm + AuthGate before ShiftGate; login/logout/me; `apiFetch` credentials + CSRF. Logout in CashierMenu.~~
-- [x] ~~**Current-user context (v1)** — Feature 026: `useAuthStore` holds user (+ role); `selectStoreId` from `/me` with `DEFAULT_STORE_ID` fallback.~~
 - [ ] **System user management UI** — Admin screens to create/edit/deactivate users. **Deferred** with backend user CRUD API.
 - [ ] **Role-gated navigation and actions** — Deferred until ADMIN vs CASHIER permissions diverge. Shift close with discrepancy remains cashier-allowed; no manager override for variance.
 - [ ] **Store picker / multi-org UX** — Deferred with multi-organization / multi-store tenancy (Oxxo-, Walmart-style orgs with many stores). Not in Auth v1.
 
 ## Opt-in module UIs
 
-- [x] ~~**Inventory screens** — Feature [063](../features/063-frontend-inventory-workspace/README.md): list/adjust/receive modal; read-only when flag off; register negative-stock warning. Depends on BE **062**. Cart Stock column was Feature [043](../features/043-frontend-cart-stock-column/).~~
-- [x] ~~**Customer credit UI** — Feature 014 checkout CREDIT + **037** assign-from-register; dedicated Customers workspace ledger/pay shipped as Feature [061](../features/061-frontend-customers-workspace/README.md).~~
-- [ ] **Notify admin when sale drives stock negative** — Companion to register warning (063); out of scope for 062/063.
-- [x] ~~**Receipt / print on pay** — Feature 036: Print and pay = complete + print sell ticket + return to ready register.~~
-
-## Small bugs
-
-- [x] ~~**Weight product save: unitOfMeasure required but no UI** — Feature [076](../features/076-frontend-product-editor-category-parent-ux/README.md): weight UOM chips + send `unitOfMeasure` (074 regression).~~
-- [x] ~~**Hide recent movements in inventory receive/adjust modal** — Modal is for posting movements only; history remains available via inventory APIs if needed later.~~
-- [x] ~~**Friendly login failure message** — Feature [065](../features/065-frontend-login-friendly-error/README.md): Problem Details `detail` + i18n `login.invalidCredentials`.~~
-- [x] ~~**Customers / Inventory list stuck on Loading** — Feature [064](../features/064-frontend-uset-stable-loading/README.md): stabilize `useT` with `useCallback` so list effects stop thrashing.~~
-- [x] ~~**Inventory receive: cost change should refresh prices** — Feature [066](../features/066-frontend-inventory-receive-price-preview/README.md): derive selling/wholesale from margins on cost change.~~
-- [x] ~~**Customer Add payment shows "Failed to fetch"** — Addressed by **064** (reload storm) + **068** pay modal; re-open if POST still fails without the loop.~~
-- [x] ~~**Customer balance pay modal (CASH / CARD)** — Feature [068](../features/068-frontend-customer-payment-modal/README.md): Add payment → modal amount + CASH|CARD; depends on BE **067**.~~
-- [x] ~~**Credit ledger Movements description** — Feature [070](../features/070-frontend-credit-ledger-movements/README.md): show stored locale snapshot from **069**; section titled Movements.~~
+- [ ] **Notify admin when sale drives stock negative** — triad: [`092-frontend-negative-stock-notify`](../features/092-frontend-negative-stock-notify/README.md). **Deferred**; depends on BE **091**.
 
 ## Tooling / quality
 
