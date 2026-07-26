@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-// https://vite.dev/config/
+/** Regression-only Vitest config — not part of default `npm test`. */
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -14,24 +14,10 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-    },
-  },
   test: {
     environment: 'jsdom',
     setupFiles: ['./src/test/setup.ts'],
     css: true,
-    // Default `npm test` skips regression; run with `npm run test:regression`.
-    exclude: [
-      '**/node_modules/**',
-      '**/dist/**',
-      '**/*.regression.test.ts',
-      '**/*.regression.test.tsx',
-    ],
+    include: ['**/*.regression.test.ts', '**/*.regression.test.tsx'],
   },
 })
