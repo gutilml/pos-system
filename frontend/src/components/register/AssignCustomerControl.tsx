@@ -36,7 +36,7 @@ export function AssignCustomerControl() {
           type="button"
           data-testid="open-assign-customer"
           onClick={() => setOpen(true)}
-          className="min-w-0 flex-1 rounded-lg border border-slate-300 bg-white px-2 py-2.5 text-sm font-medium text-slate-700 active:bg-slate-100"
+          className="min-w-0 flex-1 rounded-lg border-2 border-slate-400 bg-slate-100 px-2 py-3 text-sm font-semibold text-slate-900 shadow-sm active:bg-slate-200"
         >
           {customer ? t('customer.change') : t('customer.assignTitle')}
         </button>

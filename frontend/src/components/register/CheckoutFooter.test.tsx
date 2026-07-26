@@ -45,6 +45,9 @@ describe('CheckoutFooter', () => {
       'open-previous-tickets',
       'open-checkout',
     ])
+    expect(screen.getByTestId('footer-clear').className).toMatch(/border-slate-400/)
+    expect(screen.getByTestId('footer-clear').className).toMatch(/bg-slate-100/)
+    expect(screen.getByTestId('open-checkout').className).toMatch(/bg-emerald-700/)
   })
 
   it('opens the checkout modal from Pay', async () => {
