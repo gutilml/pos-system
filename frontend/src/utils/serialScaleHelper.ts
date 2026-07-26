@@ -8,10 +8,13 @@ type SerialPortLike = {
   close: () => Promise<void>
 }
 
+type SerialApi = {
+  requestPort: () => Promise<SerialPortLike>
+  getPorts: () => Promise<SerialPortLike[]>
+}
+
 type SerialNavigator = Navigator & {
-  serial?: {
-    requestPort: () => Promise<SerialPortLike>
-  }
+  serial?: SerialApi
 }
 
 export class ScaleConnectionError extends Error {
@@ -26,32 +29,52 @@ export function isWebSerialSupported(): boolean {
   return Boolean((navigator as SerialNavigator).serial)
 }
 
-/**
- * Prompts the user to pick a serial port, reads a short burst of data,
- * parses the first numeric weight value, then closes the port.
- *
- * Throws ScaleConnectionError when Serial is unsupported or the read fails,
- * so callers can fall back to the manual numpad.
- */
-export async function requestScaleWeight(options?: {
-  baudRate?: number
-  readMs?: number
-}): Promise<number> {
+function getSerial(): SerialApi {
   const serial = (navigator as SerialNavigator).serial
   if (!serial) {
     throw new ScaleConnectionError('Web Serial API is not supported in this browser')
   }
+  return serial
+}
 
-  const baudRate = options?.baudRate ?? 9600
-  const readMs = options?.readMs ?? 1500
-
-  let port: SerialPortLike | null = null
-  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
-
+/** Previously granted ports (no user gesture required). */
+export async function listGrantedScalePorts(): Promise<SerialPortLike[]> {
+  if (!isWebSerialSupported()) return []
   try {
-    port = await serial.requestPort()
-    await port.open({ baudRate })
+    return await getSerial().getPorts()
+  } catch {
+    return []
+  }
+}
 
+export async function hasGrantedScalePort(): Promise<boolean> {
+  const ports = await listGrantedScalePorts()
+  return ports.length > 0
+}
+
+/**
+ * Prompt the user to grant a serial port (requires a user gesture).
+ * Used for early Connect scale / reconnect.
+ */
+export async function pairScalePort(): Promise<void> {
+  const serial = getSerial()
+  const port = await serial.requestPort()
+  // Open+close once so Chrome remembers a usable grant and we verify access.
+  await port.open({ baudRate: 9600 })
+  try {
+    await port.close()
+  } catch {
+    // ignore
+  }
+}
+
+async function readWeightFromPort(
+  port: SerialPortLike,
+  options: { baudRate: number; readMs: number },
+): Promise<number> {
+  let reader: ReadableStreamDefaultReader<Uint8Array> | null = null
+  try {
+    await port.open({ baudRate: options.baudRate })
     if (!port.readable) {
       throw new ScaleConnectionError('Serial port is not readable')
     }
@@ -59,7 +82,7 @@ export async function requestScaleWeight(options?: {
     reader = port.readable.getReader()
     const decoder = new TextDecoder()
     let buffer = ''
-    const deadline = Date.now() + readMs
+    const deadline = Date.now() + options.readMs
 
     while (Date.now() < deadline) {
       const remaining = deadline - Date.now()
@@ -89,12 +112,6 @@ export async function requestScaleWeight(options?: {
     }
 
     throw new ScaleConnectionError('No numeric weight value received from scale')
-  } catch (error) {
-    if (error instanceof ScaleConnectionError) {
-      throw error
-    }
-    const message = error instanceof Error ? error.message : 'Failed to read from scale'
-    throw new ScaleConnectionError(message)
   } finally {
     try {
       reader?.releaseLock()
@@ -102,11 +119,69 @@ export async function requestScaleWeight(options?: {
       // ignore
     }
     try {
-      await port?.close()
+      await port.close()
     } catch {
       // ignore
     }
   }
+}
+
+export type ReadScaleWeightOptions = {
+  baudRate?: number
+  readMs?: number
+  /** When true and no granted port exists, call requestPort (needs user gesture). */
+  allowPrompt?: boolean
+}
+
+/**
+ * Read a weight from a previously granted port, or optionally prompt for a port.
+ */
+export async function readScaleWeight(options?: ReadScaleWeightOptions): Promise<number> {
+  const baudRate = options?.baudRate ?? 9600
+  const readMs = options?.readMs ?? 1500
+  const allowPrompt = options?.allowPrompt === true
+  const serial = getSerial()
+
+  try {
+    const granted = await serial.getPorts()
+    if (granted.length > 0) {
+      let lastError: unknown
+      for (const port of granted) {
+        try {
+          return await readWeightFromPort(port, { baudRate, readMs })
+        } catch (error) {
+          lastError = error
+        }
+      }
+      if (lastError instanceof ScaleConnectionError) {
+        throw lastError
+      }
+      throw new ScaleConnectionError(
+        lastError instanceof Error ? lastError.message : 'Failed to read from scale',
+      )
+    }
+
+    if (!allowPrompt) {
+      throw new ScaleConnectionError('No scale paired. Connect a scale in Settings.')
+    }
+
+    const port = await serial.requestPort()
+    return await readWeightFromPort(port, { baudRate, readMs })
+  } catch (error) {
+    if (error instanceof ScaleConnectionError) {
+      throw error
+    }
+    const message = error instanceof Error ? error.message : 'Failed to read from scale'
+    throw new ScaleConnectionError(message)
+  }
+}
+
+/** Prefer readScaleWeight({ allowPrompt: true }); kept for existing call sites. */
+export async function requestScaleWeight(options?: {
+  baudRate?: number
+  readMs?: number
+}): Promise<number> {
+  return readScaleWeight({ ...options, allowPrompt: true })
 }
 
 /** Extracts the first decimal number from a scale text stream (e.g. "ST,GS,  0.250 kg"). */
@@ -118,3 +193,5 @@ export function parseWeightFromBuffer(buffer: string): number | null {
   if (!Number.isFinite(value) || value < 0) return null
   return value
 }
+
+export const SCALE_BANNER_DISMISS_KEY = 'pos-scale-banner-dismissed'

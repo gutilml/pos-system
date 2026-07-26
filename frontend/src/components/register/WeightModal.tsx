@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useT } from '@/i18n/useT'
 import { formatMoney } from '@/lib/money'
 import { useCartStore } from '@/store/useCartStore'
-import { isWebSerialSupported, requestScaleWeight } from '@/utils/serialScaleHelper'
+import { isWebSerialSupported, readScaleWeight } from '@/utils/serialScaleHelper'
 
 const NUMPAD_KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'] as const
 
@@ -45,6 +45,32 @@ export function WeightModal() {
       requestAnimationFrame(() => inputRef.current?.focus())
     }
   }, [pending])
+
+  useEffect(() => {
+    if (!pending || !isWebSerialSupported()) return
+    let cancelled = false
+    setReadingScale(true)
+    setScaleError(null)
+    void (async () => {
+      try {
+        const weight = await readScaleWeight({ allowPrompt: false })
+        if (!cancelled) {
+          setWeightInput(String(weight))
+        }
+      } catch (error) {
+        if (!cancelled) {
+          const message =
+            error instanceof Error ? error.message : t('weight.readFailed')
+          setScaleError(`${message}. ${t('weight.manualFallback')}`)
+        }
+      } finally {
+        if (!cancelled) setReadingScale(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [pending, t])
 
   useEffect(() => {
     if (!pending) return
@@ -98,7 +124,7 @@ export function WeightModal() {
     setScaleError(null)
     setReadingScale(true)
     try {
-      const weight = await requestScaleWeight()
+      const weight = await readScaleWeight({ allowPrompt: true })
       setWeightInput(String(weight))
     } catch (error) {
       const message =

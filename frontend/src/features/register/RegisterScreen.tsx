@@ -7,6 +7,7 @@ import { TicketTabs } from '@/components/register/TicketTabs'
 import { WorkspaceNav } from '@/components/register/WorkspaceNav'
 import { WeightModal } from '@/components/register/WeightModal'
 import { CashierMenu } from '@/components/shift/CashierMenu'
+import { ScaleConnectBanner } from '@/components/register/ScaleConnectBanner'
 import { ShiftGate } from '@/components/shift/ShiftGate'
 import { ProductsWorkspace } from '@/features/admin/ProductsWorkspace'
 import { CustomersWorkspace } from '@/features/admin/CustomersWorkspace'
@@ -52,6 +53,8 @@ export function RegisterScreen() {
           </header>
 
           <WorkspaceNav active={workspace} onChange={setWorkspace} />
+
+          <ScaleConnectBanner />
 
           {workspace === 'sell' ? (
             <>

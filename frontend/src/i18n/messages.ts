@@ -146,6 +146,15 @@ export type MessageKey =
   | 'weight.backspace'
   | 'weight.decimal'
   | 'weight.inputAria'
+  | 'scale.settingsTitle'
+  | 'scale.connected'
+  | 'scale.notConnected'
+  | 'scale.connectHint'
+  | 'scale.connect'
+  | 'scale.reconnect'
+  | 'scale.connecting'
+  | 'scale.connectFailed'
+  | 'scale.dismiss'
   | 'saleTicket.title'
   | 'saleTicket.customer'
   | 'shiftTicket.title'
@@ -563,6 +572,15 @@ export const en: MessageDict = {
   'weight.backspace': 'Backspace',
   'weight.decimal': 'Decimal point',
   'weight.inputAria': 'Weight in',
+  'scale.settingsTitle': 'Scale',
+  'scale.connected': 'Scale connected',
+  'scale.notConnected': 'Scale not connected',
+  'scale.connectHint': 'Connect once after opening the register so weight items can auto-read.',
+  'scale.connect': 'Connect scale',
+  'scale.reconnect': 'Reconnect scale',
+  'scale.connecting': 'Connecting…',
+  'scale.connectFailed': 'Could not connect to the scale',
+  'scale.dismiss': 'Dismiss',
   'saleTicket.title': 'Sale Ticket',
   'saleTicket.customer': 'Customer:',
   'shiftTicket.title': 'Shift Close Ticket',
@@ -868,6 +886,15 @@ export const es: MessageDict = {
   'weight.backspace': 'Borrar',
   'weight.decimal': 'Punto decimal',
   'weight.inputAria': 'Peso en',
+  'scale.settingsTitle': 'Báscula',
+  'scale.connected': 'Báscula conectada',
+  'scale.notConnected': 'Báscula no conectada',
+  'scale.connectHint': 'Conéctala una vez al abrir la caja para leer el peso automáticamente.',
+  'scale.connect': 'Conectar báscula',
+  'scale.reconnect': 'Reconectar báscula',
+  'scale.connecting': 'Conectando…',
+  'scale.connectFailed': 'No se pudo conectar la báscula',
+  'scale.dismiss': 'Descartar',
   'saleTicket.title': 'Ticket de venta',
   'saleTicket.customer': 'Cliente:',
   'shiftTicket.title': 'Ticket de cierre de turno',

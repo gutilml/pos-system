@@ -1,8 +1,19 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { WeightModal } from '@/components/register/WeightModal'
 import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
+
+vi.mock('@/utils/serialScaleHelper', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/utils/serialScaleHelper')>()
+  return {
+    ...actual,
+    isWebSerialSupported: vi.fn(() => false),
+    readScaleWeight: vi.fn(),
+  }
+})
+
+import { isWebSerialSupported, readScaleWeight } from '@/utils/serialScaleHelper'
 
 const deliHam = {
   id: 'p-ham',
@@ -16,6 +27,7 @@ const deliHam = {
 describe('WeightModal', () => {
   beforeEach(() => {
     resetCartForTests()
+    vi.mocked(isWebSerialSupported).mockReturnValue(false)
   })
 
   it('does not render when there is no pending weight product', () => {
@@ -82,17 +94,33 @@ describe('WeightModal', () => {
 describe('WeightModal scale fallback', () => {
   beforeEach(() => {
     resetCartForTests({ pendingWeightProduct: deliHam })
+    vi.mocked(isWebSerialSupported).mockReturnValue(false)
   })
 
   it('shows fallback messaging when Web Serial is unsupported', () => {
-    Object.defineProperty(navigator, 'serial', {
-      configurable: true,
-      value: undefined,
-    })
-
     render(<WeightModal />)
 
     expect(screen.getByText(/Web Serial not available/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Read from Scale' })).toBeDisabled()
+  })
+})
+
+describe('WeightModal auto-read', () => {
+  beforeEach(() => {
+    resetCartForTests({ pendingWeightProduct: deliHam })
+    vi.mocked(isWebSerialSupported).mockReturnValue(true)
+    vi.mocked(readScaleWeight).mockReset()
+  })
+
+  it('auto-fills weight from a granted scale without prompting', async () => {
+    vi.mocked(readScaleWeight).mockResolvedValue(1.25)
+    render(<WeightModal />)
+
+    await waitFor(() => {
+      expect(readScaleWeight).toHaveBeenCalledWith({ allowPrompt: false })
+    })
+    await waitFor(() => {
+      expect(screen.getByLabelText(/weight in gr/i)).toHaveValue('1.25')
+    })
   })
 })

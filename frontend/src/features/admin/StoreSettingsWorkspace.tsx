@@ -1,4 +1,5 @@
 import { useEffect, useState, type FormEvent } from 'react'
+import { ScaleConnectBanner } from '@/components/register/ScaleConnectBanner'
 import { useT } from '@/i18n/useT'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 
@@ -101,6 +102,11 @@ export function StoreSettingsWorkspace() {
           </p>
         ) : null}
       </form>
+
+      <div>
+        <h3 className="mb-2 text-sm font-semibold text-slate-900">{t('scale.settingsTitle')}</h3>
+        <ScaleConnectBanner alwaysShow />
+      </div>
     </section>
   )
 }

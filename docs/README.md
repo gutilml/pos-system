@@ -180,6 +180,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 096 | FE | Done | [README](features/096-frontend-register-footer-secondary-buttons/README.md) | [spec](features/096-frontend-register-footer-secondary-buttons/spec.md) · [plan](features/096-frontend-register-footer-secondary-buttons/plan.md) · [tasks](features/096-frontend-register-footer-secondary-buttons/tasks.md) |
 | 097 | BE | Done | [README](features/097-backend-parent-pc-no-weight-child/README.md) | [spec](features/097-backend-parent-pc-no-weight-child/spec.md) · [plan](features/097-backend-parent-pc-no-weight-child/plan.md) · [tasks](features/097-backend-parent-pc-no-weight-child/tasks.md) |
 | 098 | FE | Done | [README](features/098-frontend-parent-package-editor-guards/README.md) | [spec](features/098-frontend-parent-package-editor-guards/spec.md) · [plan](features/098-frontend-parent-package-editor-guards/plan.md) · [tasks](features/098-frontend-parent-package-editor-guards/tasks.md) |
+| 099 | FE | Done | [README](features/099-frontend-scale-early-pair-autoread/README.md) | [spec](features/099-frontend-scale-early-pair-autoread/spec.md) · [plan](features/099-frontend-scale-early-pair-autoread/plan.md) · [tasks](features/099-frontend-scale-early-pair-autoread/tasks.md) |
 
 ---
 
