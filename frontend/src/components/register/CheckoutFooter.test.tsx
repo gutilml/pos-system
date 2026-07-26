@@ -83,8 +83,8 @@ describe('CheckoutFooter', () => {
     await user.click(screen.getByTestId('apply-global-discount'))
 
     expect(screen.queryByTestId('global-discount-modal')).not.toBeInTheDocument()
-    expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.199')
-    expect(screen.getByTestId('footer-total')).toHaveTextContent('1.791')
+    expect(screen.getByTestId('discount-saved')).toHaveTextContent('−0.20')
+    expect(screen.getByTestId('footer-total')).toHaveTextContent('1.79')
     expect(screen.getByTestId('open-global-discount')).toHaveTextContent(/10/)
   })
 

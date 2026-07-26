@@ -174,6 +174,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 090 | BE | Planned — Deferred (design needed) | [README](features/090-backend-multi-tier-pricing/README.md) | [spec](features/090-backend-multi-tier-pricing/spec.md) · [plan](features/090-backend-multi-tier-pricing/plan.md) · [tasks](features/090-backend-multi-tier-pricing/tasks.md) |
 | 091 | BE | Planned — Deferred (channel TBD) | [README](features/091-backend-negative-stock-notify/README.md) | [spec](features/091-backend-negative-stock-notify/spec.md) · [plan](features/091-backend-negative-stock-notify/plan.md) · [tasks](features/091-backend-negative-stock-notify/tasks.md) |
 | 092 | FE | Planned — Deferred | [README](features/092-frontend-negative-stock-notify/README.md) | [spec](features/092-frontend-negative-stock-notify/spec.md) · [plan](features/092-frontend-negative-stock-notify/plan.md) · [tasks](features/092-frontend-negative-stock-notify/tasks.md) |
+| 093 | FE | Done | [README](features/093-frontend-money-display-2dp/README.md) | [spec](features/093-frontend-money-display-2dp/spec.md) · [plan](features/093-frontend-money-display-2dp/plan.md) · [tasks](features/093-frontend-money-display-2dp/tasks.md) |
 
 ---
 

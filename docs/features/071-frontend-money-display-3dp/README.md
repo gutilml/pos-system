@@ -6,7 +6,7 @@ Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`
 
 ## Status
 
-**Done** — `MONEY_DISPLAY_SCALE = 3`; payment modal uses `formatMoney`.
+**Done** — `MONEY_DISPLAY_SCALE = 3`; payment modal uses `formatMoney`. **Superseded by Feature [093](../093-frontend-money-display-2dp/README.md)** (restore 2 dp display + payable rounding).
 
 ## Summary
 

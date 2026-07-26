@@ -10,7 +10,7 @@ import {
   selectActiveCustomer,
   selectActiveGlobalDiscountPercentage,
   selectActiveItems,
-  selectGrandTotal,
+  selectPayableGrandTotal,
   selectTotalDiscountAmount,
   useCartStore,
 } from '@/store/useCartStore'
@@ -32,7 +32,7 @@ export function CheckoutFooter() {
   const [ticketsOpen, setTicketsOpen] = useState(false)
   const [globalDraft, setGlobalDraft] = useState(() => fractionToDisplayPercent(globalDiscount))
 
-  const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
+  const grandTotal = selectPayableGrandTotal(items, taxRate, globalDiscount)
   const discountSaved = selectTotalDiscountAmount(items, globalDiscount)
   const activePctLabel = fractionToDisplayPercent(globalDiscount)
 

@@ -6,6 +6,7 @@ import {
   resetCartForTests,
   selectActivePayments,
   selectGrandTotal,
+  selectPayableGrandTotal,
   useCartStore,
 } from '@/store/useCartStore'
 
@@ -201,7 +202,7 @@ describe('CheckoutModal', () => {
       taxRate: 0,
       globalDiscountPercentage: 0.05,
     })
-    const total = selectGrandTotal(
+    const total = selectPayableGrandTotal(
       useCartStore.getState().tickets[useCartStore.getState().activeTicketId].items,
       0,
       0.05,
@@ -222,6 +223,52 @@ describe('CheckoutModal', () => {
               itemDiscountPercentage: 0.1,
             }),
           ],
+        }),
+      )
+    })
+  })
+
+  it('remaps payable tenders to the internal 4dp total on PAY', async () => {
+    const user = userEvent.setup()
+    vi.mocked(createTransaction).mockResolvedValue({ id: 'tx-mills', status: 'COMPLETED' })
+
+    resetCartForTests({
+      items: [
+        {
+          productId: 'p-cola',
+          sku: '1001',
+          name: 'Cola 12oz',
+          unitPrice: 1.99,
+          quantity: 2,
+        },
+        {
+          productId: 'p-chips',
+          sku: '1002',
+          name: 'Chips',
+          unitPrice: 2.5,
+          quantity: 1,
+        },
+      ],
+      taxRate: 0.0825,
+    })
+
+    const items = useCartStore.getState().tickets[useCartStore.getState().activeTicketId].items
+    const internal = selectGrandTotal(items, 0.0825)
+    const payable = selectPayableGrandTotal(items, 0.0825)
+    expect(internal).toBe(7.0146)
+    expect(payable).toBe(7.01)
+
+    useCartStore.getState().upsertPayment('CARD', payable)
+    render(<CheckoutModal open onClose={() => undefined} />)
+
+    expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('7.01')
+    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
+    await user.click(screen.getByTestId('complete-transaction'))
+
+    await waitFor(() => {
+      expect(createTransaction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          payments: [{ paymentMethod: 'CARD', amount: 7.0146 }],
         }),
       )
     })

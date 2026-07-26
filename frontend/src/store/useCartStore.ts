@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { priceCartLine } from '@/lib/discountPricing'
-import { roundMoney } from '@/lib/money'
+import { roundMoney, roundMoneyDisplay } from '@/lib/money'
 import type { CartItem, CartProduct } from '@/types/cart'
 
 export type PaymentMethod = 'CASH' | 'CARD' | 'CREDIT'
@@ -194,7 +194,43 @@ export function selectActiveGlobalDiscountPercentage(state: {
 }
 
 export function selectTotalTendered(payments: PaymentTender[]): number {
-  return roundMoney(payments.reduce((sum, payment) => sum + payment.amount, 0))
+  return roundMoneyDisplay(
+    payments.reduce((sum, payment) => sum + payment.amount, 0),
+  )
+}
+
+/** Grand total cashiers pay against (2 dp HALF_UP). Internal math stays at 4 dp. */
+export function selectPayableGrandTotal(
+  items: CartItem[],
+  taxRate: number,
+  globalDiscountPercentage = 0,
+): number {
+  return roundMoneyDisplay(selectGrandTotal(items, taxRate, globalDiscountPercentage))
+}
+
+/**
+ * Remap UI tenders (payable 2 dp) so their sum equals the internal 4 dp grand total
+ * for the create-transaction API (BE rejects non-cash over the 4 dp total).
+ */
+export function paymentsForApi(
+  payments: PaymentTender[],
+  internalGrandTotal: number,
+): PaymentTender[] {
+  if (payments.length === 0) return []
+  const tendered = selectTotalTendered(payments)
+  const diff = roundMoney(tendered - internalGrandTotal)
+  if (diff === 0) {
+    return payments.map((payment) => ({ ...payment }))
+  }
+
+  const adjusted = payments.map((payment) => ({ ...payment }))
+  const cashIdx = adjusted.findIndex((payment) => payment.method === 'CASH')
+  const idx = cashIdx >= 0 ? cashIdx : adjusted.length - 1
+  adjusted[idx] = {
+    ...adjusted[idx],
+    amount: roundMoney(adjusted[idx].amount - diff),
+  }
+  return adjusted.filter((payment) => payment.amount > 0)
 }
 
 export function selectBalanceDue(
@@ -203,8 +239,12 @@ export function selectBalanceDue(
   payments: PaymentTender[],
   globalDiscountPercentage = 0,
 ): number {
-  return roundMoney(
-    Math.max(0, selectGrandTotal(items, taxRate, globalDiscountPercentage) - selectTotalTendered(payments)),
+  return roundMoneyDisplay(
+    Math.max(
+      0,
+      selectPayableGrandTotal(items, taxRate, globalDiscountPercentage) -
+        selectTotalTendered(payments),
+    ),
   )
 }
 
@@ -214,10 +254,11 @@ export function selectTenderChangeDue(
   payments: PaymentTender[],
   globalDiscountPercentage = 0,
 ): number {
-  return roundMoney(
+  return roundMoneyDisplay(
     Math.max(
       0,
-      selectTotalTendered(payments) - selectGrandTotal(items, taxRate, globalDiscountPercentage),
+      selectTotalTendered(payments) -
+        selectPayableGrandTotal(items, taxRate, globalDiscountPercentage),
     ),
   )
 }
@@ -235,7 +276,7 @@ export function selectCanCompleteSale(
 ): boolean {
   if (items.length === 0 || payments.length === 0) return false
   const tendered = selectTotalTendered(payments)
-  const total = selectGrandTotal(items, taxRate, globalDiscountPercentage)
+  const total = selectPayableGrandTotal(items, taxRate, globalDiscountPercentage)
   if (tendered !== total) {
     return false
   }
@@ -348,7 +389,7 @@ export const useCartStore = create<CartState>()(
       },
 
       upsertPayment: (method, amount) => {
-        const tenderAmount = roundMoney(amount)
+        const tenderAmount = roundMoneyDisplay(amount)
         const state = get()
         const ticket = state.tickets[state.activeTicketId]
         if (!ticket) return false
@@ -368,12 +409,12 @@ export const useCartStore = create<CartState>()(
 
         const others = ticket.payments.filter((payment) => payment.method !== method)
         const othersSum = selectTotalTendered(others)
-        const grandTotal = selectGrandTotal(
+        const payableTotal = selectPayableGrandTotal(
           ticket.items,
           state.taxRate,
           ticket.globalDiscountPercentage,
         )
-        const maxForMethod = roundMoney(Math.max(0, grandTotal - othersSum))
+        const maxForMethod = roundMoneyDisplay(Math.max(0, payableTotal - othersSum))
         if (tenderAmount > maxForMethod) return false
 
         set((prev) =>
@@ -647,8 +688,8 @@ export function selectChangeDue(
   globalDiscountPercentage = 0,
 ): number {
   if (amountReceived === null) return 0
-  return roundMoney(
-    amountReceived - selectGrandTotal(items, taxRate, globalDiscountPercentage),
+  return roundMoneyDisplay(
+    amountReceived - selectPayableGrandTotal(items, taxRate, globalDiscountPercentage),
   )
 }
 

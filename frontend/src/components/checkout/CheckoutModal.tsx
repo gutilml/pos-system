@@ -16,7 +16,9 @@ import {
   selectCanCompleteSale,
   selectGrandTotal,
   selectItemPricedLine,
+  selectPayableGrandTotal,
   selectTotalTendered,
+  paymentsForApi,
   useCartStore,
   type AssignedCustomer,
 } from '@/store/useCartStore'
@@ -46,7 +48,8 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const [error, setError] = useState<string | null>(null)
   const [saleReceipt, setSaleReceipt] = useState<SaleTicketPayload | null>(null)
 
-  const grandTotal = selectGrandTotal(items, taxRate, globalDiscount)
+  const grandTotal = selectPayableGrandTotal(items, taxRate, globalDiscount)
+  const internalGrandTotal = selectGrandTotal(items, taxRate, globalDiscount)
   const totalTendered = selectTotalTendered(payments)
   const balanceDue = selectBalanceDue(items, taxRate, payments, globalDiscount)
   const canComplete = selectCanCompleteSale(items, taxRate, payments, customer, globalDiscount)
@@ -113,6 +116,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
     setError(null)
 
     const receipt = buildReceiptSnapshot()
+    const apiPayments = paymentsForApi(payments, internalGrandTotal)
 
     try {
       await createTransaction({
@@ -126,7 +130,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
           itemDiscountPercentage:
             (item.itemDiscountPercentage ?? 0) > 0 ? item.itemDiscountPercentage : undefined,
         })),
-        payments: payments.map((payment) => ({
+        payments: apiPayments.map((payment) => ({
           paymentMethod: payment.method,
           amount: payment.amount,
         })),

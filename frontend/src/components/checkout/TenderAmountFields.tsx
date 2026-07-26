@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { formatMoney, roundMoney } from '@/lib/money'
+import { formatMoney, roundMoneyDisplay } from '@/lib/money'
 import { useT } from '@/i18n/useT'
 import type { PaymentMethod, PaymentTender } from '@/store/useCartStore'
 
@@ -53,7 +53,7 @@ export function TenderAmountFields({
     if (!Number.isFinite(parsed) || parsed < 0) {
       return false
     }
-    const amount = roundMoney(parsed)
+    const amount = roundMoneyDisplay(parsed)
     const ok = onUpsert(method, amount)
     if (!ok) {
       setFieldError(method)
@@ -87,7 +87,7 @@ export function TenderAmountFields({
       } else {
         const parsed = Number.parseFloat(trimmed)
         if (Number.isFinite(parsed) && parsed > 0) {
-          setDrafts((prev) => ({ ...prev, [method]: formatMoney(roundMoney(parsed)) }))
+          setDrafts((prev) => ({ ...prev, [method]: formatMoney(roundMoneyDisplay(parsed)) }))
         }
       }
     }
@@ -99,7 +99,7 @@ export function TenderAmountFields({
     }
     const parsed = Number.parseFloat(trimmed)
     if (!Number.isFinite(parsed)) return
-    onCreditBlur(roundMoney(parsed))
+    onCreditBlur(roundMoneyDisplay(parsed))
   }
 
   return (

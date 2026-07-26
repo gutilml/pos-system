@@ -11,6 +11,8 @@ import {
   selectCanCompleteSale,
   selectChangeDue,
   selectGrandTotal,
+  selectPayableGrandTotal,
+  paymentsForApi,
   selectSubtotal,
   selectTaxTotal,
   selectTotalDiscountAmount,
@@ -214,6 +216,28 @@ describe('useCartStore', () => {
     removePayment(payments[0].id)
     const state3 = useCartStore.getState()
     expect(selectBalanceDue(items, 0, selectActivePayments(state3))).toBe(2.48)
+  })
+
+  it('completes against payable 2dp when internal total has mills', () => {
+    const { addItem, setTaxRate, upsertPayment } = useCartStore.getState()
+    addItem(cola, 2)
+    addItem(chips, 1)
+    setTaxRate(0.0825)
+
+    const state = useCartStore.getState()
+    const items = selectActiveItems(state)
+    expect(selectGrandTotal(items, state.taxRate)).toBe(7.0146)
+    expect(selectPayableGrandTotal(items, state.taxRate)).toBe(7.01)
+
+    expect(upsertPayment('CASH', 7.01)).toBe(true)
+    expect(upsertPayment('CASH', 7.02)).toBe(false)
+
+    const payments = selectActivePayments(useCartStore.getState())
+    expect(selectBalanceDue(items, state.taxRate, payments)).toBe(0)
+    expect(selectCanCompleteSale(items, state.taxRate, payments, null)).toBe(true)
+    expect(paymentsForApi(payments, selectGrandTotal(items, state.taxRate))).toEqual([
+      expect.objectContaining({ method: 'CASH', amount: 7.0146 }),
+    ])
   })
 
   it('upsertPayment replaces per method, clears on zero, and rejects overpay', () => {
