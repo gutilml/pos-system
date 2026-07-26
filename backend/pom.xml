@@ -19,6 +19,8 @@
 
     <properties>
         <java.version>17</java.version>
+        <!-- Default `mvn test` excludes @Tag("regression"). Clear with -Dpos.excludedGroups= -->
+        <pos.excludedGroups>regression</pos.excludedGroups>
     </properties>
 
     <dependencies>
@@ -93,6 +95,17 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!--
+              Default `mvn test` excludes JUnit 5 @Tag("regression").
+              Run regression only: mvn test -Dgroups=regression -Dpos.excludedGroups=
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <excludedGroups>${pos.excludedGroups}</excludedGroups>
+                </configuration>
             </plugin>
         </plugins>
     </build>

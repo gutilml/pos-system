@@ -85,6 +85,8 @@ API: http://localhost:8080
 
 Optional: set `POS_JWT_SECRET` for a non-default signing key.
 
+Backend unit/integration tests (`cd backend`): `./mvnw test` skips JUnit 5 `@Tag("regression")`. Run regression only with `./mvnw test -Dgroups=regression -DexcludedGroups=`.
+
 ### 4. Frontend
 
 ```bash
