@@ -11,6 +11,7 @@ import { ShiftGate } from '@/components/shift/ShiftGate'
 import { ProductsWorkspace } from '@/features/admin/ProductsWorkspace'
 import { CustomersWorkspace } from '@/features/admin/CustomersWorkspace'
 import { InventoryWorkspace } from '@/features/admin/InventoryWorkspace'
+import { StoreSettingsWorkspace } from '@/features/admin/StoreSettingsWorkspace'
 import type { WorkspaceId } from '@/features/workspace/workspaceIds'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -97,6 +98,8 @@ export function RegisterScreen() {
           {workspace === 'customers' ? <CustomersWorkspace /> : null}
 
           {workspace === 'inventory' ? <InventoryWorkspace /> : null}
+
+          {workspace === 'settings' ? <StoreSettingsWorkspace /> : null}
         </div>
       </ShiftGate>
     </AuthGate>

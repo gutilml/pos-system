@@ -1,10 +1,9 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { CashierMenu } from '@/components/shift/CashierMenu'
+import { StoreSettingsWorkspace } from '@/features/admin/StoreSettingsWorkspace'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useCartStore } from '@/store/useCartStore'
-import { useShiftStore } from '@/store/useShiftStore'
 
 vi.mock('@/api/storeSettings', () => ({
   patchStoreSettings: vi.fn(),
@@ -12,15 +11,15 @@ vi.mock('@/api/storeSettings', () => ({
 
 import { patchStoreSettings } from '@/api/storeSettings'
 
-describe('CashierMenu tax rate', () => {
+describe('StoreSettingsWorkspace tax rate', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useCartStore.setState({ taxRate: 0.08 })
     useAuthStore.setState({
       user: {
         id: 'u1',
-        username: 'cashier',
-        role: 'CASHIER',
+        username: 'admin',
+        role: 'ADMIN',
         storeId: 'store-1',
         storeName: 'Demo',
         active: true,
@@ -29,13 +28,6 @@ describe('CashierMenu tax rate', () => {
       },
       status: 'authenticated',
       error: null,
-    })
-    useShiftStore.setState({
-      currentShift: null,
-      lastClosedShift: null,
-      isLoading: false,
-      error: null,
-      hydrationFailed: false,
     })
   })
 
@@ -49,8 +41,7 @@ describe('CashierMenu tax rate', () => {
       uiLocale: 'en',
     })
 
-    render(<CashierMenu />)
-    await user.click(screen.getByRole('button', { name: /Cashier/ }))
+    render(<StoreSettingsWorkspace />)
 
     const input = screen.getByTestId('tax-rate-input')
     expect(input).toHaveValue('8')
@@ -63,5 +54,6 @@ describe('CashierMenu tax rate', () => {
     })
     expect(useAuthStore.getState().user?.defaultTaxRate).toBe(0.16)
     expect(useCartStore.getState().taxRate).toBe(0.16)
+    expect(screen.getByTestId('tax-rate-saved')).toBeInTheDocument()
   })
 })

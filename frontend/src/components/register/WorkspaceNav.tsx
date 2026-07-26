@@ -16,6 +16,7 @@ export function WorkspaceNav({ active, onChange }: WorkspaceNavProps) {
     { id: 'products', label: t('workspace.products'), testId: 'workspace-products' },
     { id: 'customers', label: t('workspace.customers'), testId: 'workspace-customers' },
     { id: 'inventory', label: t('workspace.inventory'), testId: 'workspace-inventory' },
+    { id: 'settings', label: t('workspace.settings'), testId: 'workspace-settings' },
   ]
 
   return (

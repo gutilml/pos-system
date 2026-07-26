@@ -19,11 +19,6 @@ export type MessageKey =
   | 'cashier.loggingOut'
   | 'cashier.language'
   | 'cashier.languageSaveFailed'
-  | 'cashier.taxRate'
-  | 'cashier.taxRateSave'
-  | 'cashier.taxRateSaving'
-  | 'cashier.taxRateInvalid'
-  | 'cashier.taxRateSaveFailed'
   | 'cashier.shiftHistory'
   | 'register.title'
   | 'register.emptyCart'
@@ -178,7 +173,15 @@ export type MessageKey =
   | 'workspace.products'
   | 'workspace.customers'
   | 'workspace.inventory'
+  | 'workspace.settings'
   | 'workspace.comingSoon'
+  | 'settings.taxRate'
+  | 'settings.taxRateHint'
+  | 'settings.taxRateSave'
+  | 'settings.taxRateSaving'
+  | 'settings.taxRateSaved'
+  | 'settings.taxRateInvalid'
+  | 'settings.taxRateSaveFailed'
   | 'products.subNavAria'
   | 'products.lookupLabel'
   | 'products.lookupPlaceholder'
@@ -318,11 +321,6 @@ export const en: MessageDict = {
   'cashier.loggingOut': 'Logging out…',
   'cashier.language': 'Language',
   'cashier.languageSaveFailed': 'Failed to save language',
-  'cashier.taxRate': 'Tax rate',
-  'cashier.taxRateSave': 'Save',
-  'cashier.taxRateSaving': 'Saving…',
-  'cashier.taxRateInvalid': 'Enter a tax rate between 0 and 100',
-  'cashier.taxRateSaveFailed': 'Failed to save tax rate',
   'cashier.shiftHistory': 'Shift history',
   'cashier.catalog': 'Products & categories',
   'admin.title': 'Catalog',
@@ -590,7 +588,15 @@ export const en: MessageDict = {
   'workspace.products': 'Products',
   'workspace.customers': 'Customers',
   'workspace.inventory': 'Inventory',
+  'workspace.settings': 'Settings',
   'workspace.comingSoon': 'Coming soon. This workspace will be available in a later update.',
+  'settings.taxRate': 'Tax rate',
+  'settings.taxRateHint': 'Store default applied to new sales on the register.',
+  'settings.taxRateSave': 'Save',
+  'settings.taxRateSaving': 'Saving…',
+  'settings.taxRateSaved': 'Tax rate saved.',
+  'settings.taxRateInvalid': 'Enter a tax rate between 0 and 100',
+  'settings.taxRateSaveFailed': 'Failed to save tax rate',
   'products.subNavAria': 'Products sections',
   'products.lookupLabel': 'Scan or search product',
   'products.lookupPlaceholder': 'Barcode or product name',
@@ -618,11 +624,6 @@ export const es: MessageDict = {
   'cashier.loggingOut': 'Cerrando sesión…',
   'cashier.language': 'Idioma',
   'cashier.languageSaveFailed': 'No se pudo guardar el idioma',
-  'cashier.taxRate': 'Tasa de impuesto',
-  'cashier.taxRateSave': 'Guardar',
-  'cashier.taxRateSaving': 'Guardando…',
-  'cashier.taxRateInvalid': 'Ingresa una tasa entre 0 y 100',
-  'cashier.taxRateSaveFailed': 'No se pudo guardar la tasa de impuesto',
   'cashier.shiftHistory': 'Historial de turnos',
   'cashier.catalog': 'Productos y categorías',
   'admin.title': 'Catálogo',
@@ -891,7 +892,15 @@ export const es: MessageDict = {
   'workspace.products': 'Productos',
   'workspace.customers': 'Clientes',
   'workspace.inventory': 'Inventario',
+  'workspace.settings': 'Configuración',
   'workspace.comingSoon': 'Próximamente. Este espacio estará disponible en una actualización posterior.',
+  'settings.taxRate': 'Tasa de impuesto',
+  'settings.taxRateHint': 'Valor predeterminado de la tienda para ventas en caja.',
+  'settings.taxRateSave': 'Guardar',
+  'settings.taxRateSaving': 'Guardando…',
+  'settings.taxRateSaved': 'Tasa de impuesto guardada.',
+  'settings.taxRateInvalid': 'Ingresa una tasa entre 0 y 100',
+  'settings.taxRateSaveFailed': 'No se pudo guardar la tasa de impuesto',
   'products.subNavAria': 'Secciones de productos',
   'products.lookupLabel': 'Escanear o buscar producto',
   'products.lookupPlaceholder': 'Código de barras o nombre',
