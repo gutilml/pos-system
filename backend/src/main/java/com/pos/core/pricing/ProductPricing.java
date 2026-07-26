@@ -158,7 +158,19 @@ public final class ProductPricing {
     }
 
     private static boolean countFamily(String u) {
-        return u.equals("unit") || u.equals("bottle") || u.equals("ea") || u.equals("each");
+        return u.equals("unit") || u.equals("bottle") || u.equals("ea") || u.equals("each") || u.equals("pc") || u.equals("pza");
+    }
+
+    /**
+     * Parent package unit is piece/count {@code pc} (Feature 097).
+     * Also accepts {@code pza} as a common Spanish label for the same chip.
+     */
+    public static boolean isPiecePackageUnit(String unit) {
+        if (unit == null || unit.isBlank()) {
+            return false;
+        }
+        String n = normalizeUnit(unit);
+        return "pc".equals(n) || "pza".equals(n);
     }
 
     /** Factor: 1 of this unit = N base units (gr for mass, ml for volume, 1 for count). */
@@ -169,7 +181,7 @@ public final class ProductPricing {
             case "lb" -> new BigDecimal("453.592");
             case "l", "lt" -> PER_KILO;
             case "ml" -> BigDecimal.ONE;
-            case "unit", "bottle", "ea", "each" -> BigDecimal.ONE;
+            case "unit", "bottle", "ea", "each", "pc", "pza" -> BigDecimal.ONE;
             default -> null;
         };
     }

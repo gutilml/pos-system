@@ -178,6 +178,8 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 094 | FE | Done | [README](features/094-frontend-inventory-receive-blend-preview/README.md) | [spec](features/094-frontend-inventory-receive-blend-preview/spec.md) · [plan](features/094-frontend-inventory-receive-blend-preview/plan.md) · [tasks](features/094-frontend-inventory-receive-blend-preview/tasks.md) |
 | 095 | FE | Done | [README](features/095-frontend-tax-rate-store-config/README.md) | [spec](features/095-frontend-tax-rate-store-config/spec.md) · [plan](features/095-frontend-tax-rate-store-config/plan.md) · [tasks](features/095-frontend-tax-rate-store-config/tasks.md) |
 | 096 | FE | Done | [README](features/096-frontend-register-footer-secondary-buttons/README.md) | [spec](features/096-frontend-register-footer-secondary-buttons/spec.md) · [plan](features/096-frontend-register-footer-secondary-buttons/plan.md) · [tasks](features/096-frontend-register-footer-secondary-buttons/tasks.md) |
+| 097 | BE | Done | [README](features/097-backend-parent-pc-no-weight-child/README.md) | [spec](features/097-backend-parent-pc-no-weight-child/spec.md) · [plan](features/097-backend-parent-pc-no-weight-child/plan.md) · [tasks](features/097-backend-parent-pc-no-weight-child/tasks.md) |
+| 098 | FE | Done | [README](features/098-frontend-parent-package-editor-guards/README.md) | [spec](features/098-frontend-parent-package-editor-guards/spec.md) · [plan](features/098-frontend-parent-package-editor-guards/plan.md) · [tasks](features/098-frontend-parent-package-editor-guards/tasks.md) |
 
 ---
 

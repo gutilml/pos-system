@@ -240,6 +240,11 @@ public class ProductServiceImpl implements ProductService {
             }
             Product parent = getProduct(request.parentProductId());
             ensureParentPackageComplete(parent);
+            if (Boolean.TRUE.equals(product.getSellByWeight())
+                    && ProductPricing.isPiecePackageUnit(parent.getUnitOfMeasure())) {
+                throw new BusinessRuleException(
+                        "sellByWeight is not allowed when parent package unit is pc");
+            }
             product.setParentProduct(parent);
             product.setIndividualUnit(true);
             product.setUnitsPerPackage(null);

@@ -172,6 +172,57 @@ class ProductServiceImplTest {
     }
 
     @Test
+    void create_rejectsSellByWeightWhenParentPackageUnitIsPc() {
+        UUID parentId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        Product parent = new Product();
+        parent.setId(parentId);
+        parent.setName("Portem");
+        parent.setSellingPrice(new BigDecimal("62.5000"));
+        parent.setCostPrice(new BigDecimal("37.5000"));
+        parent.setUnitsPerPackage(new BigDecimal("10.0000"));
+        parent.setUnitOfMeasure("pc");
+        when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
+
+        ProductRequestDTO request = new ProductRequestDTO(
+                null, null, "P1 pill", null, null, null, null, null, null, null,
+                true, "pc", parentId, null, null, null, null, null, null, null
+        );
+
+        assertThatThrownBy(() -> productService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("sellByWeight is not allowed when parent package unit is pc");
+    }
+
+    @Test
+    void create_allowsSellByWeightWhenParentPackageUnitIsKg() {
+        UUID parentId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        Product parent = new Product();
+        parent.setId(parentId);
+        parent.setName("Bulk bag");
+        parent.setSellingPrice(new BigDecimal("100.0000"));
+        parent.setCostPrice(new BigDecimal("70.0000"));
+        parent.setUnitsPerPackage(new BigDecimal("1.0000"));
+        parent.setUnitOfMeasure("kg");
+        when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
+        when(productRepository.save(any(Product.class))).thenAnswer(inv -> {
+            Product p = inv.getArgument(0);
+            if (p.getId() == null) {
+                p.setId(UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc"));
+            }
+            return p;
+        });
+
+        ProductRequestDTO request = new ProductRequestDTO(
+                null, null, "Loose kg", null, null, null, null, new BigDecimal("0.3000"), null, null,
+                true, "kg", parentId, null, null, null, null, null, null, null
+        );
+
+        ProductDTO created = productService.create(request);
+        assertThat(created.sellByWeight()).isTrue();
+        assertThat(created.parentProductId()).isEqualTo(parentId);
+    }
+
+    @Test
     void create_rejectsIncompleteParentPackage() {
         UUID parentId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         Product parent = new Product();

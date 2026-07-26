@@ -54,4 +54,14 @@ class ProductPricingTest {
         assertThat(ProductPricing.backfillTargetMargin(null, new BigDecimal("10.0000"), null)).isNull();
         assertThat(ProductPricing.backfillTargetMargin(new BigDecimal("5.0000"), null, null)).isNull();
     }
+
+    @Test
+    void isPiecePackageUnit_detectsPcAndPza() {
+        assertThat(ProductPricing.isPiecePackageUnit("pc")).isTrue();
+        assertThat(ProductPricing.isPiecePackageUnit("PC")).isTrue();
+        assertThat(ProductPricing.isPiecePackageUnit("pza")).isTrue();
+        assertThat(ProductPricing.isPiecePackageUnit("kg")).isFalse();
+        assertThat(ProductPricing.isPiecePackageUnit(null)).isFalse();
+        assertThat(ProductPricing.isPiecePackageUnit("")).isFalse();
+    }
 }
