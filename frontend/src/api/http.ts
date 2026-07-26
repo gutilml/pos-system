@@ -33,10 +33,21 @@ export function formatApiErrorBody(body: string): string {
   return trimmed
 }
 
+export function getErrorStatus(err: unknown): number | undefined {
+  if (err && typeof err === 'object' && 'status' in err) {
+    const status = (err as { status: unknown }).status
+    return typeof status === 'number' ? status : undefined
+  }
+  return undefined
+}
+
 export async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const detail = await response.text()
-    throw new Error(formatApiErrorBody(detail) || `Request failed (${response.status})`)
+    const message = formatApiErrorBody(detail) || `Request failed (${response.status})`
+    const error = new Error(message) as Error & { status: number }
+    error.status = response.status
+    throw error
   }
   if (response.status === 204 || response.status === 205) {
     return undefined as T

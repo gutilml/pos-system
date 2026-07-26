@@ -94,6 +94,7 @@ describe('ClosedTicketsModal', () => {
     await waitFor(() => {
       expect(screen.getByTestId('closed-tickets-list')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('closed-tickets-scope-hint')).toHaveTextContent(/Your tickets/)
     await user.click(screen.getByTestId(`closed-ticket-row-${cashTx.id}`))
 
     await waitFor(() => {
@@ -111,6 +112,68 @@ describe('ClosedTicketsModal', () => {
       })
     })
     expect(screen.getByTestId('closed-tickets-success')).toBeInTheDocument()
+  })
+
+  it('shows all-store hint for admin', async () => {
+    useAuthStore.setState({
+      user: {
+        id: 'admin-1',
+        username: 'admin',
+        role: 'ADMIN',
+        storeId: 'store-1',
+        storeName: 'Demo',
+        active: true,
+        uiLocale: 'en',
+      },
+      status: 'authenticated',
+      error: null,
+    })
+    vi.mocked(listTransactions).mockResolvedValue([])
+
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('closed-tickets-scope-hint')).toHaveTextContent(
+        /All store tickets/,
+      )
+    })
+    expect(screen.getByText('No completed tickets yet.')).toBeInTheDocument()
+  })
+
+  it('shows own empty copy for cashier', async () => {
+    vi.mocked(listTransactions).mockResolvedValue([])
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+    await waitFor(() => {
+      expect(screen.getByText('You have no completed tickets yet.')).toBeInTheDocument()
+    })
+  })
+
+  it('shows friendly message on 403 reimburse', async () => {
+    const user = userEvent.setup()
+    const cashTx = sampleTx()
+    vi.mocked(listTransactions).mockResolvedValue([cashTx])
+    vi.mocked(getTransaction).mockResolvedValue(cashTx)
+    const forbidden = Object.assign(new Error('You can only reimburse your own tickets'), {
+      status: 403,
+    })
+    vi.mocked(reimburseTransaction).mockRejectedValue(forbidden)
+
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId(`closed-ticket-row-${cashTx.id}`)).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId(`closed-ticket-row-${cashTx.id}`))
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-reimburse')).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId('confirm-reimburse'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('closed-tickets-error')).toHaveTextContent(
+        /only reimburse your own tickets/i,
+      )
+    })
   })
 
   it('blocks reimburse when ticket has CARD', async () => {

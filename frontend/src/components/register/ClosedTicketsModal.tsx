@@ -9,6 +9,7 @@ import {
   type TransactionItemResponse,
   type TransactionResponse,
 } from '@/api/transactions'
+import { getErrorStatus } from '@/api/http'
 import { useT } from '@/i18n/useT'
 import { formatMoney } from '@/lib/money'
 import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
@@ -52,6 +53,8 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
   const t = useT()
   const storeId = useAuthStore((s) => s.user?.storeId)
   const locale = useAuthStore((s) => s.user?.uiLocale ?? 'en')
+  const role = useAuthStore((s) => s.user?.role)
+  const isCashier = role === 'CASHIER'
 
   const [view, setView] = useState<View>('list')
   const [tickets, setTickets] = useState<TransactionResponse[]>([])
@@ -157,7 +160,11 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
       setSuccess(t('closedTickets.success'))
       setTickets((prev) => prev.map((row) => (row.id === updated.id ? updated : row)))
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : t('closedTickets.reimburseFailed'))
+      if (getErrorStatus(err) === 403) {
+        setError(t('closedTickets.reimburseForbidden'))
+      } else {
+        setError(err instanceof Error ? err.message : t('closedTickets.reimburseFailed'))
+      }
     } finally {
       setSubmitting(false)
     }
@@ -175,9 +182,19 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
     >
       <div className="flex max-h-[90dvh] w-full max-w-lg flex-col rounded-2xl bg-white p-5 shadow-xl">
         <div className="flex items-start justify-between gap-3">
-          <h2 id="closed-tickets-title" className="text-lg font-semibold text-slate-900">
-            {view === 'list' ? t('closedTickets.title') : t('closedTickets.detailTitle')}
-          </h2>
+          <div>
+            <h2 id="closed-tickets-title" className="text-lg font-semibold text-slate-900">
+              {view === 'list' ? t('closedTickets.title') : t('closedTickets.detailTitle')}
+            </h2>
+            {view === 'list' ? (
+              <p
+                className="mt-1 text-xs text-slate-500"
+                data-testid="closed-tickets-scope-hint"
+              >
+                {isCashier ? t('closedTickets.ownHint') : t('closedTickets.allHint')}
+              </p>
+            ) : null}
+          </div>
           {view === 'detail' ? (
             <button
               type="button"
@@ -221,7 +238,9 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
         {!loading && view === 'list' ? (
           <ul className="mt-4 min-h-0 flex-1 space-y-2 overflow-y-auto" data-testid="closed-tickets-list">
             {tickets.length === 0 ? (
-              <li className="py-8 text-center text-sm text-slate-500">{t('closedTickets.empty')}</li>
+              <li className="py-8 text-center text-sm text-slate-500">
+                {isCashier ? t('closedTickets.emptyOwn') : t('closedTickets.empty')}
+              </li>
             ) : (
               tickets.map((tx) => (
                 <li key={tx.id}>

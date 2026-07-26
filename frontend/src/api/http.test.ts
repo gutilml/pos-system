@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { apiFetch, formatApiErrorBody, parseJson, readCookie } from '@/api/http'
+import { apiFetch, formatApiErrorBody, getErrorStatus, parseJson, readCookie } from '@/api/http'
 
 describe('http helpers', () => {
   afterEach(() => {
@@ -65,5 +65,19 @@ describe('http helpers', () => {
       { status: 401 },
     )
     await expect(parseJson(response)).rejects.toThrow('Invalid credentials')
+  })
+
+  it('parseJson attaches HTTP status on error', async () => {
+    const response = new Response(
+      JSON.stringify({ detail: 'You can only reimburse your own tickets' }),
+      { status: 403 },
+    )
+    try {
+      await parseJson(response)
+      expect.unreachable('expected throw')
+    } catch (err) {
+      expect(err).toBeInstanceOf(Error)
+      expect(getErrorStatus(err)).toBe(403)
+    }
   })
 })
