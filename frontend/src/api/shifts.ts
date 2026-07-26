@@ -91,3 +91,23 @@ export async function addDrawerEventRequest(
   })
   return parseJson<CashDrawerEvent>(response)
 }
+
+/** Feature 077/078 — list shifts for a store (newest first). */
+export async function listShifts(
+  storeId: string,
+  status?: ShiftStatus,
+): Promise<Shift[]> {
+  const params = new URLSearchParams({ storeId })
+  if (status) params.set('status', status)
+  const response = await apiFetch(`${API_BASE}/shifts?${params.toString()}`)
+  return parseJson<Shift[]>(response)
+}
+
+export type ShiftDetail = Shift & {
+  events: CashDrawerEvent[]
+}
+
+export async function getShiftDetail(shiftId: string): Promise<ShiftDetail> {
+  const response = await apiFetch(`${API_BASE}/shifts/${shiftId}`)
+  return parseJson<ShiftDetail>(response)
+}
