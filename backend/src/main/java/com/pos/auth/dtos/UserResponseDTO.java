@@ -2,6 +2,7 @@ package com.pos.auth.dtos;
 
 import com.pos.auth.models.Role;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 public record UserResponseDTO(
@@ -13,6 +14,7 @@ public record UserResponseDTO(
         boolean active,
         boolean enableInventory,
         boolean enableCustomerCredit,
-        String uiLocale
+        String uiLocale,
+        BigDecimal defaultTaxRate
 ) {
 }

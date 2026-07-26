@@ -87,7 +87,8 @@ public class AuthService {
                 user.isActive(),
                 isInventoryEnabled(store),
                 isCustomerCreditEnabled(store),
-                StoreSettingsServiceImpl.resolveUiLocale(store)
+                StoreSettingsServiceImpl.resolveUiLocale(store),
+                StoreSettingsServiceImpl.resolveDefaultTaxRate(store)
         );
     }
 

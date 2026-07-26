@@ -21,6 +21,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -83,7 +84,21 @@ class AuthServiceTest {
         assertThat(result.enableInventory()).isFalse();
         assertThat(result.enableCustomerCredit()).isFalse();
         assertThat(result.uiLocale()).isEqualTo("en");
+        assertThat(result.defaultTaxRate()).isNull();
         verify(authCookieService).writeJwtCookie(response, "jwt-token");
+    }
+
+    @Test
+    void login_exposesDefaultTaxRateFromPreferences() {
+        store.setPreferences(Map.of("default_tax_rate", new BigDecimal("0.1600")));
+        when(userRepository.findByUsernameIgnoreCase("admin")).thenReturn(Optional.of(admin));
+        when(passwordEncoder.matches("admin", "hash")).thenReturn(true);
+        when(jwtService.createToken(admin.getId(), "admin", Role.ADMIN, store.getId()))
+                .thenReturn("jwt-token");
+
+        var result = authService.login(new LoginRequestDTO("admin", "admin"), response);
+
+        assertThat(result.defaultTaxRate()).isEqualByComparingTo("0.1600");
     }
 
     @Test
@@ -190,5 +205,6 @@ class AuthServiceTest {
         assertThat(me.storeName()).isEqualTo("Demo Corner Store");
         assertThat(me.enableInventory()).isFalse();
         assertThat(me.uiLocale()).isEqualTo("en");
+        assertThat(me.defaultTaxRate()).isNull();
     }
 }

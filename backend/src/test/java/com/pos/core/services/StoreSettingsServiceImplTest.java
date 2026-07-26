@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -135,6 +136,81 @@ class StoreSettingsServiceImplTest {
                 new UpdateStoreSettingsRequest(null, Map.of("tax_rate", 0.16))
         )).isInstanceOf(BusinessRuleException.class)
                 .hasMessageContaining("Unknown preference");
+    }
+
+    @Test
+    void patchSettings_mergesDefaultTaxRate() {
+        stubCaller();
+        when(storeSettingsRepository.findById(storeId)).thenReturn(Optional.of(store));
+        when(storeSettingsRepository.save(any(StoreSettings.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var dto = storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", 0.16))
+        );
+
+        assertThat(dto.preferences()).containsEntry("default_tax_rate", new BigDecimal("0.1600"));
+    }
+
+    @Test
+    void patchSettings_acceptsTaxRateZeroAndOne() {
+        stubCaller();
+        when(storeSettingsRepository.findById(storeId)).thenReturn(Optional.of(store));
+        when(storeSettingsRepository.save(any(StoreSettings.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var zero = storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", 0))
+        );
+        assertThat(zero.preferences()).containsEntry("default_tax_rate", new BigDecimal("0.0000"));
+
+        var one = storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", 1))
+        );
+        assertThat(one.preferences()).containsEntry("default_tax_rate", new BigDecimal("1.0000"));
+    }
+
+    @Test
+    void patchSettings_rejectsNegativeTaxRate() {
+        stubCaller();
+        when(storeSettingsRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+        assertThatThrownBy(() -> storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", -0.01))
+        )).isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("default_tax_rate");
+    }
+
+    @Test
+    void patchSettings_rejectsTaxRateAboveOne() {
+        stubCaller();
+        when(storeSettingsRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+        assertThatThrownBy(() -> storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", 1.01))
+        )).isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("default_tax_rate");
+    }
+
+    @Test
+    void patchSettings_rejectsNonNumericTaxRate() {
+        stubCaller();
+        when(storeSettingsRepository.findById(storeId)).thenReturn(Optional.of(store));
+
+        assertThatThrownBy(() -> storeSettingsService.patchSettings(
+                storeId,
+                new UpdateStoreSettingsRequest(null, Map.of("default_tax_rate", "abc"))
+        )).isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("default_tax_rate");
+    }
+
+    @Test
+    void readStoreDefaultTaxRate_returnsNullWhenMissing() {
+        assertThat(StoreSettingsServiceImpl.readStoreDefaultTaxRate(null)).isNull();
+        assertThat(StoreSettingsServiceImpl.readStoreDefaultTaxRate(Map.of())).isNull();
     }
 
     @Test
