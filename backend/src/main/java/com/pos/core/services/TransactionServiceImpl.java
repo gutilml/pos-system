@@ -1,5 +1,9 @@
 package com.pos.core.services;
 
+import com.pos.auth.models.Role;
+import com.pos.auth.models.User;
+import com.pos.auth.repositories.UserRepository;
+import com.pos.auth.security.PosUserDetails;
 import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.PaymentResponseDTO;
 import com.pos.core.dtos.ReimburseLineRequestDTO;
@@ -30,6 +34,9 @@ import com.pos.customers.models.Customer;
 import com.pos.customers.repositories.CustomerRepository;
 import com.pos.customers.services.CustomerCreditService;
 import com.pos.inventory.services.InventoryService;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +48,7 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -60,6 +68,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final CustomerRepository customerRepository;
     private final CustomerCreditService customerCreditService;
     private final ShiftService shiftService;
+    private final UserRepository userRepository;
 
     public TransactionServiceImpl(
             TransactionRepository transactionRepository,
@@ -69,7 +78,8 @@ public class TransactionServiceImpl implements TransactionService {
             InventoryService inventoryService,
             CustomerRepository customerRepository,
             CustomerCreditService customerCreditService,
-            ShiftService shiftService
+            ShiftService shiftService,
+            UserRepository userRepository
     ) {
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
@@ -79,6 +89,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.customerRepository = customerRepository;
         this.customerCreditService = customerCreditService;
         this.shiftService = shiftService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -115,6 +126,7 @@ public class TransactionServiceImpl implements TransactionService {
         Transaction transaction = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
         transaction.setGlobalDiscountPercentage(globalDiscountPercentage);
+        currentUser().ifPresent(user -> transaction.setCreatedBy(user.getId()));
 
         StoreSettings store = null;
         if (request.storeId() != null) {
@@ -237,22 +249,37 @@ public class TransactionServiceImpl implements TransactionService {
         storeSettingsRepository.findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found: " + storeId));
 
-        return transactionRepository
-                .findByStoreIdAndStatusOrderByCreatedAtDesc(storeId, TransactionStatus.COMPLETED)
-                .stream()
-                .map(this::toDto)
-                .toList();
+        Optional<User> caller = currentUser();
+        List<Transaction> transactions;
+        if (caller.isPresent() && caller.get().getRole() == Role.CASHIER) {
+            // Own tickets only; legacy null created_by never matches (ADMIN-only).
+            transactions = transactionRepository.findByStoreIdAndStatusAndCreatedByOrderByCreatedAtDesc(
+                    storeId,
+                    TransactionStatus.COMPLETED,
+                    caller.get().getId()
+            );
+        } else {
+            transactions = transactionRepository.findByStoreIdAndStatusOrderByCreatedAtDesc(
+                    storeId,
+                    TransactionStatus.COMPLETED
+            );
+        }
+
+        return transactions.stream().map(this::toDto).toList();
     }
 
     @Override
     @Transactional(readOnly = true)
     public TransactionResponseDTO get(UUID id) {
-        return toDto(requireTransaction(id));
+        Transaction transaction = requireTransaction(id);
+        assertCanAccessTicket(transaction, "view");
+        return toDto(transaction);
     }
 
     @Override
     public TransactionResponseDTO reimburse(UUID id, ReimburseRequestDTO request) {
         Transaction transaction = requireTransaction(id);
+        assertCanAccessTicket(transaction, "reimburse");
 
         if (transaction.getStatus() != TransactionStatus.COMPLETED) {
             throw new BusinessRuleException("Only COMPLETED transactions can be reimbursed");
@@ -468,6 +495,35 @@ public class TransactionServiceImpl implements TransactionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found: " + id));
     }
 
+    /**
+     * Feature 086: cashiers may only access tickets they created; null ownership is ADMIN-only.
+     * When SecurityContext is empty (unit tests), access is unrestricted.
+     */
+    private void assertCanAccessTicket(Transaction transaction, String action) {
+        Optional<User> caller = currentUser();
+        if (caller.isEmpty() || caller.get().getRole() == Role.ADMIN) {
+            return;
+        }
+        if (caller.get().getRole() != Role.CASHIER) {
+            return;
+        }
+        UUID ownerId = transaction.getCreatedBy();
+        if (ownerId == null || !ownerId.equals(caller.get().getId())) {
+            throw new AccessDeniedException(
+                    "You can only " + action + " your own tickets");
+        }
+    }
+
+    /** Resolves the authenticated user when present; empty when SecurityContext has no PosUserDetails. */
+    private Optional<User> currentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof PosUserDetails details)) {
+            return Optional.empty();
+        }
+        return userRepository.findByUsernameIgnoreCase(details.getUsername())
+                .filter(User::isActive);
+    }
+
     static void validateDiscountPercentage(BigDecimal percentage, String fieldName) {
         if (percentage.compareTo(BigDecimal.ZERO) < 0) {
             throw new BusinessRuleException(fieldName + " cannot be negative");
@@ -522,6 +578,7 @@ public class TransactionServiceImpl implements TransactionService {
                 storeId,
                 shiftId,
                 customerId,
+                transaction.getCreatedBy(),
                 transaction.getStatus(),
                 transaction.getSubtotal(),
                 transaction.getTaxTotal(),

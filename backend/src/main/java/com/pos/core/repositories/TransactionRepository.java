@@ -16,6 +16,12 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByStoreIdAndStatusOrderByCreatedAtDesc(UUID storeId, TransactionStatus status);
 
+    List<Transaction> findByStoreIdAndStatusAndCreatedByOrderByCreatedAtDesc(
+            UUID storeId,
+            TransactionStatus status,
+            UUID createdBy
+    );
+
     @Modifying(clearAutomatically = true)
     @Query("UPDATE Transaction t SET t.customer = null WHERE t.customer.id = :customerId")
     int clearCustomerReference(@Param("customerId") UUID customerId);
