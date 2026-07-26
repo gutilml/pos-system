@@ -56,6 +56,14 @@ public class Shift {
     @Column(name = "closed_at")
     private OffsetDateTime closedAt;
 
+    /** User id who opened the shift (Feature 079); null for legacy rows. */
+    @Column(name = "opened_by")
+    private UUID openedBy;
+
+    /** User id who closed the shift (Feature 079); null while OPEN or legacy. */
+    @Column(name = "closed_by")
+    private UUID closedBy;
+
     @OneToMany(mappedBy = "shift", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CashDrawerEvent> drawerEvents = new ArrayList<>();
 
@@ -129,6 +137,22 @@ public class Shift {
 
     public void setClosedAt(OffsetDateTime closedAt) {
         this.closedAt = closedAt;
+    }
+
+    public UUID getOpenedBy() {
+        return openedBy;
+    }
+
+    public void setOpenedBy(UUID openedBy) {
+        this.openedBy = openedBy;
+    }
+
+    public UUID getClosedBy() {
+        return closedBy;
+    }
+
+    public void setClosedBy(UUID closedBy) {
+        this.closedBy = closedBy;
     }
 
     public List<CashDrawerEvent> getDrawerEvents() {

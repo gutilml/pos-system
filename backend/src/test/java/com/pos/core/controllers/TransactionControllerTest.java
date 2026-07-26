@@ -47,6 +47,7 @@ class TransactionControllerTest {
                 UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"),
                 null,
                 null,
+                null,
                 TransactionStatus.COMPLETED,
                 new BigDecimal("1.9900"),
                 new BigDecimal("0.0000"),
@@ -168,6 +169,7 @@ class TransactionControllerTest {
         TransactionResponseDTO reimbursed = new TransactionResponseDTO(
                 txId,
                 UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                null,
                 null,
                 null,
                 TransactionStatus.COMPLETED,

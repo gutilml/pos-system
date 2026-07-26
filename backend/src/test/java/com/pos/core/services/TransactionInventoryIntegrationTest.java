@@ -64,6 +64,9 @@ class TransactionInventoryIntegrationTest {
     @Mock
     private ShiftService shiftService;
 
+    @Mock
+    private com.pos.auth.repositories.UserRepository userRepository;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 

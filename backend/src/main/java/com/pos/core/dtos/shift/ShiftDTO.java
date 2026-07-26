@@ -16,6 +16,8 @@ public record ShiftDTO(
         BigDecimal discrepancy,
         OffsetDateTime openedAt,
         OffsetDateTime closedAt,
+        UUID openedBy,
+        UUID closedBy,
         BigDecimal totalCashPayments,
         BigDecimal totalCardPayments,
         BigDecimal totalCreditPayments,

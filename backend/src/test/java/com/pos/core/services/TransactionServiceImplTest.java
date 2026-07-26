@@ -1,5 +1,6 @@
 package com.pos.core.services;
 
+import com.pos.auth.repositories.UserRepository;
 import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.ReimburseLineRequestDTO;
 import com.pos.core.dtos.ReimburseRequestDTO;
@@ -76,6 +77,9 @@ class TransactionServiceImplTest {
     @Mock
     private ShiftService shiftService;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private TransactionServiceImpl transactionService;
 
@@ -119,6 +123,8 @@ class TransactionServiceImplTest {
                 store.getId(),
                 ShiftStatus.OPEN,
                 new BigDecimal("100.0000"),
+                null,
+                null,
                 null,
                 null,
                 null,

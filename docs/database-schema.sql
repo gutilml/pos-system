@@ -12,6 +12,17 @@ CREATE TABLE store_settings (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 2b. SYSTEM USERS (AuthN — separate from credit customers; before shifts/transactions for FKs)
+CREATE TABLE users (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    role VARCHAR(20) NOT NULL, -- 'ADMIN' | 'CASHIER'
+    store_id UUID REFERENCES store_settings(id),
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
 -- 3. CATEGORIES
 CREATE TABLE categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -106,7 +117,9 @@ CREATE TABLE shifts (
     actual_cash DECIMAL(12, 4),
     discrepancy DECIMAL(12, 4),
     opened_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    closed_at TIMESTAMP WITH TIME ZONE
+    closed_at TIMESTAMP WITH TIME ZONE,
+    opened_by UUID REFERENCES users(id), -- Feature 079; nullable for legacy
+    closed_by UUID REFERENCES users(id)  -- Feature 079; nullable for legacy
 );
 
 CREATE TABLE cash_drawer_events (
@@ -135,6 +148,7 @@ CREATE TABLE transactions (
     store_id UUID REFERENCES store_settings(id),
     shift_id UUID REFERENCES shifts(id),
     customer_id UUID REFERENCES customers(id),
+    created_by UUID REFERENCES users(id), -- Feature 079; nullable for legacy / unauthenticated creates
     status VARCHAR(50) NOT NULL DEFAULT 'COMPLETED', -- 'IN_PROGRESS', 'HELD', 'COMPLETED', 'VOIDED'
     subtotal DECIMAL(12, 4) NOT NULL,
     tax_total DECIMAL(12, 4) NOT NULL DEFAULT 0.0000,
@@ -179,16 +193,5 @@ CREATE TABLE credit_ledger_entries (
     type VARCHAR(20) NOT NULL, -- 'CHARGE' | 'PAYMENT' | 'REFUND'
     payment_method VARCHAR(20), -- 'CASH' | 'CARD' on PAYMENT rows (Feature 067); null on CHARGE
     description VARCHAR(120) NOT NULL, -- locale snapshot at write (Feature 069)
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-);
-
--- 12. SYSTEM USERS (AuthN — separate from credit customers)
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    username VARCHAR(100) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    role VARCHAR(20) NOT NULL, -- 'ADMIN' | 'CASHIER'
-    store_id UUID REFERENCES store_settings(id),
-    is_active BOOLEAN NOT NULL DEFAULT true,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );

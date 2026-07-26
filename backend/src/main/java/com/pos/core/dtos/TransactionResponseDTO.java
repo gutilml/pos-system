@@ -12,6 +12,7 @@ public record TransactionResponseDTO(
         UUID storeId,
         UUID shiftId,
         UUID customerId,
+        UUID createdBy,
         TransactionStatus status,
         BigDecimal subtotal,
         BigDecimal taxTotal,

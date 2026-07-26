@@ -42,6 +42,10 @@ public class Transaction {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    /** User id who created the sale (Feature 079); null for legacy / no SecurityContext. */
+    @Column(name = "created_by")
+    private UUID createdBy;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private TransactionStatus status = TransactionStatus.COMPLETED;
@@ -107,6 +111,14 @@ public class Transaction {
 
     public void setCustomer(Customer customer) {
         this.customer = customer;
+    }
+
+    public UUID getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(UUID createdBy) {
+        this.createdBy = createdBy;
     }
 
     public TransactionStatus getStatus() {
