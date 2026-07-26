@@ -285,6 +285,13 @@ export type MessageKey =
   | 'inventory.unitCost'
   | 'inventory.selling'
   | 'inventory.wholesale'
+  | 'inventory.lotUnitCost'
+  | 'inventory.lotSelling'
+  | 'inventory.lotWholesale'
+  | 'inventory.afterReceive'
+  | 'inventory.afterCost'
+  | 'inventory.afterSelling'
+  | 'inventory.afterWholesale'
   | 'inventory.loadFailed'
   | 'inventory.saveFailed'
   | 'inventory.saving'
@@ -416,6 +423,13 @@ export const en: MessageDict = {
   'inventory.unitCost': 'Unit cost',
   'inventory.selling': 'Selling price',
   'inventory.wholesale': 'Wholesale price',
+  'inventory.lotUnitCost': 'Incoming lot unit cost',
+  'inventory.lotSelling': 'Incoming lot selling price',
+  'inventory.lotWholesale': 'Incoming lot wholesale price',
+  'inventory.afterReceive': 'After this receive',
+  'inventory.afterCost': 'Product cost',
+  'inventory.afterSelling': 'Product selling',
+  'inventory.afterWholesale': 'Product wholesale',
   'inventory.loadFailed': 'Could not load inventory',
   'inventory.saveFailed': 'Could not save stock movement',
   'inventory.saving': 'Saving…',
@@ -709,6 +723,13 @@ export const es: MessageDict = {
   'inventory.unitCost': 'Costo unitario',
   'inventory.selling': 'Precio de venta',
   'inventory.wholesale': 'Precio mayoreo',
+  'inventory.lotUnitCost': 'Costo unitario del lote',
+  'inventory.lotSelling': 'Precio de venta del lote',
+  'inventory.lotWholesale': 'Precio mayoreo del lote',
+  'inventory.afterReceive': 'Después de recibir',
+  'inventory.afterCost': 'Costo del producto',
+  'inventory.afterSelling': 'Precio de venta del producto',
+  'inventory.afterWholesale': 'Mayoreo del producto',
   'inventory.loadFailed': 'No se pudo cargar el inventario',
   'inventory.saveFailed': 'No se pudo guardar el movimiento',
   'inventory.saving': 'Guardando…',

@@ -99,4 +99,41 @@ describe('InventoryWorkspace', () => {
     const wholesale = screen.getByTestId('inventory-wholesale') as HTMLInputElement
     expect(Number(wholesale.value)).toBeCloseTo(4 / (1 - 0.33), 3)
   })
+
+  it('previews blended product prices after receive', async () => {
+    vi.mocked(listInventoryProducts).mockResolvedValue([
+      {
+        productId: 'p1',
+        name: 'portem',
+        primarySku: '750',
+        stockedProductId: 'p1',
+        parentProductId: null,
+        trackInventory: true,
+        currentStock: 10,
+        lowStockThreshold: 10,
+        lowStock: false,
+        costPrice: 35,
+        sellingPrice: 58.3333,
+        wholesalePrice: 0,
+        targetMargin: 0.4,
+        wholesaleMargin: null,
+      },
+    ])
+
+    const user = userEvent.setup()
+    render(<InventoryWorkspace />)
+    expect(await screen.findByText('portem')).toBeInTheDocument()
+    await user.click(screen.getByTestId('inventory-receive-p1'))
+
+    await user.type(screen.getByTestId('inventory-qty'), '10')
+    const cost = screen.getByTestId('inventory-unit-cost')
+    await user.clear(cost)
+    await user.type(cost, '40')
+
+    expect(screen.getByTestId('inventory-selling')).toHaveValue(66.6667)
+    expect(screen.getByTestId('inventory-receive-preview')).toBeInTheDocument()
+    expect(screen.getByTestId('inventory-preview-cost')).toHaveTextContent('37.50')
+    expect(screen.getByTestId('inventory-preview-selling')).toHaveTextContent('62.50')
+    expect(screen.getByTestId('inventory-preview-wholesale')).toHaveTextContent('0.00')
+  })
 })

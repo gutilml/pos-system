@@ -5,7 +5,8 @@ import {
   type InventoryProduct,
 } from '@/api/inventory'
 import { useT } from '@/i18n/useT'
-import { roundMoney } from '@/lib/money'
+import { formatMoney, roundMoney } from '@/lib/money'
+import { previewReceiveBlend } from '@/lib/inventoryPricing'
 import { sellingPriceFromMargin } from '@/lib/productPricing'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 
@@ -93,6 +94,20 @@ export function InventoryWorkspace() {
       }
     }
   }
+
+  const receiveBlendPreview =
+    modalProduct && modalMode === 'receive'
+      ? previewReceiveBlend({
+          qtyBefore: Number(modalProduct.currentStock),
+          costBefore: Number(modalProduct.costPrice),
+          sellingBefore: Number(modalProduct.sellingPrice),
+          wholesaleBefore: Number(modalProduct.wholesalePrice),
+          incomingQty: Number(qty),
+          incomingCost: Number(unitCost),
+          incomingSelling: Number(sellingPrice),
+          incomingWholesale: Number(wholesalePrice),
+        })
+      : null
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -280,7 +295,7 @@ export function InventoryWorkspace() {
 
               <div>
                 <label className="text-sm font-medium text-slate-700" htmlFor="inv-cost">
-                  {t('inventory.unitCost')}
+                  {modalMode === 'receive' ? t('inventory.lotUnitCost') : t('inventory.unitCost')}
                 </label>
                 <input
                   id="inv-cost"
@@ -302,7 +317,7 @@ export function InventoryWorkspace() {
                 <>
                   <div>
                     <label className="text-sm font-medium text-slate-700" htmlFor="inv-selling">
-                      {t('inventory.selling')}
+                      {t('inventory.lotSelling')}
                     </label>
                     <input
                       id="inv-selling"
@@ -316,7 +331,7 @@ export function InventoryWorkspace() {
                   </div>
                   <div>
                     <label className="text-sm font-medium text-slate-700" htmlFor="inv-wholesale">
-                      {t('inventory.wholesale')}
+                      {t('inventory.lotWholesale')}
                     </label>
                     <input
                       id="inv-wholesale"
@@ -328,6 +343,44 @@ export function InventoryWorkspace() {
                       className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     />
                   </div>
+
+                  {receiveBlendPreview ? (
+                    <div
+                      className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700"
+                      data-testid="inventory-receive-preview"
+                    >
+                      <p className="font-medium text-slate-900">{t('inventory.afterReceive')}</p>
+                      <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-3">
+                        <div>
+                          <dt className="text-xs text-slate-500">{t('inventory.afterCost')}</dt>
+                          <dd
+                            className="tabular-nums font-medium text-slate-900"
+                            data-testid="inventory-preview-cost"
+                          >
+                            {formatMoney(receiveBlendPreview.cost)}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-slate-500">{t('inventory.afterSelling')}</dt>
+                          <dd
+                            className="tabular-nums font-medium text-slate-900"
+                            data-testid="inventory-preview-selling"
+                          >
+                            {formatMoney(receiveBlendPreview.selling)}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-slate-500">{t('inventory.afterWholesale')}</dt>
+                          <dd
+                            className="tabular-nums font-medium text-slate-900"
+                            data-testid="inventory-preview-wholesale"
+                          >
+                            {formatMoney(receiveBlendPreview.wholesale)}
+                          </dd>
+                        </div>
+                      </dl>
+                    </div>
+                  ) : null}
                 </>
               ) : null}
 
