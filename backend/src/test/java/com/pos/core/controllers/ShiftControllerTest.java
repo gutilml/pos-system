@@ -5,6 +5,7 @@ import com.pos.core.dtos.shift.CashDrawerEventRequestDTO;
 import com.pos.core.dtos.shift.CloseShiftRequestDTO;
 import com.pos.core.dtos.shift.OpenShiftRequestDTO;
 import com.pos.core.dtos.shift.ShiftDTO;
+import com.pos.core.dtos.shift.ShiftDetailDTO;
 import com.pos.core.exception.GlobalExceptionHandler;
 import com.pos.core.exception.ResourceNotFoundException;
 import com.pos.core.models.CashDrawerEventType;
@@ -20,10 +21,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -50,6 +53,8 @@ class ShiftControllerTest {
                 null,
                 null,
                 OffsetDateTime.parse("2026-07-16T12:00:00Z"),
+                null,
+                null,
                 null,
                 null,
                 null,
@@ -88,6 +93,107 @@ class ShiftControllerTest {
     void getCurrentOpenShift_returns400WhenStoreIdMissing() throws Exception {
         mockMvc.perform(get("/api/v1/shifts/current"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void listShifts_returns200NewestFirst() throws Exception {
+        UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID newerId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID olderId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+        when(shiftService.listShifts(eq(storeId), isNull())).thenReturn(List.of(
+                openShiftDto(newerId, storeId),
+                new ShiftDTO(
+                        olderId,
+                        storeId,
+                        ShiftStatus.CLOSED,
+                        new BigDecimal("50.0000"),
+                        new BigDecimal("50.0000"),
+                        new BigDecimal("50.0000"),
+                        new BigDecimal("0.0000"),
+                        OffsetDateTime.parse("2026-07-01T10:00:00Z"),
+                        OffsetDateTime.parse("2026-07-01T18:00:00Z"),
+                        null,
+                        null,
+                        new BigDecimal("0.0000"),
+                        new BigDecimal("0.0000"),
+                        new BigDecimal("0.0000"),
+                        new BigDecimal("0.0000")
+                )
+        ));
+
+        mockMvc.perform(get("/api/v1/shifts").param("storeId", storeId.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(newerId.toString()))
+                .andExpect(jsonPath("$[1].id").value(olderId.toString()))
+                .andExpect(jsonPath("$[1].status").value("CLOSED"));
+    }
+
+    @Test
+    void listShifts_passesStatusFilter() throws Exception {
+        UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+
+        when(shiftService.listShifts(storeId, ShiftStatus.OPEN)).thenReturn(List.of(openShiftDto(shiftId, storeId)));
+
+        mockMvc.perform(get("/api/v1/shifts")
+                        .param("storeId", storeId.toString())
+                        .param("status", "OPEN"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].status").value("OPEN"));
+    }
+
+    @Test
+    void getShift_returnsDetailWithEvents() throws Exception {
+        UUID storeId = UUID.fromString("11111111-1111-1111-1111-111111111111");
+        UUID shiftId = UUID.fromString("22222222-2222-2222-2222-222222222222");
+        UUID eventId = UUID.fromString("33333333-3333-3333-3333-333333333333");
+
+        when(shiftService.getShiftDetail(shiftId)).thenReturn(
+                new ShiftDetailDTO(
+                        shiftId,
+                        storeId,
+                        ShiftStatus.CLOSED,
+                        new BigDecimal("100.0000"),
+                        new BigDecimal("149.9900"),
+                        new BigDecimal("150.0000"),
+                        new BigDecimal("0.0100"),
+                        OffsetDateTime.parse("2026-07-16T12:00:00Z"),
+                        OffsetDateTime.parse("2026-07-16T20:00:00Z"),
+                        null,
+                        null,
+                        new BigDecimal("40.0000"),
+                        new BigDecimal("25.0000"),
+                        new BigDecimal("10.0000"),
+                        new BigDecimal("75.0000"),
+                        List.of(new CashDrawerEventDTO(
+                                eventId,
+                                shiftId,
+                                CashDrawerEventType.PAY_IN,
+                                new BigDecimal("10.0000"),
+                                "Float top-up",
+                                OffsetDateTime.parse("2026-07-16T13:00:00Z")
+                        ))
+                )
+        );
+
+        mockMvc.perform(get("/api/v1/shifts/" + shiftId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(shiftId.toString()))
+                .andExpect(jsonPath("$.expectedCash").value(149.9900))
+                .andExpect(jsonPath("$.totalCashPayments").value(40.0000))
+                .andExpect(jsonPath("$.events[0].type").value("PAY_IN"))
+                .andExpect(jsonPath("$.events[0].reason").value("Float top-up"));
+    }
+
+    @Test
+    void getShift_returns404WhenMissing() throws Exception {
+        UUID shiftId = UUID.fromString("99999999-9999-9999-9999-999999999999");
+        when(shiftService.getShiftDetail(shiftId))
+                .thenThrow(new ResourceNotFoundException("Shift not found: " + shiftId));
+
+        mockMvc.perform(get("/api/v1/shifts/" + shiftId))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -161,6 +267,8 @@ class ShiftControllerTest {
                         new BigDecimal("0.0100"),
                         OffsetDateTime.parse("2026-07-16T12:00:00Z"),
                         OffsetDateTime.parse("2026-07-16T20:00:00Z"),
+                        null,
+                        null,
                         new BigDecimal("40.0000"),
                         new BigDecimal("25.0000"),
                         new BigDecimal("10.0000"),

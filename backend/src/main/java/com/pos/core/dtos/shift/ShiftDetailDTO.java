@@ -1,0 +1,28 @@
+package com.pos.core.dtos.shift;
+
+import com.pos.core.models.ShiftStatus;
+
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record ShiftDetailDTO(
+        UUID id,
+        UUID storeId,
+        ShiftStatus status,
+        BigDecimal startingCash,
+        BigDecimal expectedCash,
+        BigDecimal actualCash,
+        BigDecimal discrepancy,
+        OffsetDateTime openedAt,
+        OffsetDateTime closedAt,
+        UUID openedBy,
+        UUID closedBy,
+        BigDecimal totalCashPayments,
+        BigDecimal totalCardPayments,
+        BigDecimal totalCreditPayments,
+        BigDecimal totalSalesGrandTotal,
+        List<CashDrawerEventDTO> events
+) {
+}

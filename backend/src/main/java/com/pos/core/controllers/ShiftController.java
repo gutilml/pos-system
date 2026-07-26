@@ -5,6 +5,8 @@ import com.pos.core.dtos.shift.CashDrawerEventRequestDTO;
 import com.pos.core.dtos.shift.CloseShiftRequestDTO;
 import com.pos.core.dtos.shift.OpenShiftRequestDTO;
 import com.pos.core.dtos.shift.ShiftDTO;
+import com.pos.core.dtos.shift.ShiftDetailDTO;
+import com.pos.core.models.ShiftStatus;
 import com.pos.core.services.shift.ShiftService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,9 +32,22 @@ public class ShiftController {
         this.shiftService = shiftService;
     }
 
+    @GetMapping
+    public List<ShiftDTO> listShifts(
+            @RequestParam UUID storeId,
+            @RequestParam(required = false) ShiftStatus status
+    ) {
+        return shiftService.listShifts(storeId, status);
+    }
+
     @GetMapping("/current")
     public ShiftDTO getCurrentOpenShift(@RequestParam UUID storeId) {
         return shiftService.getCurrentOpenShift(storeId);
+    }
+
+    @GetMapping("/{id}")
+    public ShiftDetailDTO getShift(@PathVariable UUID id) {
+        return shiftService.getShiftDetail(id);
     }
 
     @PostMapping("/open")
