@@ -24,7 +24,12 @@
 ## Key Files
 
 - `frontend/src/store/useCartStore.ts` — `upsertPayment`: CASH skips the max-cap guard; `selectCanCompleteSale`: `<` instead of `!==`.
-- `frontend/src/components/checkout/TenderAmountFields.tsx` — `grandTotal` prop; Change chip after CASH field; overpay error suppressed for CASH.
-- `frontend/src/components/checkout/CheckoutModal.tsx` — `useEffect` prefills CASH on open when no payments exist.
-- `frontend/src/i18n/messages.ts` — `checkout.change` / `checkout.change` (ES: Cambio).
-- Tests: `CheckoutModal.test.tsx` (9 tests), `useCartStore.test.ts` (14 tests).
+- `frontend/src/components/checkout/TenderAmountFields.tsx` — `grandTotal` prop; Change chip after CASH field; drafts sync from store when empty (prefill).
+- `frontend/src/components/checkout/CheckoutModal.tsx` — one-shot `useLayoutEffect` prefills CASH on open when no payments exist.
+- `frontend/src/i18n/messages.ts` — `checkout.change` (ES: Cambio).
+- Tests: `CheckoutModal.test.tsx` asserts CASH **input value** equals formatted total on open.
+
+## Follow-up fixes
+
+* **Draft sync:** Prefill wrote to the cart store but the CASH input draft stayed empty; CARD then hit the overpay cap. Fixed by filling empty drafts from `payments` in `useLayoutEffect`.
+* **Locale CORS:** Switching ESP↔EN via `PATCH` settings failed with `Invalid CORS request` when the SPA was opened as `http://127.0.0.1:5173`. Backend allowlist now includes both `localhost` and `127.0.0.1` on port 5173.
