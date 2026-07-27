@@ -26,7 +26,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Core catalog + checkout API** | [003](features/003-backend-core-api/README.md) | Products, transactions, DTOs/services |
 | **Register UI shell** | [004](features/004-frontend-register-ui/README.md) | Search, cart, footer layout |
 | **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields done; **043** cart Stock column done |
-| **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md) | Weight modal + optional scale |
+| **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md), [099](features/099-frontend-scale-early-pair-autoread/README.md), [100](features/100-frontend-mock-scale-toggle/README.md) | Weight modal + optional scale; **099** early pair; **100** mock scale toggle |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md), [077](features/077-backend-shift-history/README.md), [079](features/079-backend-shift-audit-stamps/README.md), [081](features/081-backend-drawer-event-policy/README.md) | Open / events / close; **077** history done; **079** audit stamps done; **081** deferred caps/RBAC |
 | **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history done; **080** opener/closer labels (optional) |
 | **Multi-ticket tabs** | [009](features/009-frontend-open-tickets/README.md) | Client-side held tickets |
@@ -181,6 +181,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 097 | BE | Done | [README](features/097-backend-parent-pc-no-weight-child/README.md) | [spec](features/097-backend-parent-pc-no-weight-child/spec.md) · [plan](features/097-backend-parent-pc-no-weight-child/plan.md) · [tasks](features/097-backend-parent-pc-no-weight-child/tasks.md) |
 | 098 | FE | Done | [README](features/098-frontend-parent-package-editor-guards/README.md) | [spec](features/098-frontend-parent-package-editor-guards/spec.md) · [plan](features/098-frontend-parent-package-editor-guards/plan.md) · [tasks](features/098-frontend-parent-package-editor-guards/tasks.md) |
 | 099 | FE | Done | [README](features/099-frontend-scale-early-pair-autoread/README.md) | [spec](features/099-frontend-scale-early-pair-autoread/spec.md) · [plan](features/099-frontend-scale-early-pair-autoread/plan.md) · [tasks](features/099-frontend-scale-early-pair-autoread/tasks.md) |
+| 100 | FE | Done | [README](features/100-frontend-mock-scale-toggle/README.md) | [spec](features/100-frontend-mock-scale-toggle/spec.md) · [plan](features/100-frontend-mock-scale-toggle/plan.md) · [tasks](features/100-frontend-mock-scale-toggle/tasks.md) |
 
 ---
 

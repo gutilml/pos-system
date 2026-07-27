@@ -13,7 +13,7 @@ vi.mock('@/utils/serialScaleHelper', async (importOriginal) => {
   }
 })
 
-import { isWebSerialSupported, readScaleWeight } from '@/utils/serialScaleHelper'
+import { isWebSerialSupported, MOCK_SCALE_STORAGE_KEY, readScaleWeight } from '@/utils/serialScaleHelper'
 
 const deliHam = {
   id: 'p-ham',
@@ -27,6 +27,7 @@ const deliHam = {
 describe('WeightModal', () => {
   beforeEach(() => {
     resetCartForTests()
+    localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
     vi.mocked(isWebSerialSupported).mockReturnValue(false)
   })
 
@@ -94,6 +95,7 @@ describe('WeightModal', () => {
 describe('WeightModal scale fallback', () => {
   beforeEach(() => {
     resetCartForTests({ pendingWeightProduct: deliHam })
+    localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
     vi.mocked(isWebSerialSupported).mockReturnValue(false)
   })
 
@@ -108,6 +110,7 @@ describe('WeightModal scale fallback', () => {
 describe('WeightModal auto-read', () => {
   beforeEach(() => {
     resetCartForTests({ pendingWeightProduct: deliHam })
+    localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
     vi.mocked(isWebSerialSupported).mockReturnValue(true)
     vi.mocked(readScaleWeight).mockReset()
   })
@@ -122,5 +125,38 @@ describe('WeightModal auto-read', () => {
     await waitFor(() => {
       expect(screen.getByLabelText(/weight in gr/i)).toHaveValue('1.25')
     })
+  })
+})
+
+describe('WeightModal mock scale', () => {
+  beforeEach(() => {
+    resetCartForTests({ pendingWeightProduct: deliHam })
+    localStorage.setItem(MOCK_SCALE_STORAGE_KEY, '1')
+    vi.mocked(isWebSerialSupported).mockReturnValue(false)
+    vi.mocked(readScaleWeight).mockReset()
+  })
+
+  it('auto-fills fake weight without calling readScaleWeight', async () => {
+    render(<WeightModal />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/weight in gr/i)).toHaveValue('1')
+    })
+    expect(readScaleWeight).not.toHaveBeenCalled()
+    expect(screen.getByTestId('weight-mock-active')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Read from Scale' })).toBeEnabled()
+  })
+
+  it('Read from Scale fills the same fake weight', async () => {
+    const user = userEvent.setup()
+    render(<WeightModal />)
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/weight in gr/i)).toHaveValue('1')
+    })
+    await user.clear(screen.getByLabelText(/weight in gr/i))
+    await user.click(screen.getByRole('button', { name: 'Read from Scale' }))
+    expect(screen.getByLabelText(/weight in gr/i)).toHaveValue('1')
+    expect(readScaleWeight).not.toHaveBeenCalled()
   })
 })

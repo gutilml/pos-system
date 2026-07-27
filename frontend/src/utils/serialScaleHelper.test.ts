@@ -1,9 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
+  isMockScaleEnabled,
+  MOCK_SCALE_STORAGE_KEY,
+  MOCK_SCALE_WEIGHT,
   parseWeightFromBuffer,
   readScaleWeight,
   ScaleConnectionError,
+  setMockScaleEnabled,
 } from '@/utils/serialScaleHelper'
+
+describe('mock scale preference', () => {
+  beforeEach(() => {
+    localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
+  })
+
+  it('defaults to disabled', () => {
+    expect(isMockScaleEnabled()).toBe(false)
+  })
+
+  it('persists enabled state in localStorage', () => {
+    setMockScaleEnabled(true)
+    expect(localStorage.getItem(MOCK_SCALE_STORAGE_KEY)).toBe('1')
+    expect(isMockScaleEnabled()).toBe(true)
+    setMockScaleEnabled(false)
+    expect(localStorage.getItem(MOCK_SCALE_STORAGE_KEY)).toBeNull()
+    expect(isMockScaleEnabled()).toBe(false)
+  })
+
+  it('exposes a fixed MOCK_SCALE_WEIGHT', () => {
+    expect(MOCK_SCALE_WEIGHT).toBe(1)
+  })
+})
 
 describe('parseWeightFromBuffer', () => {
   it('parses a plain decimal weight', () => {

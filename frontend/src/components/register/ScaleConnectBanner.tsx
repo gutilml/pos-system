@@ -3,7 +3,9 @@ import { useT } from '@/i18n/useT'
 import {
   SCALE_BANNER_DISMISS_KEY,
   hasGrantedScalePort,
+  isMockScaleEnabled,
   isWebSerialSupported,
+  MOCK_SCALE_CHANGE_EVENT,
   pairScalePort,
 } from '@/utils/serialScaleHelper'
 
@@ -16,6 +18,7 @@ type ScaleConnectBannerProps = {
 export function ScaleConnectBanner({ alwaysShow = false }: ScaleConnectBannerProps) {
   const t = useT()
   const [supported] = useState(() => isWebSerialSupported())
+  const [mockEnabled, setMockEnabled] = useState(() => isMockScaleEnabled())
   const [paired, setPaired] = useState<boolean | null>(null)
   const [dismissed, setDismissed] = useState(() => {
     if (typeof sessionStorage === 'undefined') return false
@@ -35,6 +38,23 @@ export function ScaleConnectBanner({ alwaysShow = false }: ScaleConnectBannerPro
   useEffect(() => {
     void refresh()
   }, [refresh])
+
+  useEffect(() => {
+    function onMockChange() {
+      setMockEnabled(isMockScaleEnabled())
+    }
+    window.addEventListener(MOCK_SCALE_CHANGE_EVENT, onMockChange)
+    window.addEventListener('storage', onMockChange)
+    return () => {
+      window.removeEventListener(MOCK_SCALE_CHANGE_EVENT, onMockChange)
+      window.removeEventListener('storage', onMockChange)
+    }
+  }, [])
+
+  // Register: suppress pairing CTA while mock scale is on (Feature 100).
+  if (!alwaysShow && mockEnabled) {
+    return null
+  }
 
   if (!supported) {
     if (!alwaysShow) return null

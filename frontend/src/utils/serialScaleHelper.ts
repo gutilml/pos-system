@@ -195,3 +195,34 @@ export function parseWeightFromBuffer(buffer: string): number | null {
 }
 
 export const SCALE_BANNER_DISMISS_KEY = 'pos-scale-banner-dismissed'
+
+/** Client-local mock scale (Feature 100) — no Web Serial when enabled. */
+export const MOCK_SCALE_STORAGE_KEY = 'pos-mock-scale-enabled'
+/** Fixed fake weight (kg/unit of measure) filled when mock scale is on. */
+export const MOCK_SCALE_WEIGHT = 1
+export const MOCK_SCALE_CHANGE_EVENT = 'pos-mock-scale-change'
+
+export function isMockScaleEnabled(): boolean {
+  if (typeof localStorage === 'undefined') return false
+  try {
+    return localStorage.getItem(MOCK_SCALE_STORAGE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+export function setMockScaleEnabled(enabled: boolean): void {
+  if (typeof localStorage === 'undefined') return
+  try {
+    if (enabled) {
+      localStorage.setItem(MOCK_SCALE_STORAGE_KEY, '1')
+    } else {
+      localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
+    }
+  } catch {
+    // ignore quota / private mode
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new Event(MOCK_SCALE_CHANGE_EVENT))
+  }
+}

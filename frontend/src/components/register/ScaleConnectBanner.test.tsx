@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { ScaleConnectBanner } from '@/components/register/ScaleConnectBanner'
-import { SCALE_BANNER_DISMISS_KEY } from '@/utils/serialScaleHelper'
+import { SCALE_BANNER_DISMISS_KEY, MOCK_SCALE_STORAGE_KEY } from '@/utils/serialScaleHelper'
 
 vi.mock('@/utils/serialScaleHelper', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/utils/serialScaleHelper')>()
@@ -20,6 +20,7 @@ describe('ScaleConnectBanner', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     sessionStorage.clear()
+    localStorage.removeItem(MOCK_SCALE_STORAGE_KEY)
   })
 
   it('shows connect CTA when unpaired', async () => {
@@ -34,6 +35,20 @@ describe('ScaleConnectBanner', () => {
     render(<ScaleConnectBanner />)
     await waitFor(() => expect(hasGrantedScalePort).toHaveBeenCalled())
     expect(screen.queryByTestId('scale-connect-banner')).not.toBeInTheDocument()
+  })
+
+  it('suppresses register CTA when mock scale is on', async () => {
+    localStorage.setItem(MOCK_SCALE_STORAGE_KEY, '1')
+    vi.mocked(hasGrantedScalePort).mockResolvedValue(false)
+    render(<ScaleConnectBanner />)
+    expect(screen.queryByTestId('scale-connect-banner')).not.toBeInTheDocument()
+  })
+
+  it('still shows Settings connect panel when mock scale is on', async () => {
+    localStorage.setItem(MOCK_SCALE_STORAGE_KEY, '1')
+    vi.mocked(hasGrantedScalePort).mockResolvedValue(false)
+    render(<ScaleConnectBanner alwaysShow />)
+    expect(await screen.findByTestId('scale-connect-banner')).toBeInTheDocument()
   })
 
   it('dismisses for the session', async () => {

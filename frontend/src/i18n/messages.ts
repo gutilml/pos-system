@@ -147,6 +147,9 @@ export type MessageKey =
   | 'weight.decimal'
   | 'weight.inputAria'
   | 'scale.settingsTitle'
+  | 'scale.mockTitle'
+  | 'scale.mockHint'
+  | 'scale.mockActive'
   | 'scale.connected'
   | 'scale.notConnected'
   | 'scale.connectHint'
@@ -573,6 +576,10 @@ export const en: MessageDict = {
   'weight.decimal': 'Decimal point',
   'weight.inputAria': 'Weight in',
   'scale.settingsTitle': 'Scale',
+  'scale.mockTitle': 'Mock scale',
+  'scale.mockHint':
+    'For demos and development without hardware. Weight modal fills a fake weight; no USB/serial scale needed.',
+  'scale.mockActive': 'Mock scale on — fake weight, no serial port.',
   'scale.connected': 'Scale connected',
   'scale.notConnected': 'Scale not connected',
   'scale.connectHint': 'Connect once after opening the register so weight items can auto-read.',
@@ -887,6 +894,10 @@ export const es: MessageDict = {
   'weight.decimal': 'Punto decimal',
   'weight.inputAria': 'Peso en',
   'scale.settingsTitle': 'Báscula',
+  'scale.mockTitle': 'Báscula simulada',
+  'scale.mockHint':
+    'Para demos y desarrollo sin hardware. El modal de peso usa un valor falso; no hace falta báscula USB/serial.',
+  'scale.mockActive': 'Báscula simulada activa — peso falso, sin puerto serial.',
   'scale.connected': 'Báscula conectada',
   'scale.notConnected': 'Báscula no conectada',
   'scale.connectHint': 'Conéctala una vez al abrir la caja para leer el peso automáticamente.',

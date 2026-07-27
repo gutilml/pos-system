@@ -2,7 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useT } from '@/i18n/useT'
 import { formatMoney } from '@/lib/money'
 import { useCartStore } from '@/store/useCartStore'
-import { isWebSerialSupported, readScaleWeight } from '@/utils/serialScaleHelper'
+import {
+  isMockScaleEnabled,
+  isWebSerialSupported,
+  MOCK_SCALE_WEIGHT,
+  readScaleWeight,
+} from '@/utils/serialScaleHelper'
 
 const NUMPAD_KEYS = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'] as const
 
@@ -47,7 +52,16 @@ export function WeightModal() {
   }, [pending])
 
   useEffect(() => {
-    if (!pending || !isWebSerialSupported()) return
+    if (!pending) return
+
+    if (isMockScaleEnabled()) {
+      setWeightInput(String(MOCK_SCALE_WEIGHT))
+      setScaleError(null)
+      setReadingScale(false)
+      return
+    }
+
+    if (!isWebSerialSupported()) return
     let cancelled = false
     setReadingScale(true)
     setScaleError(null)
@@ -122,6 +136,10 @@ export function WeightModal() {
 
   async function handleReadScale() {
     setScaleError(null)
+    if (isMockScaleEnabled()) {
+      setWeightInput(String(MOCK_SCALE_WEIGHT))
+      return
+    }
     setReadingScale(true)
     try {
       const weight = await readScaleWeight({ allowPrompt: true })
@@ -134,6 +152,9 @@ export function WeightModal() {
       setReadingScale(false)
     }
   }
+
+  const mockScale = isMockScaleEnabled()
+  const canReadScale = mockScale || isWebSerialSupported()
 
   return (
     <div
@@ -213,12 +234,16 @@ export function WeightModal() {
           <button
             type="button"
             onClick={() => void handleReadScale()}
-            disabled={readingScale || !isWebSerialSupported()}
+            disabled={readingScale || !canReadScale}
             className="rounded-xl border border-emerald-700 px-4 py-3 font-medium text-emerald-800 disabled:cursor-not-allowed disabled:border-slate-300 disabled:text-slate-400 active:bg-emerald-50"
           >
             {readingScale ? t('weight.readingScale') : t('weight.readScale')}
           </button>
-          {!isWebSerialSupported() ? (
+          {mockScale ? (
+            <p className="text-xs text-slate-500" data-testid="weight-mock-active">
+              {t('scale.mockActive')}
+            </p>
+          ) : !isWebSerialSupported() ? (
             <p className="text-xs text-slate-500">{t('weight.serialUnavailable')}</p>
           ) : null}
 

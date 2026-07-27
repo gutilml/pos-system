@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import { ScaleConnectBanner } from '@/components/register/ScaleConnectBanner'
 import { useT } from '@/i18n/useT'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
+import { isMockScaleEnabled, setMockScaleEnabled } from '@/utils/serialScaleHelper'
 
 function taxPercentFromFraction(rate: number | null | undefined): string {
   if (rate == null || !Number.isFinite(Number(rate))) return '0'
@@ -21,6 +22,7 @@ export function StoreSettingsWorkspace() {
   const [taxError, setTaxError] = useState<string | null>(null)
   const [savingTax, setSavingTax] = useState(false)
   const [savedFlash, setSavedFlash] = useState(false)
+  const [mockScale, setMockScale] = useState(() => isMockScaleEnabled())
 
   useEffect(() => {
     setTaxInput(taxPercentFromFraction(defaultTaxRate))
@@ -105,6 +107,25 @@ export function StoreSettingsWorkspace() {
 
       <div>
         <h3 className="mb-2 text-sm font-semibold text-slate-900">{t('scale.settingsTitle')}</h3>
+        <label
+          className="mb-3 flex max-w-md cursor-pointer items-start gap-3 rounded-xl border border-slate-200 bg-white p-4"
+          data-testid="mock-scale-toggle"
+        >
+          <input
+            type="checkbox"
+            className="mt-1 h-4 w-4 rounded border-slate-300"
+            checked={mockScale}
+            onChange={(e) => {
+              const enabled = e.target.checked
+              setMockScaleEnabled(enabled)
+              setMockScale(enabled)
+            }}
+          />
+          <span>
+            <span className="block text-sm font-medium text-slate-900">{t('scale.mockTitle')}</span>
+            <span className="mt-0.5 block text-xs text-slate-600">{t('scale.mockHint')}</span>
+          </span>
+        </label>
         <ScaleConnectBanner alwaysShow />
       </div>
     </section>
