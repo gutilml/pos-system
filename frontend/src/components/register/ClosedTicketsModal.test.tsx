@@ -176,6 +176,50 @@ describe('ClosedTicketsModal', () => {
     })
   })
 
+  it('shows productName when provided, falls back to id prefix when absent', async () => {
+    const user = userEvent.setup()
+    const txWithName = sampleTx({
+      items: [{ ...sampleTx().items[0], productName: 'Coca Cola 355ml' }],
+    })
+    const txNoName = sampleTx({
+      items: [{ ...sampleTx().items[0], productId: 'prod-1111-2222' }],
+    })
+    vi.mocked(listTransactions).mockResolvedValue([txWithName])
+    vi.mocked(getTransaction).mockResolvedValueOnce(txWithName).mockResolvedValueOnce(txNoName)
+
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+    await waitFor(() => {
+      expect(screen.getByTestId(`closed-ticket-row-${txWithName.id}`)).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId(`closed-ticket-row-${txWithName.id}`))
+    await waitFor(() => {
+      expect(screen.getByTestId('closed-ticket-detail')).toBeInTheDocument()
+    })
+    expect(screen.getByText('Coca Cola 355ml')).toBeInTheDocument()
+  })
+
+  it('localizes CASH payment label to CASH in English and EFECTIVO in Spanish', async () => {
+    const user = userEvent.setup()
+    const cashTx = sampleTx()
+    vi.mocked(listTransactions).mockResolvedValue([cashTx])
+    vi.mocked(getTransaction).mockResolvedValue(cashTx)
+
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+    await waitFor(() => {
+      expect(screen.getByTestId(`closed-ticket-row-${cashTx.id}`)).toBeInTheDocument()
+    })
+
+    // list row shows English label
+    expect(screen.getByTestId(`closed-ticket-row-${cashTx.id}`)).toHaveTextContent('CASH')
+
+    await user.click(screen.getByTestId(`closed-ticket-row-${cashTx.id}`))
+    await waitFor(() => {
+      expect(screen.getByTestId('closed-ticket-detail')).toBeInTheDocument()
+    })
+    // detail also shows English label (not raw enum)
+    expect(screen.getByTestId('closed-ticket-detail')).toHaveTextContent('CASH')
+  })
+
   it('blocks reimburse when ticket has CARD', async () => {
     const user = userEvent.setup()
     const cardTx = sampleTx({

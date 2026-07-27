@@ -35,8 +35,13 @@ function formatTicketWhen(iso: string, locale: string): string {
   })
 }
 
-function paymentLabels(tx: TransactionResponse): string {
-  return tx.payments.map((p) => p.paymentMethod).join(' · ')
+type TFn = ReturnType<typeof useT>
+
+function tenderLabel(method: string, t: TFn): string {
+  if (method === 'CASH') return t('tender.cash')
+  if (method === 'CARD') return t('tender.card')
+  if (method === 'CREDIT') return t('tender.credit')
+  return method
 }
 
 function defaultSelections(items: TransactionItemResponse[]): ReimburseLineSelection[] {
@@ -256,7 +261,7 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
                     </span>
                     <span className="flex justify-between gap-2 text-xs text-slate-600">
                       <span>{formatTicketWhen(tx.createdAt, locale)}</span>
-                      <span>{paymentLabels(tx)}</span>
+                      <span>{tx.payments.map((p) => tenderLabel(p.paymentMethod, t)).join(' · ')}</span>
                     </span>
                   </button>
                 </li>
@@ -280,7 +285,7 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
               </div>
               <div className="flex justify-between gap-2">
                 <dt>{t('closedTickets.payments')}</dt>
-                <dd>{paymentLabels(detail)}</dd>
+                <dd>{detail.payments.map((p) => tenderLabel(p.paymentMethod, t)).join(' · ')}</dd>
               </div>
             </dl>
 
@@ -321,7 +326,9 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
                           htmlFor={`reimburse-line-${item.id}`}
                           className="block text-sm font-medium text-slate-900"
                         >
-                          {t('closedTickets.lineProduct')} #{shortId(item.productId)}
+                          {item.productName?.trim()
+                            ? item.productName
+                            : `${t('closedTickets.lineProduct')} #${shortId(item.productId)}`}
                         </label>
                         <p className="mt-0.5 text-xs text-slate-600">
                           {t('cart.qty')} {item.quantity} · {formatMoney(item.finalUnitPrice)} ·{' '}

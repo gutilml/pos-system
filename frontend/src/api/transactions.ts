@@ -41,6 +41,7 @@ export type TransactionPaymentResponse = {
 export type TransactionItemResponse = {
   id: string
   productId: string
+  productName?: string | null
   quantity: number
   priceAtTime: number
   originalUnitPrice: number
