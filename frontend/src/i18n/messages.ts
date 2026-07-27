@@ -115,6 +115,8 @@ export type MessageKey =
   | 'shiftHistory.discrepancy'
   | 'shiftHistory.openedAt'
   | 'shiftHistory.closedAt'
+  | 'shiftHistory.openedBy'
+  | 'shiftHistory.closedBy'
   | 'shiftHistory.events'
   | 'shiftHistory.noEvents'
   | 'shiftHistory.totalCash'
@@ -164,6 +166,8 @@ export type MessageKey =
   | 'shiftTicket.shift'
   | 'shiftTicket.opened'
   | 'shiftTicket.closed'
+  | 'shiftTicket.openedBy'
+  | 'shiftTicket.closedBy'
   | 'shiftTicket.expectedCash'
   | 'shiftTicket.countedCash'
   | 'shiftTicket.discrepancy'
@@ -544,6 +548,8 @@ export const en: MessageDict = {
   'shiftHistory.discrepancy': 'Discrepancy',
   'shiftHistory.openedAt': 'Opened',
   'shiftHistory.closedAt': 'Closed',
+  'shiftHistory.openedBy': 'Opened by',
+  'shiftHistory.closedBy': 'Closed by',
   'shiftHistory.events': 'Drawer events',
   'shiftHistory.noEvents': 'No pay-in / pay-out events.',
   'shiftHistory.totalCash': 'Cash sales',
@@ -594,6 +600,8 @@ export const en: MessageDict = {
   'shiftTicket.shift': 'Shift',
   'shiftTicket.opened': 'Opened',
   'shiftTicket.closed': 'Closed',
+  'shiftTicket.openedBy': 'Opened by',
+  'shiftTicket.closedBy': 'Closed by',
   'shiftTicket.expectedCash': 'Expected cash',
   'shiftTicket.countedCash': 'Counted cash',
   'shiftTicket.discrepancy': 'Discrepancy',
@@ -862,6 +870,8 @@ export const es: MessageDict = {
   'shiftHistory.discrepancy': 'Diferencia',
   'shiftHistory.openedAt': 'Apertura',
   'shiftHistory.closedAt': 'Cierre',
+  'shiftHistory.openedBy': 'Abierto por',
+  'shiftHistory.closedBy': 'Cerrado por',
   'shiftHistory.events': 'Movimientos del cajón',
   'shiftHistory.noEvents': 'Sin entradas ni salidas.',
   'shiftHistory.totalCash': 'Ventas en efectivo',
@@ -912,6 +922,8 @@ export const es: MessageDict = {
   'shiftTicket.shift': 'Turno',
   'shiftTicket.opened': 'Apertura',
   'shiftTicket.closed': 'Cierre',
+  'shiftTicket.openedBy': 'Abierto por',
+  'shiftTicket.closedBy': 'Cerrado por',
   'shiftTicket.expectedCash': 'Efectivo esperado',
   'shiftTicket.countedCash': 'Efectivo contado',
   'shiftTicket.discrepancy': 'Diferencia',

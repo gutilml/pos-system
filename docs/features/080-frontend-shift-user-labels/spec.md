@@ -15,20 +15,20 @@ Optional polish: surface who opened and closed a shift on the close discrepancy 
 
 ## Scope
 
-* **Strictly Frontend:** `frontend/`.
-* **Depends on:** BE **079**; ideally FE **078** for history.
+* Frontend close ticket + history detail; BE shift DTOs expose `openedByUsername` / `closedByUsername` resolved from `users.username`.
+* **Depends on:** BE **079**; FE **078** for history.
 * **Unlocks:** none.
 
 ## UX
 
 * Close ticket (**024** / **030** print): opener + closer labels when present.
 * Shift history detail (**078**): same labels.
-* Fallback: hide or show “—” when null (legacy shifts).
+* Fallback: show “—” when null (legacy shifts).
 * EN/ES.
 
 ## Acceptance Criteria
 
-1. [ ] Close ticket shows opener/closer when API provides them.
-2. [ ] History detail shows opener/closer when available.
-3. [ ] Null-safe for legacy shifts; EN/ES.
-4. [ ] Component tests; pending/catalog when Done.
+1. [x] Close ticket shows opener/closer when API provides usernames.
+2. [x] History detail shows opener/closer when available.
+3. [x] Null-safe for legacy shifts; EN/ES.
+4. [x] Component tests; pending/catalog when Done.

@@ -12,6 +12,11 @@ export type Shift = {
   discrepancy: number | null
   openedAt: string | null
   closedAt: string | null
+  /** Feature 079/080 — null on legacy shifts */
+  openedBy?: string | null
+  closedBy?: string | null
+  openedByUsername?: string | null
+  closedByUsername?: string | null
   /** CLOSED only — Feature 029/030 sales summary */
   totalCashPayments?: number | null
   totalCardPayments?: number | null

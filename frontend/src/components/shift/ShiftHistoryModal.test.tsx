@@ -84,9 +84,31 @@ describe('ShiftHistoryModal', () => {
       expect(getShiftDetail).toHaveBeenCalledWith(closedShift.id)
       expect(screen.getByTestId('shift-history-detail')).toBeInTheDocument()
     })
+    expect(screen.getByTestId('shift-history-opened-by')).toHaveTextContent('—')
+    expect(screen.getByTestId('shift-history-closed-by')).toHaveTextContent('—')
     expect(screen.getByTestId('shift-history-events')).toBeInTheDocument()
     expect(screen.getByTestId('shift-history-event-evt-1')).toBeInTheDocument()
     expect(screen.getByText('Change fund')).toBeInTheDocument()
+  })
+
+  it('shows opener and closer usernames on detail', async () => {
+    const user = userEvent.setup()
+    vi.mocked(listShifts).mockResolvedValue([closedShift])
+    vi.mocked(getShiftDetail).mockResolvedValue({
+      ...detail,
+      openedByUsername: 'alice',
+      closedByUsername: 'bob',
+    })
+
+    render(<ShiftHistoryModal open onClose={vi.fn()} />)
+    await waitFor(() => {
+      expect(screen.getByTestId(`shift-history-row-${closedShift.id}`)).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId(`shift-history-row-${closedShift.id}`))
+    await waitFor(() => {
+      expect(screen.getByTestId('shift-history-opened-by')).toHaveTextContent('alice')
+      expect(screen.getByTestId('shift-history-closed-by')).toHaveTextContent('bob')
+    })
   })
 
   it('shows empty state when no shifts', async () => {

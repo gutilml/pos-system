@@ -26,7 +26,6 @@ Phase A register wire-up features are shipped. Paired backend: 017, 019, 021.
 
 ## Shift UX
 
-- [ ] **Shift opener/closer labels** — triad: [`080-frontend-shift-user-labels`](../features/080-frontend-shift-user-labels/README.md). Optional polish; depends on BE **079**.
 - [ ] **Remove `DEFAULT_STORE_ID` hardcode** — Feature 026 prefers `/me.storeId` via `selectStoreId`; constant remains as unauthenticated/fallback until multi-store picker.
 - [ ] **Shift status in header** — Open-since time, starting cash, quick indicator while selling. Not yet a numbered triad.
 
@@ -43,7 +42,7 @@ Phase A register wire-up features are shipped. Paired backend: 017, 019, 021.
 - Roles ADMIN + CASHIER; **equal permissions for now** (no role-gated UI yet).
 - Single store for now; drop `DEFAULT_STORE_ID` hardcode in favor of store from auth/config once BE exposes it on `/me` (or keep seed UUID until then).
 - User management **UI deferred** until user CRUD API exists.
-- Shift ↔ user linking: follow-up FE **080** after BE **079**.
+- Shift ↔ user linking: FE **080** opener/closer labels shipped (after BE **079**).
 
 - [ ] **System user management UI** — Admin screens to create/edit/deactivate users. **Deferred** with backend user CRUD API.
 - [ ] **Role-gated navigation and actions** — Deferred until ADMIN vs CASHIER permissions diverge. Shift close with discrepancy remains cashier-allowed; no manager override for variance.
@@ -55,7 +54,6 @@ Phase A register wire-up features are shipped. Paired backend: 017, 019, 021.
 
 ## Tooling / quality
 
-- [ ] **E2E smoke** — Open shift → scan → weight item → checkout → close shift against a running backend.
 - [ ] **Accessibility pass** — Modals, focus traps, scanner-first keyboard flow.
 
 ---

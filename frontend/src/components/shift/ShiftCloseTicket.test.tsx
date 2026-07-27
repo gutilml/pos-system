@@ -71,4 +71,25 @@ describe('ShiftCloseTicket', () => {
 
     expect(useShiftStore.getState().lastClosedShift).toBeNull()
   })
+
+  it('renders opener and closer usernames when present', () => {
+    render(
+      <ShiftCloseTicket
+        shift={{
+          ...closedShift,
+          openedByUsername: 'alice',
+          closedByUsername: 'bob',
+        }}
+      />,
+    )
+
+    expect(screen.getByTestId('ticket-opened-by')).toHaveTextContent('alice')
+    expect(screen.getByTestId('ticket-closed-by')).toHaveTextContent('bob')
+  })
+
+  it('shows dash when opener/closer usernames are missing', () => {
+    render(<ShiftCloseTicket shift={closedShift} />)
+    expect(screen.getByTestId('ticket-opened-by')).toHaveTextContent('—')
+    expect(screen.getByTestId('ticket-closed-by')).toHaveTextContent('—')
+  })
 })

@@ -6,15 +6,15 @@ Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`
 
 ## Status
 
-**Planned** (optional polish)
+**Done** — Vitest green. Small BE DTO enrichment (`openedByUsername` / `closedByUsername`) shipped with this feature so labels can show usernames, not only UUIDs.
 
 ## Summary
 
-Show opener/closer display names on shift close ticket and shift history once BE **079** exposes audit stamps.
+Show opener/closer usernames on the shift close ticket and shift history detail. Legacy shifts without stamps show “—”.
 
 ## Depends on
 
-BE **079** (soft: history UI **078** for history surface).
+BE **079** audit stamps (+ username resolution on shift DTOs).
 
 ## Out of scope
 

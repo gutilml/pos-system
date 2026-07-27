@@ -63,9 +63,21 @@ export function ShiftCloseTicket({ shift }: ShiftCloseTicketProps) {
               </dd>
             </div>
             <div className="flex justify-between gap-4">
+              <dt>{t('shiftTicket.openedBy')}</dt>
+              <dd className="text-slate-900" data-testid="ticket-opened-by">
+                {shift.openedByUsername?.trim() ? shift.openedByUsername : '—'}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
               <dt>{t('shiftTicket.closed')}</dt>
               <dd className="tabular-nums text-slate-900" data-testid="ticket-closed-at">
                 {formatTimestamp(shift.closedAt)}
+              </dd>
+            </div>
+            <div className="flex justify-between gap-4">
+              <dt>{t('shiftTicket.closedBy')}</dt>
+              <dd className="text-slate-900" data-testid="ticket-closed-by">
+                {shift.closedByUsername?.trim() ? shift.closedByUsername : '—'}
               </dd>
             </div>
             <div className="flex justify-between gap-4 border-t border-slate-200 pt-3">

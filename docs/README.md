@@ -28,7 +28,8 @@ Use this table when you know the *subject*, not the feature number.
 | **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields done; **043** cart Stock column done |
 | **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md), [099](features/099-frontend-scale-early-pair-autoread/README.md), [100](features/100-frontend-mock-scale-toggle/README.md) | Weight modal + optional scale; **099** early pair; **100** mock scale toggle |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md), [077](features/077-backend-shift-history/README.md), [079](features/079-backend-shift-audit-stamps/README.md), [081](features/081-backend-drawer-event-policy/README.md) | Open / events / close; **077** history done; **079** audit stamps done; **081** deferred caps/RBAC |
-| **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history done; **080** opener/closer labels (optional) |
+| **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history; **080** opener/closer labels |
+| **Register E2E / regression** | [101](features/101-e2e-register-smoke/README.md) | Tagged BE + FE regression smoke (weight sale included) |
 | **Multi-ticket tabs** | [009](features/009-frontend-open-tickets/README.md) | Client-side held tickets |
 | **Stripe (backend)** | [010](features/010-backend-stripe-integration/README.md) | Checkout Session + webhook — **keep code; Stripe-in-POS ON HOLD** |
 | **Stripe QR UI** | [011](features/011-frontend-stripe-ui/README.md) | QR + polling — **keep code; ON HOLD** |
@@ -161,7 +162,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 077 | BE | Done | [README](features/077-backend-shift-history/README.md) | [spec](features/077-backend-shift-history/spec.md) · [plan](features/077-backend-shift-history/plan.md) · [tasks](features/077-backend-shift-history/tasks.md) |
 | 078 | FE | Done | [README](features/078-frontend-shift-history/README.md) | [spec](features/078-frontend-shift-history/spec.md) · [plan](features/078-frontend-shift-history/plan.md) · [tasks](features/078-frontend-shift-history/tasks.md) |
 | 079 | BE | Done | [README](features/079-backend-shift-audit-stamps/README.md) | [spec](features/079-backend-shift-audit-stamps/spec.md) · [plan](features/079-backend-shift-audit-stamps/plan.md) · [tasks](features/079-backend-shift-audit-stamps/tasks.md) |
-| 080 | FE | Planned (optional polish) | [README](features/080-frontend-shift-user-labels/README.md) | [spec](features/080-frontend-shift-user-labels/spec.md) · [plan](features/080-frontend-shift-user-labels/plan.md) · [tasks](features/080-frontend-shift-user-labels/tasks.md) |
+| 080 | FE | Done | [README](features/080-frontend-shift-user-labels/README.md) | [spec](features/080-frontend-shift-user-labels/spec.md) · [plan](features/080-frontend-shift-user-labels/plan.md) · [tasks](features/080-frontend-shift-user-labels/tasks.md) |
 | 081 | BE | Planned — Deferred (needs product caps/RBAC) | [README](features/081-backend-drawer-event-policy/README.md) | [spec](features/081-backend-drawer-event-policy/spec.md) · [plan](features/081-backend-drawer-event-policy/plan.md) · [tasks](features/081-backend-drawer-event-policy/tasks.md) |
 | 082 | BE | Planned — Deferred (product design) | [README](features/082-backend-transaction-lifecycle/README.md) | [spec](features/082-backend-transaction-lifecycle/spec.md) · [plan](features/082-backend-transaction-lifecycle/plan.md) · [tasks](features/082-backend-transaction-lifecycle/tasks.md) |
 | 083 | FE | Planned — Deferred | [README](features/083-frontend-transaction-lifecycle/README.md) | [spec](features/083-frontend-transaction-lifecycle/spec.md) · [plan](features/083-frontend-transaction-lifecycle/plan.md) · [tasks](features/083-frontend-transaction-lifecycle/tasks.md) |
@@ -182,6 +183,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 098 | FE | Done | [README](features/098-frontend-parent-package-editor-guards/README.md) | [spec](features/098-frontend-parent-package-editor-guards/spec.md) · [plan](features/098-frontend-parent-package-editor-guards/plan.md) · [tasks](features/098-frontend-parent-package-editor-guards/tasks.md) |
 | 099 | FE | Done | [README](features/099-frontend-scale-early-pair-autoread/README.md) | [spec](features/099-frontend-scale-early-pair-autoread/spec.md) · [plan](features/099-frontend-scale-early-pair-autoread/plan.md) · [tasks](features/099-frontend-scale-early-pair-autoread/tasks.md) |
 | 100 | FE | Done | [README](features/100-frontend-mock-scale-toggle/README.md) | [spec](features/100-frontend-mock-scale-toggle/spec.md) · [plan](features/100-frontend-mock-scale-toggle/plan.md) · [tasks](features/100-frontend-mock-scale-toggle/tasks.md) |
+| 101 | FE+BE | Done | [README](features/101-e2e-register-smoke/README.md) | [spec](features/101-e2e-register-smoke/spec.md) · [plan](features/101-e2e-register-smoke/plan.md) · [tasks](features/101-e2e-register-smoke/tasks.md) |
 
 ---
 
@@ -195,9 +197,9 @@ Decisions 2026-07-22 + review 2026-07-23. All frontend-only; implement in number
 4. [035](features/035-frontend-search-typeahead/README.md) — search typeahead ~~(done)~~
 5. [036](features/036-frontend-pay-modal-redesign/README.md) — Pay redesign + Print and pay ~~(done)~~
 6. [037](features/037-frontend-assign-customer-sell-screen/README.md) — assign customer from sell screen ~~(done)~~
-7. [038](features/038-frontend-cart-line-chrome/README.md) — cart line chrome (hide SKU/unit price; Product/Qty/Discount/Subtotal headers)
-8. [039](features/039-frontend-footer-totals-total-only/README.md) — footer totals: Total only
-9. [040](features/040-frontend-global-discount-footer-button/README.md) — global discount as footer button
+7. [038](features/038-frontend-cart-line-chrome/README.md) — cart line chrome ~~(done)~~
+8. [039](features/039-frontend-footer-totals-total-only/README.md) — footer totals: Total only ~~(done)~~
+9. [040](features/040-frontend-global-discount-footer-button/README.md) — global discount as footer button ~~(done)~~
 10. [041](features/041-frontend-pay-modal-layout-polish/README.md) — Pay modal layout polish ~~(done)~~
 11. [042](features/042-backend-product-stock-inventory-flag/README.md) — BE: ProductDTO stock fields + `enableInventory` on `/me` ~~(done)~~
 12. [043](features/043-frontend-cart-stock-column/README.md) — cart Stock column when inventory enabled ~~(done)~~

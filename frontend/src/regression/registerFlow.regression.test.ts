@@ -1,10 +1,10 @@
 /**
- * High-level register smoke path (Features 089 / 078 / 087).
+ * High-level register smoke path (Features 089 / 078 / 087 / 101).
  * Run only via: `npm run test:regression`
  */
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useAuthStore } from '@/store/useAuthStore'
-import { useCartStore } from '@/store/useCartStore'
+import { resetCartForTests, selectActiveItems, useCartStore } from '@/store/useCartStore'
 
 vi.mock('@/api/auth', () => ({
   fetchCsrf: vi.fn().mockResolvedValue('csrf'),
@@ -41,10 +41,10 @@ describe('registerFlow regression smoke', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     useAuthStore.setState({ user: null, status: 'idle', error: null })
-    useCartStore.setState({ taxRate: 0 })
+    resetCartForTests()
   })
 
-  it('login hydrates tax; shifts and cashier reimburse APIs are callable', async () => {
+  it('login hydrates tax; weight confirm; shifts and cashier reimburse APIs are callable', async () => {
     vi.mocked(login).mockResolvedValue({
       id: 'u1',
       username: 'cashier',
@@ -101,6 +101,19 @@ describe('registerFlow regression smoke', () => {
 
     await useAuthStore.getState().login('cashier', 'cashier')
     expect(useCartStore.getState().taxRate).toBe(0.08)
+
+    useCartStore.getState().addItem({
+      id: 'p-ham',
+      sku: '2001',
+      name: 'Deli Ham',
+      sellingPrice: 0.01,
+      sellByWeight: true,
+      unitOfMeasure: 'gr',
+    })
+    useCartStore.getState().confirmWeight(250)
+    const items = selectActiveItems(useCartStore.getState())
+    expect(items).toHaveLength(1)
+    expect(items[0].quantity).toBe(250)
 
     const shifts = await listShifts('store-1')
     expect(shifts).toHaveLength(1)

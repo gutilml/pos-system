@@ -4,6 +4,7 @@
 
 Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`.
 
-- [ ] 1. Types + render opener/closer on close ticket.
-- [ ] 2. Same labels on shift history detail.
-- [ ] 3. Tests; pending + catalog Done; commit `feat(080): …`.
+- [x] 1. BE: username fields on shift DTOs + resolve in service; JUnit.
+- [x] 2. Types + render opener/closer on close ticket.
+- [x] 3. Same labels on shift history detail.
+- [x] 4. Tests; pending + catalog Done.

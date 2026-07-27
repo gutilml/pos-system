@@ -201,8 +201,18 @@ export function ShiftHistoryModal({ open, onClose }: ShiftHistoryModalProps) {
               <DetailRow label={t('shiftHistory.openedAt')}>
                 {formatWhen(detail.openedAt, locale)}
               </DetailRow>
+              <DetailRow label={t('shiftHistory.openedBy')}>
+                <span data-testid="shift-history-opened-by">
+                  {detail.openedByUsername?.trim() ? detail.openedByUsername : '—'}
+                </span>
+              </DetailRow>
               <DetailRow label={t('shiftHistory.closedAt')}>
                 {formatWhen(detail.closedAt, locale)}
+              </DetailRow>
+              <DetailRow label={t('shiftHistory.closedBy')}>
+                <span data-testid="shift-history-closed-by">
+                  {detail.closedByUsername?.trim() ? detail.closedByUsername : '—'}
+                </span>
               </DetailRow>
               <DetailRow label={t('shiftHistory.startingCash')}>
                 {formatMoney(detail.startingCash)}
