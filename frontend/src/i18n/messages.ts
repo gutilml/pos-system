@@ -83,6 +83,7 @@ export type MessageKey =
   | 'checkout.printAndPay'
   | 'checkout.pay'
   | 'checkout.overpay'
+  | 'checkout.change'
   | 'checkout.creditGate'
   | 'checkout.abandonCredit'
   | 'checkout.failed'
@@ -508,6 +509,7 @@ export const en: MessageDict = {
   'checkout.printAndPay': 'Print and pay',
   'checkout.pay': 'PAY',
   'checkout.overpay': 'Amount cannot exceed remaining balance',
+  'checkout.change': 'Change',
   'checkout.creditGate': 'Assign a customer before charging store credit.',
   'checkout.abandonCredit': 'Back — choose another tender',
   'checkout.failed': 'Checkout failed',
@@ -826,6 +828,7 @@ export const es: MessageDict = {
   'checkout.printAndPay': 'Imprimir y cobrar',
   'checkout.pay': 'COBRAR',
   'checkout.overpay': 'El monto no puede superar el saldo restante',
+  'checkout.change': 'Cambio',
   'checkout.creditGate': 'Asigna un cliente antes de cargar crédito de tienda.',
   'checkout.abandonCredit': 'Volver — elegir otro pago',
   'checkout.failed': 'Error al cobrar',

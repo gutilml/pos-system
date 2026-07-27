@@ -45,15 +45,20 @@ describe('CheckoutModal', () => {
     })
   })
 
-  it('disables PAY until the three fields exactly cover the grand total', async () => {
+  it('pre-fills CASH with grand total on open and enables PAY immediately', async () => {
     const user = userEvent.setup()
     render(<CheckoutModal open onClose={() => undefined} />)
 
     expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('6.48')
-    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('6.48')
-    expect(screen.getByTestId('complete-transaction')).toBeDisabled()
+    // CASH is pre-filled → balance is 0 → PAY enabled right away
+    expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
+    expect(screen.getByTestId('complete-transaction')).toBeEnabled()
+    expect(screen.getByTestId('complete-transaction')).toHaveTextContent('PAY')
 
-    await user.type(screen.getByLabelText('CASH'), '2.48')
+    // Cashier can override: clear CASH, type partial, PAY disables until covered
+    const cashInput = screen.getByLabelText('CASH')
+    await user.clear(cashInput)
+    await user.type(cashInput, '2.48')
     expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('4.00')
     expect(screen.getByTestId('complete-transaction')).toBeDisabled()
 
@@ -61,18 +66,37 @@ describe('CheckoutModal', () => {
     expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
     expect(screen.getByTestId('checkout-tendered')).toHaveTextContent('6.48')
     expect(screen.getByTestId('complete-transaction')).toBeEnabled()
-    expect(screen.getByTestId('complete-transaction')).toHaveTextContent('PAY')
   })
 
-  it('rejects field amounts that would overpay', async () => {
+  it('rejects CARD amounts that would overpay the remaining balance', async () => {
     const user = userEvent.setup()
     render(<CheckoutModal open onClose={() => undefined} />)
 
-    await user.click(screen.getByLabelText('CASH'))
-    await user.paste('10')
+    // CASH is pre-filled with 6.48; clear it so CARD can be tested for overpay
+    const cashInput = screen.getByLabelText('CASH')
+    await user.clear(cashInput)
+    await user.tab()
+
+    await user.click(screen.getByLabelText('CARD'))
+    await user.paste('99')
 
     expect(screen.getByTestId('tender-amount-error')).toHaveTextContent(/cannot exceed/i)
-    expect(selectActivePayments(useCartStore.getState())).toHaveLength(0)
+  })
+
+  it('allows CASH above the total and shows change due', async () => {
+    const user = userEvent.setup()
+    render(<CheckoutModal open onClose={() => undefined} />)
+
+    // Clear the pre-filled CASH and type an amount larger than the total
+    const cashInput = screen.getByLabelText('CASH')
+    await user.clear(cashInput)
+    await user.type(cashInput, '10')
+    await user.tab()
+
+    // PAY enabled (tenders > total)
+    expect(screen.getByTestId('complete-transaction')).toBeEnabled()
+    // Change row appears
+    expect(screen.getByTestId('change-due')).toHaveTextContent('3.52')
   })
 
   it('opens the customer gate on CREDIT blur when amount > 0', async () => {
@@ -89,6 +113,11 @@ describe('CheckoutModal', () => {
     ])
 
     render(<CheckoutModal open onClose={() => undefined} />)
+
+    // Clear CASH pre-fill so there is room for CREDIT
+    const cashInput = screen.getByLabelText('CASH')
+    await user.clear(cashInput)
+    await user.tab()
 
     const credit = screen.getByLabelText('CREDIT')
     await user.click(credit)
@@ -117,12 +146,18 @@ describe('CheckoutModal', () => {
     const user = userEvent.setup()
     render(<CheckoutModal open onClose={() => undefined} />)
 
+    // Clear the CASH pre-fill so CREDIT can be typed without hitting the total cap
+    const cashInput = screen.getByLabelText('CASH')
+    await user.clear(cashInput)
+    await user.tab()
+
     await user.type(screen.getByLabelText('CREDIT'), '4')
     await user.tab()
     expect(screen.getByTestId('credit-customer-gate')).toBeInTheDocument()
     await user.click(screen.getByTestId('abandon-credit-path'))
     expect(screen.queryByTestId('credit-customer-gate')).not.toBeInTheDocument()
-    expect(selectActivePayments(useCartStore.getState())[0]?.method).toBe('CREDIT')
+    const payments = selectActivePayments(useCartStore.getState())
+    expect(payments.some((p) => p.method === 'CREDIT')).toBe(true)
   })
 
   it('posts at most one payments[] entry per method on PAY', async () => {
@@ -179,7 +214,9 @@ describe('CheckoutModal', () => {
       expect(createTransaction).toHaveBeenCalled()
     })
     expect(onClose).toHaveBeenCalled()
-    expect(printSpy).toHaveBeenCalled()
+    await waitFor(() => {
+      expect(printSpy).toHaveBeenCalled()
+    })
     expect(await screen.findByTestId('sale-ticket')).toBeInTheDocument()
     printSpy.mockRestore()
   })

@@ -61,8 +61,10 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       setSubmitting(false)
       setError(null)
       setSaleReceipt(null)
+    } else if (payments.length === 0 && grandTotal > 0) {
+      upsertPayment('CASH', grandTotal)
     }
-  }, [open])
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open && !saleReceipt) return null
 
@@ -247,6 +249,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
 
           <TenderAmountFields
             payments={payments}
+            grandTotal={grandTotal}
             onUpsert={handleUpsert}
             onCreditBlur={handleCreditBlur}
             disabled={submitting}

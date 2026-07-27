@@ -277,7 +277,7 @@ export function selectCanCompleteSale(
   if (items.length === 0 || payments.length === 0) return false
   const tendered = selectTotalTendered(payments)
   const total = selectPayableGrandTotal(items, taxRate, globalDiscountPercentage)
-  if (tendered !== total) {
+  if (tendered < total) {
     return false
   }
   const hasCredit = payments.some((payment) => payment.method === 'CREDIT')
@@ -415,7 +415,8 @@ export const useCartStore = create<CartState>()(
           ticket.globalDiscountPercentage,
         )
         const maxForMethod = roundMoneyDisplay(Math.max(0, payableTotal - othersSum))
-        if (tenderAmount > maxForMethod) return false
+        // CASH may exceed the remaining balance (customer gives more; change is returned)
+        if (method !== 'CASH' && tenderAmount > maxForMethod) return false
 
         set((prev) =>
           updateActiveTicket(prev, (active) => {

@@ -230,7 +230,8 @@ describe('useCartStore', () => {
     expect(selectPayableGrandTotal(items, state.taxRate)).toBe(7.01)
 
     expect(upsertPayment('CASH', 7.01)).toBe(true)
-    expect(upsertPayment('CASH', 7.02)).toBe(false)
+    // CASH overage is now allowed (customer may hand over more; change is returned)
+    expect(upsertPayment('CASH', 7.02)).toBe(true)
 
     const payments = selectActivePayments(useCartStore.getState())
     expect(selectBalanceDue(items, state.taxRate, payments)).toBe(0)
@@ -240,7 +241,7 @@ describe('useCartStore', () => {
     ])
   })
 
-  it('upsertPayment replaces per method, clears on zero, and rejects overpay', () => {
+  it('upsertPayment replaces per method, clears on zero, and rejects non-cash overpay', () => {
     const { addItem, upsertPayment } = useCartStore.getState()
     addItem(cola, 2)
     addItem(chips, 1)

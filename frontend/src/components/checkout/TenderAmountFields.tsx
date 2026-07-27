@@ -5,6 +5,7 @@ import type { PaymentMethod, PaymentTender } from '@/store/useCartStore'
 
 type TenderAmountFieldsProps = {
   payments: PaymentTender[]
+  grandTotal: number
   onUpsert: (method: PaymentMethod, amount: number) => boolean
   onCreditBlur: (amount: number) => void
   disabled?: boolean
@@ -26,6 +27,7 @@ function draftsFromPayments(payments: PaymentTender[]): Record<PaymentMethod, st
 
 export function TenderAmountFields({
   payments,
+  grandTotal,
   onUpsert,
   onCreditBlur,
   disabled = false,
@@ -102,12 +104,16 @@ export function TenderAmountFields({
     onCreditBlur(roundMoneyDisplay(parsed))
   }
 
+  const totalTendered = payments.reduce((sum, p) => sum + p.amount, 0)
+  const changeDue = roundMoneyDisplay(Math.max(0, totalTendered - grandTotal))
+
   return (
     <div className="space-y-3" data-testid="tender-amount-fields">
       {METHODS.map((method) => {
         const inputId = `tender-${method.toLowerCase()}`
         const label =
           method === 'CASH' ? t('tender.cash') : method === 'CARD' ? t('tender.card') : t('tender.credit')
+        const showError = fieldError === method && method !== 'CASH'
         return (
           <div key={method}>
             <label htmlFor={inputId} className="mb-1 block text-sm font-medium text-slate-700">
@@ -125,10 +131,20 @@ export function TenderAmountFields({
               onBlur={() => handleBlur(method)}
               className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-xl tabular-nums text-slate-900 outline-none ring-emerald-600 focus:border-emerald-600 focus:bg-white focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
             />
-            {fieldError === method ? (
+            {showError ? (
               <p className="mt-1 text-sm text-red-600" role="alert" data-testid="tender-amount-error">
                 {t('checkout.overpay')}
               </p>
+            ) : null}
+            {method === 'CASH' && changeDue > 0 ? (
+              <div className="mt-2 flex items-center justify-between rounded-lg bg-emerald-50 px-3 py-2 text-sm">
+                <span className="font-medium text-emerald-800" data-testid="change-label">
+                  {t('checkout.change')}
+                </span>
+                <span className="tabular-nums font-semibold text-emerald-900" data-testid="change-due">
+                  {formatMoney(changeDue)}
+                </span>
+              </div>
             ) : null}
           </div>
         )
