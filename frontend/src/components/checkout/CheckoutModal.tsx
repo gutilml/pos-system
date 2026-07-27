@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { createTransaction } from '@/api/transactions'
 import { CustomerSearch } from '@/components/checkout/CustomerSearch'
 import { SaleTicket, type SaleTicketPayload } from '@/components/checkout/SaleTicket'
@@ -47,6 +47,7 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saleReceipt, setSaleReceipt] = useState<SaleTicketPayload | null>(null)
+  const didPrefillCashRef = useRef(false)
 
   const grandTotal = selectPayableGrandTotal(items, taxRate, globalDiscount)
   const internalGrandTotal = selectGrandTotal(items, taxRate, globalDiscount)
@@ -61,10 +62,21 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
       setSubmitting(false)
       setError(null)
       setSaleReceipt(null)
-    } else if (payments.length === 0 && grandTotal > 0) {
-      upsertPayment('CASH', grandTotal)
+      didPrefillCashRef.current = false
     }
-  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open])
+
+  // Prefill once per open (before paint). Do not re-fill if cashier clears CASH.
+  useLayoutEffect(() => {
+    if (!open) return
+    if (didPrefillCashRef.current) return
+    if (payments.length === 0 && grandTotal > 0) {
+      upsertPayment('CASH', grandTotal)
+      didPrefillCashRef.current = true
+    } else if (payments.length > 0) {
+      didPrefillCashRef.current = true
+    }
+  }, [open, grandTotal, payments.length, upsertPayment])
 
   if (!open && !saleReceipt) return null
 

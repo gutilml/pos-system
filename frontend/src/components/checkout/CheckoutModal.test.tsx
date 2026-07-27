@@ -50,6 +50,8 @@ describe('CheckoutModal', () => {
     render(<CheckoutModal open onClose={() => undefined} />)
 
     expect(screen.getByTestId('checkout-grand-total')).toHaveTextContent('6.48')
+    // CASH input must show the formatted total (not stay empty while store has the amount)
+    expect(screen.getByLabelText('CASH')).toHaveValue('6.48')
     // CASH is pre-filled → balance is 0 → PAY enabled right away
     expect(screen.getByTestId('checkout-balance-due')).toHaveTextContent('0.00')
     expect(screen.getByTestId('complete-transaction')).toBeEnabled()

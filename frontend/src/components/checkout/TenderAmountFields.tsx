@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useLayoutEffect, useState } from 'react'
 import { formatMoney, roundMoneyDisplay } from '@/lib/money'
 import { useT } from '@/i18n/useT'
 import type { PaymentMethod, PaymentTender } from '@/store/useCartStore'
@@ -38,12 +38,27 @@ export function TenderAmountFields({
 
   const allCleared = METHODS.every((method) => amountFor(payments, method) === 0)
 
-  useEffect(() => {
+  // Sync drafts when store payments are set externally (e.g. CASH prefill on modal open)
+  // without overwriting in-progress typing (only fill empty drafts).
+  useLayoutEffect(() => {
     if (allCleared) {
       setDrafts({ CASH: '', CARD: '', CREDIT: '' })
       setFieldError(null)
+      return
     }
-  }, [allCleared])
+    setDrafts((prev) => {
+      let changed = false
+      const next = { ...prev }
+      for (const method of METHODS) {
+        const amount = amountFor(payments, method)
+        if (amount > 0 && prev[method].trim() === '') {
+          next[method] = formatMoney(amount)
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [payments, allCleared])
 
   function commit(method: PaymentMethod, raw: string): boolean {
     const trimmed = raw.trim()
