@@ -372,8 +372,19 @@ export function CustomersWorkspace() {
 
               {enableCredit && hasCredit && mode === 'edit' && selectedId ? (
                 <div className="space-y-3 border-t border-slate-200 pt-3" data-testid="customers-credit-section">
-                  <div className="flex items-center justify-between gap-2">
-                    <h4 className="text-sm font-semibold text-slate-900">{t('customers.ledger')}</h4>
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-sm font-semibold text-slate-900">{t('customers.ledger')}</h4>
+                      <button
+                        type="button"
+                        data-testid="customers-pay"
+                        disabled={paying || balance <= 0}
+                        onClick={() => setPayModalOpen(true)}
+                        className="rounded-lg bg-slate-800 px-3 py-1.5 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-60"
+                      >
+                        {t('customers.pay')}
+                      </button>
+                    </div>
                     <button
                       type="button"
                       data-testid="customers-ledger-sort"
@@ -396,18 +407,6 @@ export function CustomersWorkspace() {
                       <li className="px-2 py-3 text-slate-500">{t('customers.ledgerEmpty')}</li>
                     ) : null}
                   </ul>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      data-testid="customers-pay"
-                      disabled={paying || balance <= 0}
-                      onClick={() => setPayModalOpen(true)}
-                      className="rounded-lg bg-slate-800 px-3 py-2 text-sm font-medium text-white hover:bg-slate-900 disabled:opacity-60"
-                    >
-                      {t('customers.pay')}
-                    </button>
-                  </div>
                 </div>
               ) : null}
             </form>
