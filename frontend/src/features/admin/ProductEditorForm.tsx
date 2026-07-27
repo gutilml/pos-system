@@ -143,8 +143,8 @@ export function ProductEditorForm({
   const [sellByWeight, setSellByWeight] = useState(false)
   const [parentProductId, setParentProductId] = useState('')
   const [qtyPerPackage, setQtyPerPackage] = useState('')
-  const [packageUnit, setPackageUnit] = useState('')
-  const [unitOfMeasure, setUnitOfMeasure] = useState('')
+  /** Single unit chip selection (Feature 102) — drives packageUnit and/or sell unitOfMeasure. */
+  const [unitCode, setUnitCode] = useState('')
   const [costPrice, setCostPrice] = useState('')
   const [targetMarginPct, setTargetMarginPct] = useState('')
   const [sellingPrice, setSellingPrice] = useState('')
@@ -250,19 +250,19 @@ export function ProductEditorForm({
     }
 
     const parentPc = isPiecePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
-    let nextUom = unitOfMeasure
+    let nextUnit = unitCode
     if (parentPc) {
       setSellByWeight(false)
-      nextUom = ''
-      setUnitOfMeasure('')
+      nextUnit = ''
+      setUnitCode('')
     } else if (sellByWeight) {
       const pref = normalizePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
       if (pref) {
-        nextUom = pref
-        setUnitOfMeasure(pref)
+        nextUnit = pref
+        setUnitCode(pref)
       }
     }
-    applyDerivedCostFromParent(nextId, nextUom || packageUnit, marginForCost)
+    applyDerivedCostFromParent(nextId, nextUnit, marginForCost)
   }
 
   function onSellByWeightChange(checked: boolean) {
@@ -277,7 +277,7 @@ export function ProductEditorForm({
       const parent = parents.find((p) => p.id === parentProductId)
       if (parent) {
         const pref = normalizePackageUnit(parent.packageUnit ?? parent.unitOfMeasure)
-        if (pref) setUnitOfMeasure(pref)
+        if (pref) setUnitCode(pref)
       }
     }
   }
@@ -287,8 +287,8 @@ export function ProductEditorForm({
     selectedParent && isPiecePackageUnit(selectedParent.packageUnit ?? selectedParent.unitOfMeasure),
   )
 
-  function onUnitOfMeasureChange(code: string) {
-    setUnitOfMeasure(code)
+  function onUnitCodeChange(code: string) {
+    setUnitCode(code)
     if (parentProductId) {
       applyDerivedCostFromParent(parentProductId, code, targetMarginPct)
     }
@@ -334,8 +334,13 @@ export function ProductEditorForm({
               ? String(p.qtyPerPackage)
               : '',
           )
-          setPackageUnit(normalizePackageUnit(p.packageUnit))
-          setUnitOfMeasure(normalizePackageUnit(p.unitOfMeasure ?? p.packageUnit))
+          setUnitCode(
+            normalizePackageUnit(
+              p.parentProductId
+                ? (p.unitOfMeasure ?? p.packageUnit)
+                : (p.packageUnit ?? p.unitOfMeasure),
+            ),
+          )
           setCostPrice(p.costPrice != null ? String(p.costPrice) : '')
           setCostReadOnly(Boolean(p.parentProductId))
           setTargetMarginPct(
@@ -357,8 +362,7 @@ export function ProductEditorForm({
           setSellByWeight(false)
           setParentProductId('')
           setQtyPerPackage('')
-          setPackageUnit('')
-          setUnitOfMeasure('')
+          setUnitCode('')
           setCostPrice('')
           setCostReadOnly(false)
           setTargetMarginPct('')
@@ -442,10 +446,10 @@ export function ProductEditorForm({
       skus: parseSkus(skusText),
       categoryId: categoryId || null,
       sellByWeight,
-      unitOfMeasure: sellByWeight ? unitOfMeasure.trim() || null : null,
+      unitOfMeasure: sellByWeight ? unitCode.trim() || null : null,
       parentProductId: parentProductId || null,
       qtyPerPackage: hasParent ? null : numOrNull(qtyPerPackage),
-      packageUnit: hasParent ? null : packageUnit.trim() || null,
+      packageUnit: hasParent ? null : unitCode.trim() || null,
       costPrice: costReadOnly ? null : numOrNull(costPrice),
       targetMargin: marginPct != null ? marginPct / 100 : null,
       sellingPrice: numOrNull(sellingPrice),
@@ -462,7 +466,7 @@ export function ProductEditorForm({
       setError(t('admin.parentPcNoWeight'))
       return
     }
-    if (sellByWeight && !unitOfMeasure.trim()) {
+    if (sellByWeight && !unitCode.trim()) {
       setError(t('admin.unitOfMeasureRequired'))
       return
     }
@@ -647,20 +651,18 @@ export function ProductEditorForm({
               />
             </label>
             <UnitChips
-              name="package-unit"
-              value={packageUnit}
-              onChange={setPackageUnit}
+              name="product-unit"
+              value={unitCode}
+              onChange={onUnitCodeChange}
               testId="package-unit-chips"
               legend={t('admin.packageUnit')}
             />
           </div>
-        ) : null}
-
-        {sellByWeight ? (
+        ) : sellByWeight ? (
           <UnitChips
-            name="sell-unit"
-            value={unitOfMeasure}
-            onChange={onUnitOfMeasureChange}
+            name="product-unit"
+            value={unitCode}
+            onChange={onUnitCodeChange}
             testId="unit-of-measure-chips"
             legend={t('admin.unitOfMeasure')}
           />

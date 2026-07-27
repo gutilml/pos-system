@@ -184,6 +184,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 099 | FE | Done | [README](features/099-frontend-scale-early-pair-autoread/README.md) | [spec](features/099-frontend-scale-early-pair-autoread/spec.md) · [plan](features/099-frontend-scale-early-pair-autoread/plan.md) · [tasks](features/099-frontend-scale-early-pair-autoread/tasks.md) |
 | 100 | FE | Done | [README](features/100-frontend-mock-scale-toggle/README.md) | [spec](features/100-frontend-mock-scale-toggle/spec.md) · [plan](features/100-frontend-mock-scale-toggle/plan.md) · [tasks](features/100-frontend-mock-scale-toggle/tasks.md) |
 | 101 | FE+BE | Done | [README](features/101-e2e-register-smoke/README.md) | [spec](features/101-e2e-register-smoke/spec.md) · [plan](features/101-e2e-register-smoke/plan.md) · [tasks](features/101-e2e-register-smoke/tasks.md) |
+| 102 | FE | Done | [README](features/102-frontend-single-unit-chips/README.md) | [spec](features/102-frontend-single-unit-chips/spec.md) · [plan](features/102-frontend-single-unit-chips/plan.md) · [tasks](features/102-frontend-single-unit-chips/tasks.md) |
 
 ---
 

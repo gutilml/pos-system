@@ -181,6 +181,24 @@ describe('ProductEditorForm Feature 076', () => {
     await user.click(screen.getByTestId('product-sell-by-weight'))
     expect(screen.getByTestId('product-sell-by-weight')).toBeChecked()
     expect(screen.getByTestId('unit-of-measure-chips')).toBeInTheDocument()
+    expect(screen.queryByTestId('package-unit-chips')).not.toBeInTheDocument()
+  })
+
+  it('shows a single unit chip row when sell by weight without parent', async () => {
+    const user = userEvent.setup()
+    render(
+      <ProductEditorForm
+        productId={null}
+        enableInventory={false}
+        onSaved={() => undefined}
+        onCancel={() => undefined}
+      />,
+    )
+    await waitFor(() => expect(screen.getByTestId('package-unit-chips')).toBeInTheDocument())
+    await user.click(screen.getByTestId('product-sell-by-weight'))
+    expect(screen.getByTestId('package-unit-chips')).toBeInTheDocument()
+    expect(screen.getByTestId('package-unit-chips-pc')).toBeInTheDocument()
+    expect(screen.queryByTestId('unit-of-measure-chips')).not.toBeInTheDocument()
   })
 
   it('sends unitOfMeasure when sell by weight on save', async () => {
@@ -202,8 +220,8 @@ describe('ProductEditorForm Feature 076', () => {
     await waitFor(() => expect(listCategories).toHaveBeenCalled())
     await user.type(screen.getByLabelText(/^Name$/i), 'Bulk candy')
     await user.click(screen.getByTestId('product-sell-by-weight'))
-    expect(screen.getByTestId('unit-of-measure-chips')).toBeInTheDocument()
-    await user.click(screen.getByTestId('unit-of-measure-chips-kg'))
+    expect(screen.queryByTestId('unit-of-measure-chips')).not.toBeInTheDocument()
+    await user.click(screen.getByTestId('package-unit-chips-kg'))
     await user.clear(screen.getByTestId('product-cost'))
     await user.type(screen.getByTestId('product-cost'), '70')
     await user.clear(screen.getByTestId('product-margin'))
@@ -213,6 +231,7 @@ describe('ProductEditorForm Feature 076', () => {
     expect(vi.mocked(createProduct).mock.calls[0][0]).toMatchObject({
       sellByWeight: true,
       unitOfMeasure: 'kg',
+      packageUnit: 'kg',
     })
   })
 })
