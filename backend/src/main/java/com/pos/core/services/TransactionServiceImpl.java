@@ -545,10 +545,12 @@ public class TransactionServiceImpl implements TransactionService {
         List<TransactionItemResponseDTO> items = new ArrayList<>();
         for (TransactionItem item : transaction.getItems()) {
             UUID productId = item.getProduct() != null ? item.getProduct().getId() : null;
+            String productName = item.getProduct() != null ? item.getProduct().getName() : null;
             BigDecimal returned = returnedOrZero(item);
             items.add(new TransactionItemResponseDTO(
                     item.getId(),
                     productId,
+                    productName,
                     item.getQuantity(),
                     item.getPriceAtTime(),
                     item.getOriginalUnitPrice(),

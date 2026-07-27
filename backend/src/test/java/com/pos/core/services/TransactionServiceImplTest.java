@@ -216,6 +216,24 @@ class TransactionServiceImplTest {
     }
 
     @Test
+    void create_itemDtoIncludesProductName() {
+        when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        TransactionRequestDTO request = request(
+                List.of(line(cola.getId(), new BigDecimal("1.0000"))),
+                List.of(new PaymentRequestDTO(PaymentType.CASH, new BigDecimal("2.0000"))),
+                new BigDecimal("0.0000"),
+                null
+        );
+
+        TransactionResponseDTO response = transactionService.create(request);
+
+        assertThat(response.items()).hasSize(1);
+        assertThat(response.items().get(0).productName()).isEqualTo("Cola");
+    }
+
+    @Test
     void create_appliesGlobalOnlyToLinesWithoutItemDiscountOrExclusion() {
         when(productRepository.findById(cola.getId())).thenReturn(Optional.of(cola));
         when(productRepository.findById(chips.getId())).thenReturn(Optional.of(chips));

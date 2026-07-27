@@ -6,6 +6,7 @@ import java.util.UUID;
 public record TransactionItemResponseDTO(
         UUID id,
         UUID productId,
+        String productName,
         BigDecimal quantity,
         BigDecimal priceAtTime,
         BigDecimal originalUnitPrice,

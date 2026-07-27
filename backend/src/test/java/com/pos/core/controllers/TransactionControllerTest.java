@@ -64,6 +64,7 @@ class TransactionControllerTest {
                 List.of(new TransactionItemResponseDTO(
                         itemId,
                         productId,
+                        "Cola",
                         new BigDecimal("1.0000"),
                         new BigDecimal("1.9900"),
                         new BigDecimal("1.9900"),
@@ -184,6 +185,7 @@ class TransactionControllerTest {
                 List.of(new TransactionItemResponseDTO(
                         itemId,
                         productId,
+                        "Cola",
                         new BigDecimal("1.0000"),
                         new BigDecimal("1.9900"),
                         new BigDecimal("1.9900"),
