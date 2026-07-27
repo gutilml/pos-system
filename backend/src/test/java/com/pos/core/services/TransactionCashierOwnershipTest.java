@@ -101,6 +101,7 @@ class TransactionCashierOwnershipTest {
                 ShiftStatus.OPEN,
                 new BigDecimal("100.0000"),
                 null, null, null, null, null, null, null,
+                null, null,
                 null, null, null, null
         );
     }

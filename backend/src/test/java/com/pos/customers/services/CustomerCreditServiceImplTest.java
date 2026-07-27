@@ -106,6 +106,8 @@ class CustomerCreditServiceImplTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
     }

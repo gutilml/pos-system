@@ -219,6 +219,8 @@ public class ShiftServiceImpl implements ShiftService {
                 shift.getClosedAt(),
                 shift.getOpenedBy(),
                 shift.getClosedBy(),
+                resolveUsername(shift.getOpenedBy()),
+                resolveUsername(shift.getClosedBy()),
                 totalCashPayments,
                 totalCardPayments,
                 totalCreditPayments,
@@ -263,12 +265,21 @@ public class ShiftServiceImpl implements ShiftService {
                 shift.getClosedAt(),
                 shift.getOpenedBy(),
                 shift.getClosedBy(),
+                resolveUsername(shift.getOpenedBy()),
+                resolveUsername(shift.getClosedBy()),
                 totalCashPayments,
                 totalCardPayments,
                 totalCreditPayments,
                 totalSalesGrandTotal,
                 events
         );
+    }
+
+    private String resolveUsername(UUID userId) {
+        if (userId == null) {
+            return null;
+        }
+        return userRepository.findById(userId).map(User::getUsername).orElse(null);
     }
 
     private BigDecimal paymentSum(UUID shiftId, PaymentType method) {

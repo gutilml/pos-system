@@ -18,6 +18,8 @@ public record ShiftDTO(
         OffsetDateTime closedAt,
         UUID openedBy,
         UUID closedBy,
+        String openedByUsername,
+        String closedByUsername,
         BigDecimal totalCashPayments,
         BigDecimal totalCardPayments,
         BigDecimal totalCreditPayments,

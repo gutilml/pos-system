@@ -99,6 +99,7 @@ class ShiftServiceImplTest {
 
     private void stubCaller() {
         when(userRepository.findByUsernameIgnoreCase("cashier")).thenReturn(Optional.of(cashier));
+        when(userRepository.findById(cashier.getId())).thenReturn(Optional.of(cashier));
     }
 
     @Test
@@ -117,7 +118,9 @@ class ShiftServiceImplTest {
         );
 
         assertThat(opened.openedBy()).isEqualTo(cashier.getId());
+        assertThat(opened.openedByUsername()).isEqualTo("cashier");
         assertThat(opened.closedBy()).isNull();
+        assertThat(opened.closedByUsername()).isNull();
         assertThat(opened.status()).isEqualTo(ShiftStatus.OPEN);
     }
 
@@ -142,7 +145,9 @@ class ShiftServiceImplTest {
         );
 
         assertThat(closed.openedBy()).isEqualTo(cashier.getId());
+        assertThat(closed.openedByUsername()).isEqualTo("cashier");
         assertThat(closed.closedBy()).isEqualTo(cashier.getId());
+        assertThat(closed.closedByUsername()).isEqualTo("cashier");
         assertThat(closed.status()).isEqualTo(ShiftStatus.CLOSED);
         assertThat(closed.expectedCash()).isEqualByComparingTo("154.8700");
         assertThat(closed.actualCash()).isEqualByComparingTo("155.0000");

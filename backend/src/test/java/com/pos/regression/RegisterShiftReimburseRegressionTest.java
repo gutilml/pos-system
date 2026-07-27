@@ -35,8 +35,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /**
- * End-to-end smoke: cashier register → tax prefs → shift → sale → close → list → reimburse.
+ * End-to-end smoke: cashier register → tax prefs → shift → unit sale → weight sale → close → list → reimburse.
  * Excluded from default {@code mvn test} via Surefire {@code excludedGroups=regression}.
+ *
+ * Run: {@code mvn test -Dgroups=regression -Dpos.excludedGroups=}
  */
 @Tag("regression")
 @SpringBootTest
@@ -62,6 +64,7 @@ class RegisterShiftReimburseRegressionTest {
 
     private StoreSettings store;
     private Product cola;
+    private Product ham;
     private User cashier;
 
     @BeforeEach
@@ -90,6 +93,15 @@ class RegisterShiftReimburseRegressionTest {
         cola.setCostPrice(new BigDecimal("5.0000"));
         cola.setActive(true);
         cola = productRepository.save(cola);
+
+        ham = new Product();
+        ham.setName("Regression Ham");
+        ham.setSellingPrice(new BigDecimal("0.0100")); // per gram
+        ham.setCostPrice(new BigDecimal("0.0050"));
+        ham.setSellByWeight(true);
+        ham.setUnitOfMeasure("gr");
+        ham.setActive(true);
+        ham = productRepository.save(ham);
     }
 
     @Test
@@ -115,6 +127,7 @@ class RegisterShiftReimburseRegressionTest {
                                 """.formatted(store.getId())))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.openedBy").value(cashier.getId().toString()))
+                .andExpect(jsonPath("$.openedByUsername").value("reg-cashier"))
                 .andReturn();
         String shiftId = objectMapper.readTree(openResult.getResponse().getContentAsString()).get("id").asText();
 
@@ -147,6 +160,23 @@ class RegisterShiftReimburseRegressionTest {
         String txId = sale.get("id").asText();
         assertThat(sale.get("changeGiven").decimalValue()).isEqualByComparingTo(tender.subtract(grandTotal));
 
+        // Weight / bulk line (Feature 006 path): quantity is weight in product UoM.
+        mockMvc.perform(post("/api/v1/transactions")
+                        .with(csrf())
+                        .cookie(jwt)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "storeId":"%s",
+                                  "taxRate":0.1600,
+                                  "items":[{"productId":"%s","quantity":250.0000}],
+                                  "payments":[{"paymentMethod":"CASH","amount":3.0000}]
+                                }
+                                """.formatted(store.getId(), ham.getId())))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.items[0].quantity").value(250.0000));
+
         mockMvc.perform(post("/api/v1/shifts/{id}/close", shiftId)
                         .with(csrf())
                         .cookie(jwt)
@@ -156,18 +186,29 @@ class RegisterShiftReimburseRegressionTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CLOSED"))
-                .andExpect(jsonPath("$.closedBy").value(cashier.getId().toString()));
+                .andExpect(jsonPath("$.closedBy").value(cashier.getId().toString()))
+                .andExpect(jsonPath("$.closedByUsername").value("reg-cashier"));
 
         mockMvc.perform(get("/api/v1/shifts").param("storeId", store.getId().toString()).cookie(jwt))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(shiftId))
                 .andExpect(jsonPath("$[0].status").value("CLOSED"));
 
-        mockMvc.perform(get("/api/v1/transactions").param("storeId", store.getId().toString()).cookie(jwt))
+        MvcResult listTx = mockMvc.perform(get("/api/v1/transactions").param("storeId", store.getId().toString()).cookie(jwt))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(txId))
-                .andExpect(jsonPath("$[0].createdBy").value(cashier.getId().toString()))
-                .andExpect(jsonPath("$.length()").value(1));
+                .andReturn();
+        JsonNode txs = objectMapper.readTree(listTx.getResponse().getContentAsString());
+        assertThat(txs).hasSize(2);
+        assertThat(txs.findValuesAsText("id")).contains(txId);
+        JsonNode colaSale = null;
+        for (JsonNode node : txs) {
+            if (txId.equals(node.get("id").asText())) {
+                colaSale = node;
+                break;
+            }
+        }
+        assertThat(colaSale).isNotNull();
+        assertThat(colaSale.get("createdBy").asText()).isEqualTo(cashier.getId().toString());
 
         // Cash reimburse requires an OPEN shift for drawer PAY_OUT.
         mockMvc.perform(post("/api/v1/shifts/open")

@@ -59,6 +59,8 @@ class ShiftControllerTest {
                 null,
                 null,
                 null,
+                null,
+                null,
                 null
         );
     }
@@ -115,6 +117,8 @@ class ShiftControllerTest {
                         OffsetDateTime.parse("2026-07-01T18:00:00Z"),
                         null,
                         null,
+                        null,
+                        null,
                         new BigDecimal("0.0000"),
                         new BigDecimal("0.0000"),
                         new BigDecimal("0.0000"),
@@ -160,6 +164,8 @@ class ShiftControllerTest {
                         new BigDecimal("0.0100"),
                         OffsetDateTime.parse("2026-07-16T12:00:00Z"),
                         OffsetDateTime.parse("2026-07-16T20:00:00Z"),
+                        null,
+                        null,
                         null,
                         null,
                         new BigDecimal("40.0000"),
@@ -267,6 +273,8 @@ class ShiftControllerTest {
                         new BigDecimal("0.0100"),
                         OffsetDateTime.parse("2026-07-16T12:00:00Z"),
                         OffsetDateTime.parse("2026-07-16T20:00:00Z"),
+                        null,
+                        null,
                         null,
                         null,
                         new BigDecimal("40.0000"),
