@@ -187,6 +187,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 102 | FE | Done | [README](features/102-frontend-single-unit-chips/README.md) | [spec](features/102-frontend-single-unit-chips/spec.md) · [plan](features/102-frontend-single-unit-chips/plan.md) · [tasks](features/102-frontend-single-unit-chips/tasks.md) |
 | 103 | FE | Done | [README](features/103-frontend-inventory-receive-price-ux/README.md) | [spec](features/103-frontend-inventory-receive-price-ux/spec.md) · [plan](features/103-frontend-inventory-receive-price-ux/plan.md) · [tasks](features/103-frontend-inventory-receive-price-ux/tasks.md) |
 | 104 | BE+FE | Done | [README](features/104-closed-ticket-line-names/README.md) | — |
+| 105 | FE | Done | [README](features/105-frontend-pay-cash-prefill-change/README.md) | — |
 
 ---
 
