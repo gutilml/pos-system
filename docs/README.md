@@ -25,7 +25,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Data model / JPA** | [002](features/002-backend-data-layer/README.md) | Entities + repositories from schema |
 | **Core catalog + checkout API** | [003](features/003-backend-core-api/README.md) | Products, transactions, DTOs/services |
 | **Register UI shell** | [004](features/004-frontend-register-ui/README.md) | Search, cart, footer layout |
-| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md) | Stock deduct when `enable_inventory`; **042** SPA stock/flag fields done; **043** cart Stock column done |
+| **Inventory (opt-in)** | [005](features/005-backend-inventory-module/README.md), [042](features/042-backend-product-stock-inventory-flag/README.md), [043](features/043-frontend-cart-stock-column/README.md), [103](features/103-frontend-inventory-receive-price-ux/README.md) | Stock deduct when `enable_inventory`; **103** receive Cost/Price UX + modal focus |
 | **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md), [099](features/099-frontend-scale-early-pair-autoread/README.md), [100](features/100-frontend-mock-scale-toggle/README.md) | Weight modal + optional scale; **099** early pair; **100** mock scale toggle |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md), [077](features/077-backend-shift-history/README.md), [079](features/079-backend-shift-audit-stamps/README.md), [081](features/081-backend-drawer-event-policy/README.md) | Open / events / close; **077** history done; **079** audit stamps done; **081** deferred caps/RBAC |
 | **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history; **080** opener/closer labels |
@@ -185,6 +185,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 100 | FE | Done | [README](features/100-frontend-mock-scale-toggle/README.md) | [spec](features/100-frontend-mock-scale-toggle/spec.md) · [plan](features/100-frontend-mock-scale-toggle/plan.md) · [tasks](features/100-frontend-mock-scale-toggle/tasks.md) |
 | 101 | FE+BE | Done | [README](features/101-e2e-register-smoke/README.md) | [spec](features/101-e2e-register-smoke/spec.md) · [plan](features/101-e2e-register-smoke/plan.md) · [tasks](features/101-e2e-register-smoke/tasks.md) |
 | 102 | FE | Done | [README](features/102-frontend-single-unit-chips/README.md) | [spec](features/102-frontend-single-unit-chips/spec.md) · [plan](features/102-frontend-single-unit-chips/plan.md) · [tasks](features/102-frontend-single-unit-chips/tasks.md) |
+| 103 | FE | Done | [README](features/103-frontend-inventory-receive-price-ux/README.md) | [spec](features/103-frontend-inventory-receive-price-ux/spec.md) · [plan](features/103-frontend-inventory-receive-price-ux/plan.md) · [tasks](features/103-frontend-inventory-receive-price-ux/tasks.md) |
 
 ---
 

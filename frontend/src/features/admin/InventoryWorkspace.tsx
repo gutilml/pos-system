@@ -1,16 +1,41 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   createStockMovement,
   listInventoryProducts,
   type InventoryProduct,
 } from '@/api/inventory'
 import { useT } from '@/i18n/useT'
-import { formatMoney, roundMoney } from '@/lib/money'
-import { previewReceiveBlend } from '@/lib/inventoryPricing'
+import { roundMoney } from '@/lib/money'
+import { previewReceiveBlend, reverseIncomingUnit } from '@/lib/inventoryPricing'
 import { sellingPriceFromMargin } from '@/lib/productPricing'
 import { selectStoreId, useAuthStore } from '@/store/useAuthStore'
 
 type ModalMode = 'adjust' | 'receive'
+
+function lotPricesFromCost(
+  product: InventoryProduct,
+  lotCost: number,
+): { selling: number; wholesale: number } {
+  let selling = product.sellingPrice
+  let wholesale = product.wholesalePrice
+  const margin = product.targetMargin
+  if (margin != null && margin >= 0 && margin < 1) {
+    try {
+      selling = sellingPriceFromMargin(lotCost, margin)
+    } catch {
+      // keep prior
+    }
+  }
+  const wholesaleMargin = product.wholesaleMargin
+  if (wholesaleMargin != null && wholesaleMargin >= 0 && wholesaleMargin < 1) {
+    try {
+      wholesale = sellingPriceFromMargin(lotCost, wholesaleMargin)
+    } catch {
+      // keep prior
+    }
+  }
+  return { selling, wholesale }
+}
 
 export function InventoryWorkspace() {
   const t = useT()
@@ -28,11 +53,15 @@ export function InventoryWorkspace() {
   const [modalMode, setModalMode] = useState<ModalMode>('receive')
   const [qty, setQty] = useState('')
   const [reason, setReason] = useState('')
+  /** Incoming lot unit cost sent to the API (Feature 103). */
+  const [lotUnitCost, setLotUnitCost] = useState('')
+  /** Displayed Cost field (blended when qty + lot cost allow). */
   const [unitCost, setUnitCost] = useState('')
   const [sellingPrice, setSellingPrice] = useState('')
   const [wholesalePrice, setWholesalePrice] = useState('')
   const [saving, setSaving] = useState(false)
   const [formError, setFormError] = useState<string | null>(null)
+  const qtyInputRef = useRef<HTMLInputElement>(null)
 
   const refresh = useCallback(async () => {
     setLoading(true)
@@ -55,13 +84,56 @@ export function InventoryWorkspace() {
     return () => window.clearTimeout(timer)
   }, [refresh, query])
 
+  useEffect(() => {
+    if (!modalProduct) return
+    const id = window.requestAnimationFrame(() => {
+      qtyInputRef.current?.focus()
+      qtyInputRef.current?.select()
+    })
+    return () => window.cancelAnimationFrame(id)
+  }, [modalProduct, modalMode])
+
+  function applyReceiveDisplays(product: InventoryProduct, lotCostRaw: string, qtyRaw: string) {
+    const lotCost = Number(lotCostRaw)
+    const incomingQty = Number(qtyRaw)
+    if (!Number.isFinite(lotCost) || lotCost < 0) {
+      setUnitCost(lotCostRaw)
+      return
+    }
+
+    const { selling: lotSelling, wholesale: lotWholesale } = lotPricesFromCost(product, lotCost)
+    const blend = previewReceiveBlend({
+      qtyBefore: Number(product.currentStock),
+      costBefore: Number(product.costPrice),
+      sellingBefore: Number(product.sellingPrice),
+      wholesaleBefore: Number(product.wholesalePrice),
+      incomingQty,
+      incomingCost: lotCost,
+      incomingSelling: lotSelling,
+      incomingWholesale: lotWholesale,
+    })
+
+    if (!blend) {
+      setUnitCost(lotCostRaw)
+      setSellingPrice(String(lotSelling))
+      setWholesalePrice(String(lotWholesale))
+      return
+    }
+
+    setUnitCost(String(blend.cost))
+    setSellingPrice(String(blend.selling))
+    setWholesalePrice(String(blend.wholesale))
+  }
+
   async function openModal(product: InventoryProduct, mode: ModalMode) {
     if (readOnly) return
     setModalProduct(product)
     setModalMode(mode)
     setQty('')
     setReason('')
-    setUnitCost(String(product.costPrice))
+    const cost = String(product.costPrice)
+    setLotUnitCost(cost)
+    setUnitCost(cost)
     setSellingPrice(String(product.sellingPrice))
     setWholesalePrice(String(product.wholesalePrice))
     setFormError(null)
@@ -72,42 +144,25 @@ export function InventoryWorkspace() {
     setFormError(null)
   }
 
-  function onReceiveUnitCostChange(raw: string) {
-    setUnitCost(raw)
-    if (!modalProduct || modalMode !== 'receive') return
-    const cost = Number(raw)
-    if (!Number.isFinite(cost) || cost < 0) return
-    const margin = modalProduct.targetMargin
-    if (margin != null && margin >= 0 && margin < 1) {
-      try {
-        setSellingPrice(String(sellingPriceFromMargin(cost, margin)))
-      } catch {
-        // leave selling while typing invalid margin/cost
-      }
-    }
-    const wholesaleMargin = modalProduct.wholesaleMargin
-    if (wholesaleMargin != null && wholesaleMargin >= 0 && wholesaleMargin < 1) {
-      try {
-        setWholesalePrice(String(sellingPriceFromMargin(cost, wholesaleMargin)))
-      } catch {
-        // leave wholesale while typing
-      }
-    }
+  function onReceiveQtyChange(raw: string) {
+    setQty(raw)
+    if (!modalProduct) return
+    applyReceiveDisplays(modalProduct, lotUnitCost, raw)
   }
 
-  const receiveBlendPreview =
-    modalProduct && modalMode === 'receive'
-      ? previewReceiveBlend({
-          qtyBefore: Number(modalProduct.currentStock),
-          costBefore: Number(modalProduct.costPrice),
-          sellingBefore: Number(modalProduct.sellingPrice),
-          wholesaleBefore: Number(modalProduct.wholesalePrice),
-          incomingQty: Number(qty),
-          incomingCost: Number(unitCost),
-          incomingSelling: Number(sellingPrice),
-          incomingWholesale: Number(wholesalePrice),
-        })
-      : null
+  function onReceiveUnitCostChange(raw: string) {
+    setLotUnitCost(raw)
+    setUnitCost(raw)
+  }
+
+  function onReceiveCostFocus() {
+    setUnitCost(lotUnitCost)
+  }
+
+  function onReceiveCostBlur() {
+    if (!modalProduct) return
+    applyReceiveDisplays(modalProduct, lotUnitCost, qty)
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -129,22 +184,53 @@ export function InventoryWorkspace() {
     setSaving(true)
     setFormError(null)
     try {
-      const costNum = unitCost.trim() === '' ? null : roundMoney(Number(unitCost))
-      const costChanged =
-        modalMode === 'receive' &&
-        costNum != null &&
-        Math.abs(costNum - Number(modalProduct.costPrice)) > 0.00005
+      if (modalMode === 'adjust') {
+        await createStockMovement({
+          storeId,
+          productId: modalProduct.productId,
+          type: 'ADJUSTMENT',
+          quantity,
+          reason: reason.trim(),
+          unitCost: null,
+          sellingPrice: null,
+          wholesalePrice: null,
+        })
+      } else {
+        const lotCostNum =
+          lotUnitCost.trim() === '' ? null : roundMoney(Number(lotUnitCost))
+        const costChanged =
+          lotCostNum != null &&
+          Math.abs(lotCostNum - Number(modalProduct.costPrice)) > 0.00005
 
-      await createStockMovement({
-        storeId,
-        productId: modalProduct.productId,
-        type: modalMode === 'receive' ? 'RECEIVING' : 'ADJUSTMENT',
-        quantity,
-        reason: modalMode === 'adjust' ? reason.trim() : null,
-        unitCost: modalMode === 'receive' ? costNum : null,
-        sellingPrice: costChanged ? roundMoney(Number(sellingPrice)) : null,
-        wholesalePrice: costChanged ? roundMoney(Number(wholesalePrice)) : null,
-      })
+        const qtyBefore = Number(modalProduct.currentStock)
+        const lotSelling = costChanged
+          ? reverseIncomingUnit(
+              Number(sellingPrice),
+              Number(modalProduct.sellingPrice),
+              qtyBefore,
+              quantity,
+            )
+          : null
+        const lotWholesale = costChanged
+          ? reverseIncomingUnit(
+              Number(wholesalePrice),
+              Number(modalProduct.wholesalePrice),
+              qtyBefore,
+              quantity,
+            )
+          : null
+
+        await createStockMovement({
+          storeId,
+          productId: modalProduct.productId,
+          type: 'RECEIVING',
+          quantity,
+          reason: null,
+          unitCost: lotCostNum,
+          sellingPrice: lotSelling,
+          wholesalePrice: lotWholesale,
+        })
+      }
       closeModal()
       await refresh()
     } catch (err) {
@@ -204,12 +290,19 @@ export function InventoryWorkspace() {
 
       <ul className="min-h-0 flex-1 overflow-y-auto rounded-lg border border-slate-200" data-testid="inventory-list">
         {rows.map((row) => (
-          <li key={row.productId} className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 last:border-b-0">
+          <li
+            key={row.productId}
+            className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 px-3 py-2 last:border-b-0"
+          >
             <div>
               <p className="font-medium text-slate-900">{row.name}</p>
               <p className="text-xs text-slate-500">
                 {row.primarySku ?? t('admin.noBarcode')} · {t('inventory.stock')}:{' '}
-                <span className={row.lowStock || row.currentStock < 0 ? 'font-semibold text-amber-700' : ''}>
+                <span
+                  className={
+                    row.lowStock || row.currentStock < 0 ? 'font-semibold text-amber-700' : ''
+                  }
+                >
                   {row.currentStock}
                 </span>
                 {row.lowStock ? ` · ${t('inventory.lowStock')}` : ''}
@@ -254,7 +347,8 @@ export function InventoryWorkspace() {
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-5 shadow-xl"
           >
             <h3 className="text-lg font-semibold text-slate-900">
-              {modalMode === 'receive' ? t('inventory.receive') : t('inventory.adjust')}: {modalProduct.name}
+              {modalMode === 'receive' ? t('inventory.receive') : t('inventory.adjust')}:{' '}
+              {modalProduct.name}
             </h3>
             <p className="mt-1 text-sm text-slate-600">
               {t('inventory.stock')}: {modalProduct.currentStock}
@@ -266,12 +360,17 @@ export function InventoryWorkspace() {
                   {modalMode === 'receive' ? t('inventory.qtyAdd') : t('inventory.qtyDelta')}
                 </label>
                 <input
+                  ref={qtyInputRef}
                   id="inv-qty"
                   data-testid="inventory-qty"
                   type="number"
                   step="0.0001"
                   value={qty}
-                  onChange={(e) => setQty(e.target.value)}
+                  onChange={(e) =>
+                    modalMode === 'receive'
+                      ? onReceiveQtyChange(e.target.value)
+                      : setQty(e.target.value)
+                  }
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                   required
                 />
@@ -308,6 +407,12 @@ export function InventoryWorkspace() {
                       ? onReceiveUnitCostChange(e.target.value)
                       : setUnitCost(e.target.value)
                   }
+                  onFocus={() => {
+                    if (modalMode === 'receive') onReceiveCostFocus()
+                  }}
+                  onBlur={() => {
+                    if (modalMode === 'receive') onReceiveCostBlur()
+                  }}
                   readOnly={modalMode === 'adjust'}
                   className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm read-only:bg-slate-100"
                 />
@@ -343,44 +448,6 @@ export function InventoryWorkspace() {
                       className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     />
                   </div>
-
-                  {receiveBlendPreview ? (
-                    <div
-                      className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-3 text-sm text-slate-700"
-                      data-testid="inventory-receive-preview"
-                    >
-                      <p className="font-medium text-slate-900">{t('inventory.afterReceive')}</p>
-                      <dl className="mt-2 grid grid-cols-1 gap-1 sm:grid-cols-3">
-                        <div>
-                          <dt className="text-xs text-slate-500">{t('inventory.afterCost')}</dt>
-                          <dd
-                            className="tabular-nums font-medium text-slate-900"
-                            data-testid="inventory-preview-cost"
-                          >
-                            {formatMoney(receiveBlendPreview.cost)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-slate-500">{t('inventory.afterSelling')}</dt>
-                          <dd
-                            className="tabular-nums font-medium text-slate-900"
-                            data-testid="inventory-preview-selling"
-                          >
-                            {formatMoney(receiveBlendPreview.selling)}
-                          </dd>
-                        </div>
-                        <div>
-                          <dt className="text-xs text-slate-500">{t('inventory.afterWholesale')}</dt>
-                          <dd
-                            className="tabular-nums font-medium text-slate-900"
-                            data-testid="inventory-preview-wholesale"
-                          >
-                            {formatMoney(receiveBlendPreview.wholesale)}
-                          </dd>
-                        </div>
-                      </dl>
-                    </div>
-                  ) : null}
                 </>
               ) : null}
 

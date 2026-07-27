@@ -1,11 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { previewReceiveBlend, weightedAverageMoney } from '@/lib/inventoryPricing'
+import {
+  previewReceiveBlend,
+  reverseIncomingUnit,
+  weightedAverageMoney,
+} from '@/lib/inventoryPricing'
 
 describe('inventoryPricing', () => {
   it('weightedAverageMoney matches BE WAC (user receive case)', () => {
     expect(weightedAverageMoney(35, 10, 40, 10)).toBe(37.5)
-    // prior selling ≈ 35 / (1 - 0.4) = 58.3333; lot 66.6667 → 62.5
     expect(weightedAverageMoney(58.3333, 10, 66.6667, 10)).toBe(62.5)
+  })
+
+  it('reverseIncomingUnit recovers lot cost from blend', () => {
+    const blend = weightedAverageMoney(35, 10, 40, 10)
+    expect(reverseIncomingUnit(blend, 35, 10, 10)).toBe(40)
   })
 
   it('previewReceiveBlend blends when cost changes', () => {

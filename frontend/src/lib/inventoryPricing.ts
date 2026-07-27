@@ -16,6 +16,26 @@ export function weightedAverageMoney(
   return roundMoney((oldValue * qtyBefore + incomingValue * incomingQty) / totalQty)
 }
 
+/**
+ * Invert WAC so the API still receives lot unit values when the UI shows blended product prices (Feature 103).
+ * displayed ≈ (before * qtyBefore + lot * incomingQty) / (qtyBefore + incomingQty)
+ */
+export function reverseIncomingUnit(
+  displayed: number,
+  before: number,
+  qtyBefore: number,
+  incomingQty: number,
+): number {
+  if (!(incomingQty > 0) || !Number.isFinite(incomingQty)) {
+    return roundMoney(displayed)
+  }
+  if (!(qtyBefore > 0) || !Number.isFinite(qtyBefore)) {
+    return roundMoney(displayed)
+  }
+  const totalQty = qtyBefore + incomingQty
+  return roundMoney((displayed * totalQty - before * qtyBefore) / incomingQty)
+}
+
 export type ReceiveBlendPreview = {
   cost: number
   selling: number
