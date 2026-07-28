@@ -4,6 +4,8 @@ import com.pos.auth.models.Role;
 import com.pos.auth.models.User;
 import com.pos.auth.repositories.UserRepository;
 import com.pos.auth.security.PosUserDetails;
+import com.pos.auth.services.PasswordApprovalService;
+import com.pos.core.dtos.shift.CashDrawerEventRequestDTO;
 import com.pos.core.dtos.shift.CloseShiftRequestDTO;
 import com.pos.core.dtos.shift.OpenShiftRequestDTO;
 import com.pos.core.dtos.shift.ShiftDTO;
@@ -58,6 +60,9 @@ class ShiftServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordApprovalService passwordApprovalService;
 
     @InjectMocks
     private ShiftServiceImpl shiftService;
@@ -314,6 +319,106 @@ class ShiftServiceImplTest {
         BigDecimal expected = shiftService.calculateExpectedCash(shift);
 
         assertThat(expected).isEqualByComparingTo("97.4950");
+    }
+
+    @Test
+    void addDrawerEvent_payOutWithinCash_doesNotRequireApprovalPassword() {
+        when(shiftRepository.findById(shift.getId())).thenReturn(Optional.of(shift));
+        when(transactionRepository.sumPaymentAmountByShiftIdAndMethod(shift.getId(), PaymentType.CASH))
+                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumChangeGivenByShiftId(shift.getId())).thenReturn(BigDecimal.ZERO);
+        when(cashDrawerEventRepository.save(any(CashDrawerEvent.class))).thenAnswer(inv -> {
+            CashDrawerEvent saved = inv.getArgument(0);
+            saved.setId(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"));
+            return saved;
+        });
+
+        var result = shiftService.addDrawerEvent(
+                shift.getId(),
+                new CashDrawerEventRequestDTO(
+                        CashDrawerEventType.PAY_OUT,
+                        new BigDecimal("50.0000"),
+                        "Cash drop after count"
+                )
+        );
+
+        assertThat(result.type()).isEqualTo(CashDrawerEventType.PAY_OUT);
+        assertThat(result.amount()).isEqualByComparingTo("50.0000");
+    }
+
+    @Test
+    void addDrawerEvent_payOutOverCash_requiresApprovalPassword() {
+        when(shiftRepository.findById(shift.getId())).thenReturn(Optional.of(shift));
+        when(transactionRepository.sumPaymentAmountByShiftIdAndMethod(shift.getId(), PaymentType.CASH))
+                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumChangeGivenByShiftId(shift.getId())).thenReturn(BigDecimal.ZERO);
+        when(passwordApprovalService.matchesCurrentUserPassword("cashier-pass")).thenReturn(true);
+        when(cashDrawerEventRepository.save(any(CashDrawerEvent.class))).thenAnswer(inv -> {
+            CashDrawerEvent saved = inv.getArgument(0);
+            saved.setId(UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"));
+            return saved;
+        });
+
+        assertThatThrownBy(() -> shiftService.addDrawerEvent(
+                shift.getId(),
+                new CashDrawerEventRequestDTO(
+                        CashDrawerEventType.PAY_OUT,
+                        new BigDecimal("150.0000"),
+                        "Cash withdrawal to safe",
+                        null
+                )
+        ))
+                .isInstanceOf(com.pos.core.exception.BusinessRuleException.class)
+                .hasMessageContaining("approval password required");
+
+        var ok = shiftService.addDrawerEvent(
+                shift.getId(),
+                new CashDrawerEventRequestDTO(
+                        CashDrawerEventType.PAY_OUT,
+                        new BigDecimal("150.0000"),
+                        "Cash withdrawal to safe",
+                        "cashier-pass"
+                )
+        );
+
+        assertThat(ok.id()).isEqualTo(UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"));
+    }
+
+    @Test
+    void addDrawerEvent_payOutOverCash_rejectsWrongApprovalPassword() {
+        when(shiftRepository.findById(shift.getId())).thenReturn(Optional.of(shift));
+        when(transactionRepository.sumPaymentAmountByShiftIdAndMethod(shift.getId(), PaymentType.CASH))
+                .thenReturn(BigDecimal.ZERO);
+        when(transactionRepository.sumChangeGivenByShiftId(shift.getId())).thenReturn(BigDecimal.ZERO);
+        when(passwordApprovalService.matchesCurrentUserPassword("bad-pass")).thenReturn(false);
+
+        assertThatThrownBy(() -> shiftService.addDrawerEvent(
+                shift.getId(),
+                new CashDrawerEventRequestDTO(
+                        CashDrawerEventType.PAY_OUT,
+                        new BigDecimal("150.0000"),
+                        "Cash withdrawal to safe",
+                        "bad-pass"
+                )
+        ))
+                .isInstanceOf(com.pos.core.exception.BusinessRuleException.class)
+                .hasMessageContaining("approval password required");
+    }
+
+    @Test
+    void addDrawerEvent_reasonMustHaveMinTenAndAlphanumeric() {
+        when(shiftRepository.findById(shift.getId())).thenReturn(Optional.of(shift));
+
+        assertThatThrownBy(() -> shiftService.addDrawerEvent(
+                shift.getId(),
+                new CashDrawerEventRequestDTO(
+                        CashDrawerEventType.PAY_IN,
+                        new BigDecimal("1.0000"),
+                        ".... ...."
+                )
+        ))
+                .isInstanceOf(com.pos.core.exception.BusinessRuleException.class)
+                .hasMessageContaining("at least 10 characters");
     }
 
     private void stubPaymentSum(PaymentType method, String amount) {

@@ -1,6 +1,7 @@
 package com.pos.core.services;
 
 import com.pos.auth.repositories.UserRepository;
+import com.pos.auth.services.PasswordApprovalService;
 import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.ReimburseLineRequestDTO;
 import com.pos.core.dtos.ReimburseRequestDTO;
@@ -46,6 +47,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,6 +81,9 @@ class TransactionServiceImplTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordApprovalService passwordApprovalService;
 
     @InjectMocks
     private TransactionServiceImpl transactionService;
@@ -136,6 +141,29 @@ class TransactionServiceImplTest {
                 null,
                 null,
                 null
+        );
+
+        lenient().when(shiftService.getShiftDetail(openShift.id())).thenReturn(
+                new com.pos.core.dtos.shift.ShiftDetailDTO(
+                        openShift.id(),
+                        store.getId(),
+                        ShiftStatus.OPEN,
+                        new BigDecimal("100.0000"),
+                        new BigDecimal("100.0000"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        java.util.List.<com.pos.core.dtos.shift.CashDrawerEventDTO>of()
+                )
         );
     }
 
@@ -653,6 +681,84 @@ class TransactionServiceImplTest {
                 ArgumentCaptor.forClass(CashDrawerEventRequestDTO.class);
         verify(shiftService).addDrawerEvent(eq(openShift.id()), eventCaptor.capture());
         assertThat(eventCaptor.getValue().amount()).isEqualByComparingTo("11.0000");
+    }
+
+    @Test
+    void reimburse_cashPortionOverAvailableCash_requiresApprovalPassword() {
+        Transaction tx = cashSale(new BigDecimal("2.0000"), new BigDecimal("3.9800"), new BigDecimal("0.0000"));
+        when(transactionRepository.findById(tx.getId())).thenReturn(Optional.of(tx));
+        when(shiftService.getCurrentOpenShift(store.getId())).thenReturn(openShift);
+        when(shiftService.getShiftDetail(openShift.id())).thenReturn(
+                new com.pos.core.dtos.shift.ShiftDetailDTO(
+                        openShift.id(),
+                        store.getId(),
+                        ShiftStatus.OPEN,
+                        new BigDecimal("100.0000"),
+                        new BigDecimal("1.0000"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        java.util.List.<com.pos.core.dtos.shift.CashDrawerEventDTO>of()
+                )
+        );
+        when(passwordApprovalService.matchesCurrentUserPassword("cashier-pass")).thenReturn(true);
+        when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        assertThatThrownBy(() -> transactionService.reimburse(
+                tx.getId(),
+                new ReimburseRequestDTO(null, null)
+        ))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("approval password required");
+
+        transactionService.reimburse(tx.getId(), new ReimburseRequestDTO(null, "cashier-pass"));
+        verify(shiftService).addDrawerEvent(eq(openShift.id()), any(CashDrawerEventRequestDTO.class));
+    }
+
+    @Test
+    void reimburse_cashPortionOverAvailableCash_rejectsWrongApprovalPassword() {
+        Transaction tx = cashSale(new BigDecimal("2.0000"), new BigDecimal("3.9800"), new BigDecimal("0.0000"));
+        when(transactionRepository.findById(tx.getId())).thenReturn(Optional.of(tx));
+        when(shiftService.getCurrentOpenShift(store.getId())).thenReturn(openShift);
+        when(shiftService.getShiftDetail(openShift.id())).thenReturn(
+                new com.pos.core.dtos.shift.ShiftDetailDTO(
+                        openShift.id(),
+                        store.getId(),
+                        ShiftStatus.OPEN,
+                        new BigDecimal("100.0000"),
+                        new BigDecimal("1.0000"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        java.util.List.<com.pos.core.dtos.shift.CashDrawerEventDTO>of()
+                )
+        );
+        when(passwordApprovalService.matchesCurrentUserPassword("bad-pass")).thenReturn(false);
+
+        assertThatThrownBy(() -> transactionService.reimburse(
+                tx.getId(),
+                new ReimburseRequestDTO(null, "bad-pass")
+        ))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("approval password required");
     }
 
     private Transaction cashSale(BigDecimal qty, BigDecimal lineTotal, BigDecimal taxTotal) {

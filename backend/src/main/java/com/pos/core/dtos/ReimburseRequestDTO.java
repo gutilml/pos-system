@@ -9,6 +9,10 @@ import java.util.List;
  * returnable quantity on every line.
  */
 public record ReimburseRequestDTO(
-        @Valid List<ReimburseLineRequestDTO> lines
+        @Valid List<ReimburseLineRequestDTO> lines,
+        String approvalPassword
 ) {
+    public ReimburseRequestDTO(List<ReimburseLineRequestDTO> lines) {
+        this(lines, null);
+    }
 }

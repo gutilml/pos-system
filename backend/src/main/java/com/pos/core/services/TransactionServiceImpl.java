@@ -4,6 +4,7 @@ import com.pos.auth.models.Role;
 import com.pos.auth.models.User;
 import com.pos.auth.repositories.UserRepository;
 import com.pos.auth.security.PosUserDetails;
+import com.pos.auth.services.PasswordApprovalService;
 import com.pos.core.dtos.PaymentRequestDTO;
 import com.pos.core.dtos.PaymentResponseDTO;
 import com.pos.core.dtos.ReimburseLineRequestDTO;
@@ -69,6 +70,7 @@ public class TransactionServiceImpl implements TransactionService {
     private final CustomerCreditService customerCreditService;
     private final ShiftService shiftService;
     private final UserRepository userRepository;
+    private final PasswordApprovalService passwordApprovalService;
 
     public TransactionServiceImpl(
             TransactionRepository transactionRepository,
@@ -79,7 +81,8 @@ public class TransactionServiceImpl implements TransactionService {
             CustomerRepository customerRepository,
             CustomerCreditService customerCreditService,
             ShiftService shiftService,
-            UserRepository userRepository
+            UserRepository userRepository,
+            PasswordApprovalService passwordApprovalService
     ) {
         this.transactionRepository = transactionRepository;
         this.productRepository = productRepository;
@@ -90,6 +93,7 @@ public class TransactionServiceImpl implements TransactionService {
         this.customerCreditService = customerCreditService;
         this.shiftService = shiftService;
         this.userRepository = userRepository;
+        this.passwordApprovalService = passwordApprovalService;
     }
 
     @Override
@@ -310,12 +314,26 @@ public class TransactionServiceImpl implements TransactionService {
                 throw new BusinessRuleException("Cannot reimburse CASH without a store on the transaction");
             }
             var openShift = shiftService.getCurrentOpenShift(transaction.getStore().getId());
+            var shiftDetail = shiftService.getShiftDetail(openShift.id());
+            BigDecimal availableCash = shiftDetail.expectedCash() == null
+                    ? BigDecimal.ZERO.setScale(MONEY_SCALE, MONEY_ROUNDING)
+                    : scaleMoney(shiftDetail.expectedCash());
+            if (split.cashPortion().compareTo(availableCash) > 0) {
+                String approvalPassword = request == null ? null : request.approvalPassword();
+                if (approvalPassword == null || approvalPassword.isBlank()) {
+                    throw new BusinessRuleException("Reimburse CASH exceeds available cash; approval password required");
+                }
+                if (!passwordApprovalService.matchesCurrentUserPassword(approvalPassword)) {
+                    throw new BusinessRuleException("Reimburse CASH exceeds available cash; approval password required");
+                }
+            }
             shiftService.addDrawerEvent(
                     openShift.id(),
                     new CashDrawerEventRequestDTO(
                             CashDrawerEventType.PAY_OUT,
                             split.cashPortion(),
-                            "Ticket reimburse: " + transaction.getId()
+                            "Ticket reimburse: " + transaction.getId(),
+                            request == null ? null : request.approvalPassword()
                     )
             );
         }

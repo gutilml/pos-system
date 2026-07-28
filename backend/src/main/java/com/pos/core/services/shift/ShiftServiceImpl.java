@@ -1,6 +1,7 @@
 package com.pos.core.services.shift;
 
 import com.pos.auth.models.User;
+import com.pos.auth.services.PasswordApprovalService;
 import com.pos.auth.repositories.UserRepository;
 import com.pos.auth.security.PosUserDetails;
 import com.pos.core.dtos.shift.CashDrawerEventDTO;
@@ -47,19 +48,22 @@ public class ShiftServiceImpl implements ShiftService {
     private final StoreSettingsRepository storeSettingsRepository;
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final PasswordApprovalService passwordApprovalService;
 
     public ShiftServiceImpl(
             ShiftRepository shiftRepository,
             CashDrawerEventRepository cashDrawerEventRepository,
             StoreSettingsRepository storeSettingsRepository,
             TransactionRepository transactionRepository,
-            UserRepository userRepository
+            UserRepository userRepository,
+            PasswordApprovalService passwordApprovalService
     ) {
         this.shiftRepository = shiftRepository;
         this.cashDrawerEventRepository = cashDrawerEventRepository;
         this.storeSettingsRepository = storeSettingsRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
+        this.passwordApprovalService = passwordApprovalService;
     }
 
     @Override
@@ -116,12 +120,26 @@ public class ShiftServiceImpl implements ShiftService {
     public CashDrawerEventDTO addDrawerEvent(UUID shiftId, CashDrawerEventRequestDTO request) {
         Shift shift = getShift(shiftId);
         ensureOpen(shift);
+        String normalizedReason = normalizeReason(request.reason());
+        BigDecimal amount = scaleMoney(request.amount());
+
+        if (request.type() == CashDrawerEventType.PAY_OUT) {
+            BigDecimal availableCash = calculateExpectedCash(shift);
+            if (amount.compareTo(availableCash) > 0) {
+                if (request.approvalPassword() == null || request.approvalPassword().isBlank()) {
+                    throw new BusinessRuleException("PAY_OUT exceeds available cash; approval password required");
+                }
+                if (!passwordApprovalService.matchesCurrentUserPassword(request.approvalPassword())) {
+                    throw new BusinessRuleException("PAY_OUT exceeds available cash; approval password required");
+                }
+            }
+        }
 
         CashDrawerEvent event = new CashDrawerEvent();
         event.setShift(shift);
         event.setType(request.type());
-        event.setAmount(scaleMoney(request.amount()));
-        event.setReason(request.reason());
+        event.setAmount(amount);
+        event.setReason(normalizedReason);
 
         return toDto(cashDrawerEventRepository.save(event));
     }
@@ -190,6 +208,18 @@ public class ShiftServiceImpl implements ShiftService {
         if (shift.getStatus() != ShiftStatus.OPEN) {
             throw new BusinessRuleException("Shift is not OPEN");
         }
+    }
+
+    private String normalizeReason(String rawReason) {
+        String normalized = rawReason == null ? "" : rawReason.trim();
+        if (normalized.length() < 10) {
+            throw new BusinessRuleException("reason must be at least 10 characters");
+        }
+        boolean hasAlphaNumeric = normalized.chars().anyMatch(ch -> Character.isLetterOrDigit(ch));
+        if (!hasAlphaNumeric) {
+            throw new BusinessRuleException("reason must contain letters or numbers");
+        }
+        return normalized;
     }
 
     private ShiftDTO toDto(Shift shift) {
