@@ -28,7 +28,7 @@ describe('WorkspaceNav', () => {
     expect(screen.getByTestId('workspace-products')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-customers')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-inventory')).toBeInTheDocument()
-    expect(screen.getByTestId('workspace-settings')).toBeInTheDocument()
+    expect(screen.queryByTestId('workspace-settings')).not.toBeInTheDocument()
   })
 
   it('notifies onChange when a workspace is selected', async () => {
@@ -46,6 +46,6 @@ describe('WorkspaceNav', () => {
     expect(screen.getByTestId('workspace-sell')).toHaveTextContent('Caja')
     expect(screen.getByTestId('workspace-customers')).toHaveTextContent('Clientes')
     expect(screen.getByTestId('workspace-inventory')).toHaveTextContent('Inventario')
-    expect(screen.getByTestId('workspace-settings')).toHaveTextContent('Configuración')
+    expect(screen.queryByTestId('workspace-settings')).not.toBeInTheDocument()
   })
 })

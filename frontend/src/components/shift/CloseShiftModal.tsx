@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useT } from '@/i18n/useT'
 import { useShiftStore } from '@/store/useShiftStore'
 
@@ -16,6 +16,19 @@ export function CloseShiftModal({ open, onClose }: CloseShiftModalProps) {
 
   const [amount, setAmount] = useState('')
   const [localError, setLocalError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      clearError()
+      setLocalError(null)
+      onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, clearError, onClose])
 
   if (!open) {
     return null

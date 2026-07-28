@@ -284,4 +284,15 @@ describe('ClosedTicketsModal', () => {
     })
     expect(screen.getByTestId('confirm-reimburse')).toBeDisabled()
   })
+
+  it('closes when Escape is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    vi.mocked(listTransactions).mockResolvedValue([])
+    render(<ClosedTicketsModal open onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })

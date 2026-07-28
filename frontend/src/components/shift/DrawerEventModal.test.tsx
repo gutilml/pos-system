@@ -58,6 +58,18 @@ describe('DrawerEventModal', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
+  it('rejects reason shorter than 10 characters', async () => {
+    const user = userEvent.setup()
+    render(<DrawerEventModal open onClose={vi.fn()} />)
+
+    await user.type(screen.getByTestId('drawer-amount'), '10')
+    await user.type(screen.getByTestId('drawer-reason'), 'PAGO')
+    await user.click(screen.getByTestId('drawer-event-submit'))
+
+    expect(screen.getByTestId('drawer-event-error')).toHaveTextContent(/at least 10 characters/i)
+    expect(addDrawerEventRequest).not.toHaveBeenCalled()
+  })
+
   it('posts PAY_IN with amount and trimmed reason, then closes', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()
@@ -95,7 +107,7 @@ describe('DrawerEventModal', () => {
 
     expect(screen.getByTestId('drawer-type-pay-out')).toBeChecked()
     await user.type(screen.getByTestId('drawer-amount'), '20')
-    await user.type(screen.getByTestId('drawer-reason'), 'Safe drop')
+    await user.type(screen.getByTestId('drawer-reason'), 'Safe drop box')
     await user.click(screen.getByTestId('drawer-event-submit'))
 
     await waitFor(() => {
@@ -103,7 +115,7 @@ describe('DrawerEventModal', () => {
     })
     expect(onClose).not.toHaveBeenCalled()
     expect(screen.getByTestId('drawer-amount')).toHaveValue('20')
-    expect(screen.getByTestId('drawer-reason')).toHaveValue('Safe drop')
+    expect(screen.getByTestId('drawer-reason')).toHaveValue('Safe drop box')
   })
 
   it('asks for approval password and retries when backend requires approval', async () => {
@@ -142,5 +154,15 @@ describe('DrawerEventModal', () => {
       })
     })
     expect(onClose).toHaveBeenCalled()
+  })
+
+  it('closes when Escape is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<DrawerEventModal open onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalledTimes(1)
   })
 })

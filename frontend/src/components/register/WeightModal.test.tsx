@@ -90,6 +90,18 @@ describe('WeightModal', () => {
     expect(state.pendingWeightProduct).toBeNull()
     expect(selectActiveItems(state)).toHaveLength(0)
   })
+
+  it('Escape clears pending weight without adding to cart', async () => {
+    const user = userEvent.setup()
+    useCartStore.setState({ pendingWeightProduct: deliHam })
+    render(<WeightModal />)
+
+    await user.keyboard('{Escape}')
+
+    const state = useCartStore.getState()
+    expect(state.pendingWeightProduct).toBeNull()
+    expect(selectActiveItems(state)).toHaveLength(0)
+  })
 })
 
 describe('WeightModal scale fallback', () => {

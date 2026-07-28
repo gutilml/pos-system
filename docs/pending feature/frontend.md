@@ -55,6 +55,7 @@ Phase A register wire-up features are shipped. Paired backend: 017, 019, 021.
 ## Tooling / quality
 
 - [ ] **Accessibility pass** — Modals, focus traps, scanner-first keyboard flow.
+  - Note: Feature 107 shipped Escape-to-close behavior across core register overlays; focus trap and scanner-first flow are still pending.
 
 ---
 

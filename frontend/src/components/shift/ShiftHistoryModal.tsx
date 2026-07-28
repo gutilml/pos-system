@@ -89,6 +89,17 @@ export function ShiftHistoryModal({ open, onClose }: ShiftHistoryModalProps) {
     }
   }, [open, storeId, t])
 
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      close()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, close])
+
   async function openDetail(id: string) {
     setLoading(true)
     setError(null)

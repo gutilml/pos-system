@@ -49,7 +49,7 @@ export function RegisterScreen() {
         <div className="flex h-dvh max-h-dvh flex-col bg-slate-100 text-slate-900">
           <header className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-200 bg-slate-900 px-4 py-3 text-white">
             <h1 className="text-lg font-semibold tracking-tight">{t('register.title')}</h1>
-            <CashierMenu />
+            <CashierMenu onOpenSettings={() => setWorkspace('settings')} />
           </header>
 
           <WorkspaceNav active={workspace} onChange={setWorkspace} />

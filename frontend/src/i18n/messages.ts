@@ -14,6 +14,7 @@ export type MessageKey =
   | 'cashier.menu'
   | 'cashier.payIn'
   | 'cashier.payOut'
+  | 'cashier.moneyMovement'
   | 'cashier.closeShift'
   | 'cashier.logOut'
   | 'cashier.loggingOut'
@@ -136,6 +137,7 @@ export type MessageKey =
   | 'drawer.reason'
   | 'drawer.amountInvalid'
   | 'drawer.reasonRequired'
+  | 'drawer.reasonMinLength'
   | 'drawer.approvalRequired'
   | 'drawer.approvalPassword'
   | 'drawer.approvalPasswordRequired'
@@ -336,6 +338,7 @@ export const en: MessageDict = {
   'cashier.menu': 'Cashier',
   'cashier.payIn': 'Pay in',
   'cashier.payOut': 'Pay out',
+  'cashier.moneyMovement': 'Money movement',
   'cashier.closeShift': 'Close Shift',
   'cashier.logOut': 'Log out',
   'cashier.loggingOut': 'Logging out…',
@@ -568,6 +571,7 @@ export const en: MessageDict = {
   'drawer.reason': 'Reason',
   'drawer.amountInvalid': 'Enter an amount greater than zero',
   'drawer.reasonRequired': 'Enter a reason',
+  'drawer.reasonMinLength': 'Reason must be at least 10 characters',
   'drawer.approvalRequired': 'Approval password required: amount exceeds drawer cash.',
   'drawer.approvalPassword': 'Approval password',
   'drawer.approvalPasswordRequired': 'Enter approval password to continue.',
@@ -660,6 +664,7 @@ export const es: MessageDict = {
   'cashier.menu': 'Cajero',
   'cashier.payIn': 'Entrada de efectivo',
   'cashier.payOut': 'Salida de efectivo',
+  'cashier.moneyMovement': 'Movimiento de efectivo',
   'cashier.closeShift': 'Cerrar turno',
   'cashier.logOut': 'Cerrar sesión',
   'cashier.loggingOut': 'Cerrando sesión…',
@@ -893,6 +898,7 @@ export const es: MessageDict = {
   'drawer.reason': 'Motivo',
   'drawer.amountInvalid': 'Ingresa un monto mayor que cero',
   'drawer.reasonRequired': 'Ingresa un motivo',
+  'drawer.reasonMinLength': 'El motivo debe tener al menos 10 caracteres',
   'drawer.approvalRequired': 'Se requiere contraseña de aprobación: el monto excede el efectivo en caja.',
   'drawer.approvalPassword': 'Contraseña de aprobación',
   'drawer.approvalPasswordRequired': 'Ingresa la contraseña de aprobación para continuar.',

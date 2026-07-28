@@ -118,4 +118,15 @@ describe('ShiftHistoryModal', () => {
       expect(screen.getByText('No shifts yet.')).toBeInTheDocument()
     })
   })
+
+  it('closes when Escape is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    vi.mocked(listShifts).mockResolvedValue([])
+    render(<ShiftHistoryModal open onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })

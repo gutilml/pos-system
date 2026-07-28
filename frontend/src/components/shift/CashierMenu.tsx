@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CashDrawerEventType } from '@/api/shifts'
 import { CloseShiftModal } from '@/components/shift/CloseShiftModal'
 import { DrawerEventModal } from '@/components/shift/DrawerEventModal'
 import { ShiftHistoryModal } from '@/components/shift/ShiftHistoryModal'
@@ -9,15 +8,17 @@ import { requestRegisterSearchFocus } from '@/lib/registerSearchFocus'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useShiftStore } from '@/store/useShiftStore'
 
-export function CashierMenu() {
+type CashierMenuProps = {
+  onOpenSettings?: () => void
+}
+
+export function CashierMenu({ onOpenSettings }: CashierMenuProps) {
   const t = useT()
   const locale = useLocale()
   const [menuOpen, setMenuOpen] = useState(false)
   const [closeModalOpen, setCloseModalOpen] = useState(false)
   const [drawerModalOpen, setDrawerModalOpen] = useState(false)
   const [historyModalOpen, setHistoryModalOpen] = useState(false)
-  const [drawerInitialType, setDrawerInitialType] =
-    useState<CashDrawerEventType>('PAY_IN')
   const [loggingOut, setLoggingOut] = useState(false)
   const [localeError, setLocaleError] = useState<string | null>(null)
   const [savingLocale, setSavingLocale] = useState(false)
@@ -48,9 +49,8 @@ export function CashierMenu() {
     }
   }
 
-  function openDrawer(type: CashDrawerEventType) {
+  function openDrawer() {
     setMenuOpen(false)
-    setDrawerInitialType(type)
     setDrawerModalOpen(true)
   }
 
@@ -137,27 +137,28 @@ export function CashierMenu() {
             {t('cashier.shiftHistory')}
           </button>
           {hasOpenShift ? (
-            <>
-              <button
-                type="button"
-                role="menuitem"
-                data-testid="pay-in-menu-item"
-                onClick={() => openDrawer('PAY_IN')}
-                className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
-              >
-                {t('cashier.payIn')}
-              </button>
-              <button
-                type="button"
-                role="menuitem"
-                data-testid="pay-out-menu-item"
-                onClick={() => openDrawer('PAY_OUT')}
-                className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
-              >
-                {t('cashier.payOut')}
-              </button>
-            </>
+            <button
+              type="button"
+              role="menuitem"
+              data-testid="money-movement-menu-item"
+              onClick={openDrawer}
+              className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
+            >
+              {t('cashier.moneyMovement')}
+            </button>
           ) : null}
+          <button
+            type="button"
+            role="menuitem"
+            data-testid="settings-menu-item"
+            onClick={() => {
+              setMenuOpen(false)
+              onOpenSettings?.()
+            }}
+            className="block w-full px-4 py-2 text-left text-sm text-slate-800 hover:bg-slate-100"
+          >
+            {t('workspace.settings')}
+          </button>
           <button
             type="button"
             role="menuitem"
@@ -194,7 +195,6 @@ export function CashierMenu() {
       />
       <DrawerEventModal
         open={drawerModalOpen}
-        initialType={drawerInitialType}
         onClose={() => {
           setDrawerModalOpen(false)
           requestRegisterSearchFocus()

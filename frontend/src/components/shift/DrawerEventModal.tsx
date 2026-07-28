@@ -39,6 +39,19 @@ export function DrawerEventModal({
     clearError()
   }, [open, initialType, clearError])
 
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      clearError()
+      setLocalError(null)
+      onClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, clearError, onClose])
+
   if (!open) {
     return null
   }
@@ -57,6 +70,10 @@ export function DrawerEventModal({
     const trimmedReason = reason.trim()
     if (!trimmedReason) {
       setLocalError(t('drawer.reasonRequired'))
+      return
+    }
+    if (trimmedReason.length < 10) {
+      setLocalError(t('drawer.reasonMinLength'))
       return
     }
     if (requiresApproval && approvalPassword.trim().length === 0) {

@@ -66,6 +66,17 @@ export function CheckoutModal({ open, onClose, onCompleted }: CheckoutModalProps
     }
   }, [open])
 
+  useEffect(() => {
+    if (!open || submitting) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      handleClose()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, submitting, handleClose])
+
   // Prefill once per open (before paint). Do not re-fill if cashier clears CASH.
   useLayoutEffect(() => {
     if (!open) return

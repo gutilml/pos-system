@@ -29,6 +29,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Weight / bulk sell** | [006](features/006-frontend-bulk-weight-modal/README.md), [099](features/099-frontend-scale-early-pair-autoread/README.md), [100](features/100-frontend-mock-scale-toggle/README.md) | Weight modal + optional scale; **099** early pair; **100** mock scale toggle |
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md), [077](features/077-backend-shift-history/README.md), [079](features/079-backend-shift-audit-stamps/README.md), [081](features/081-backend-drawer-event-policy/README.md) | Open / events / close; **077** history done; **079** audit stamps done; **081** deferred caps/RBAC |
 | **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history; **080** opener/closer labels |
+| **Cashier menu + modal escape UX** | [107](features/107-frontend-cashier-menu-modal-ux/README.md) | Consolidated money movement action, Settings relocation, Escape-to-close across overlays, drawer reason min-length copy. |
 | **Register E2E / regression** | [101](features/101-e2e-register-smoke/README.md) | Tagged BE + FE regression smoke (weight sale included) |
 | **Multi-ticket tabs** | [009](features/009-frontend-open-tickets/README.md) | Client-side held tickets |
 | **Stripe (backend)** | [010](features/010-backend-stripe-integration/README.md) | Checkout Session + webhook — **keep code; Stripe-in-POS ON HOLD** |
@@ -189,6 +190,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 104 | BE+FE | Done | [README](features/104-closed-ticket-line-names/README.md) | — |
 | 105 | FE | Done | [README](features/105-frontend-pay-cash-prefill-change/README.md) | — |
 | 106 | FE | Done | [README](features/106-frontend-over-cash-approval-password/README.md) | — |
+| 107 | FE | Done | [README](features/107-frontend-cashier-menu-modal-ux/README.md) | — |
 
 ---
 

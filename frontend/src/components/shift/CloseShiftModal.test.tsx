@@ -78,4 +78,14 @@ describe('CloseShiftModal', () => {
     expect(useShiftStore.getState().lastClosedShift?.expectedCash).toBe(150)
     expect(useShiftStore.getState().lastClosedShift?.totalCardPayments).toBe(20)
   })
+
+  it('closes when Escape is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<CloseShiftModal open onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })

@@ -53,27 +53,27 @@ describe('CashierMenu', () => {
     })
   })
 
-  it('shows Pay in / Pay out when a shift is open and opens the drawer modal', async () => {
+  it('shows Money movement when a shift is open and opens the drawer modal', async () => {
     const user = userEvent.setup()
     render(<CashierMenu />)
 
     await user.click(screen.getByRole('button', { name: /cashier/i }))
-    expect(screen.getByTestId('pay-in-menu-item')).toBeInTheDocument()
-    expect(screen.getByTestId('pay-out-menu-item')).toBeInTheDocument()
+    expect(screen.getByTestId('money-movement-menu-item')).toBeInTheDocument()
+    expect(screen.getByTestId('settings-menu-item')).toBeInTheDocument()
 
-    await user.click(screen.getByTestId('pay-out-menu-item'))
+    await user.click(screen.getByTestId('money-movement-menu-item'))
     expect(screen.getByTestId('drawer-event-modal')).toBeInTheDocument()
-    expect(screen.getByTestId('drawer-type-pay-out')).toBeChecked()
+    expect(screen.getByTestId('drawer-type-pay-in')).toBeChecked()
   })
 
-  it('hides Pay in / Pay out when there is no open shift', async () => {
+  it('hides Money movement when there is no open shift', async () => {
     const user = userEvent.setup()
     useShiftStore.setState({ currentShift: null })
     render(<CashierMenu />)
 
     await user.click(screen.getByRole('button', { name: /cashier/i }))
-    expect(screen.queryByTestId('pay-in-menu-item')).not.toBeInTheDocument()
-    expect(screen.queryByTestId('pay-out-menu-item')).not.toBeInTheDocument()
+    expect(screen.queryByTestId('money-movement-menu-item')).not.toBeInTheDocument()
+    expect(screen.getByTestId('settings-menu-item')).toBeInTheDocument()
     expect(screen.getByTestId('close-shift-menu-item')).toBeDisabled()
     expect(screen.getByTestId('shift-history-menu-item')).toBeInTheDocument()
   })

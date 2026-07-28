@@ -92,7 +92,7 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
   }, [onClose, reset])
 
   useEffect(() => {
-    if (!open) return
+    if (!open || !storeId) return
 
     let cancelled = false
     setLoading(true)
@@ -118,6 +118,17 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
       cancelled = true
     }
   }, [open, storeId, t])
+
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      close()
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open, close])
 
   const cardBlocked = useMemo(
     () => (detail ? transactionHasCard(detail) : false),

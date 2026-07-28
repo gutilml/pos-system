@@ -312,4 +312,14 @@ describe('CheckoutModal', () => {
       )
     })
   })
+
+  it('closes when Escape is pressed', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    render(<CheckoutModal open onClose={onClose} />)
+
+    await user.keyboard('{Escape}')
+
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
 })
