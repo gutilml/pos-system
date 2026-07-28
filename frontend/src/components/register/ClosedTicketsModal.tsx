@@ -69,6 +69,8 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [requiresApproval, setRequiresApproval] = useState(false)
+  const [approvalPassword, setApprovalPassword] = useState('')
 
   const reset = useCallback(() => {
     setView('list')
@@ -79,6 +81,8 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
     setSubmitting(false)
     setError(null)
     setSuccess(null)
+    setRequiresApproval(false)
+    setApprovalPassword('')
   }, [])
 
   const close = useCallback(() => {
@@ -133,6 +137,8 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
       const tx = await getTransaction(id)
       setDetail(tx)
       setSelections(defaultSelections(tx.items))
+      setRequiresApproval(false)
+      setApprovalPassword('')
       setView('detail')
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : t('closedTickets.loadFailed'))
@@ -154,17 +160,31 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
 
   async function confirmReimburse() {
     if (!detail || !canConfirm) return
+    if (requiresApproval && approvalPassword.trim().length === 0) {
+      setError(t('closedTickets.approvalPasswordRequired'))
+      return
+    }
     setSubmitting(true)
     setError(null)
     setSuccess(null)
     try {
-      const payload = buildReimbursePayload(selections)
+      const payload = {
+        ...buildReimbursePayload(selections),
+        ...(requiresApproval ? { approvalPassword } : {}),
+      }
       const updated = await reimburseTransaction(detail.id, payload)
       setDetail(updated)
       setSelections(defaultSelections(updated.items))
       setSuccess(t('closedTickets.success'))
+      setRequiresApproval(false)
+      setApprovalPassword('')
       setTickets((prev) => prev.map((row) => (row.id === updated.id ? updated : row)))
     } catch (err: unknown) {
+      if (err instanceof Error && err.message.toLowerCase().includes('approval password required')) {
+        setRequiresApproval(true)
+        setError(t('closedTickets.approvalRequired'))
+        return
+      }
       if (getErrorStatus(err) === 403) {
         setError(t('closedTickets.reimburseForbidden'))
       } else {
@@ -210,6 +230,8 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
                 setSelections([])
                 setError(null)
                 setSuccess(null)
+                setRequiresApproval(false)
+                setApprovalPassword('')
               }}
               className="text-sm font-medium text-emerald-800 underline"
             >
@@ -297,6 +319,28 @@ export function ClosedTicketsModal({ open, onClose }: ClosedTicketsModalProps) {
               >
                 {t('closedTickets.cardNotReimbursable')}
               </p>
+            ) : null}
+
+            {requiresApproval && !cardBlocked ? (
+              <div
+                className="mb-4 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2"
+                data-testid="reimburse-approval-box"
+              >
+                <p className="mb-2 text-sm font-medium text-amber-950">
+                  {t('closedTickets.approvalRequired')}
+                </p>
+                <label className="text-xs font-medium text-amber-900" htmlFor="reimburse-approval-password">
+                  {t('closedTickets.approvalPassword')}
+                </label>
+                <input
+                  id="reimburse-approval-password"
+                  type="password"
+                  value={approvalPassword}
+                  onChange={(e) => setApprovalPassword(e.target.value)}
+                  data-testid="reimburse-approval-password"
+                  className="mt-1 w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
             ) : null}
 
             <ul className="space-y-3" data-testid="closed-ticket-lines">

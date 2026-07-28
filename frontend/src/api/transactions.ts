@@ -77,6 +77,7 @@ export type ReimburseLineRequest = {
 
 export type ReimburseRequest = {
   lines?: ReimburseLineRequest[]
+  approvalPassword?: string
 }
 
 export type ReimburseLineSelection = {

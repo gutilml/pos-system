@@ -83,6 +83,7 @@ export type CashDrawerEventRequest = {
   type: CashDrawerEventType
   amount: number
   reason: string
+  approvalPassword?: string
 }
 
 export async function addDrawerEventRequest(

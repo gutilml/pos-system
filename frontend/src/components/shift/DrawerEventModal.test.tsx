@@ -105,4 +105,42 @@ describe('DrawerEventModal', () => {
     expect(screen.getByTestId('drawer-amount')).toHaveValue('20')
     expect(screen.getByTestId('drawer-reason')).toHaveValue('Safe drop')
   })
+
+  it('asks for approval password and retries when backend requires approval', async () => {
+    const user = userEvent.setup()
+    const onClose = vi.fn()
+    vi.mocked(addDrawerEventRequest)
+      .mockRejectedValueOnce(new Error('PAY_OUT exceeds available cash; approval password required'))
+      .mockResolvedValueOnce({
+        id: 'evt-2',
+        shiftId: 'shift-1',
+        type: 'PAY_OUT',
+        amount: 120,
+        reason: 'Cash withdrawal to safe',
+        createdAt: '2026-07-16T13:00:00Z',
+      })
+
+    render(<DrawerEventModal open onClose={onClose} initialType="PAY_OUT" />)
+
+    await user.type(screen.getByTestId('drawer-amount'), '120')
+    await user.type(screen.getByTestId('drawer-reason'), 'Cash withdrawal to safe')
+    await user.click(screen.getByTestId('drawer-event-submit'))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('drawer-approval-password')).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByTestId('drawer-approval-password'), 'cashier-pass')
+    await user.click(screen.getByTestId('drawer-event-submit'))
+
+    await waitFor(() => {
+      expect(addDrawerEventRequest).toHaveBeenLastCalledWith('shift-1', {
+        type: 'PAY_OUT',
+        amount: 120,
+        reason: 'Cash withdrawal to safe',
+        approvalPassword: 'cashier-pass',
+      })
+    })
+    expect(onClose).toHaveBeenCalled()
+  })
 })

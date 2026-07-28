@@ -24,6 +24,8 @@ export function DrawerEventModal({
   const [type, setType] = useState<CashDrawerEventType>(initialType)
   const [amount, setAmount] = useState('')
   const [reason, setReason] = useState('')
+  const [approvalPassword, setApprovalPassword] = useState('')
+  const [requiresApproval, setRequiresApproval] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export function DrawerEventModal({
     setType(initialType)
     setAmount('')
     setReason('')
+    setApprovalPassword('')
+    setRequiresApproval(false)
     setLocalError(null)
     clearError()
   }, [open, initialType, clearError])
@@ -55,14 +59,31 @@ export function DrawerEventModal({
       setLocalError(t('drawer.reasonRequired'))
       return
     }
+    if (requiresApproval && approvalPassword.trim().length === 0) {
+      setLocalError(t('drawer.approvalPasswordRequired'))
+      return
+    }
+
+    const body = {
+      type,
+      amount: parsed,
+      reason: trimmedReason,
+      ...(requiresApproval ? { approvalPassword } : {}),
+    }
 
     try {
-      await addDrawerEvent({ type, amount: parsed, reason: trimmedReason })
+      await addDrawerEvent(body)
       setAmount('')
       setReason('')
+      setApprovalPassword('')
+      setRequiresApproval(false)
       onClose()
-    } catch {
-      // error surfaced via store
+    } catch (err) {
+      const message = err instanceof Error ? err.message : ''
+      if (message.toLowerCase().includes('approval password required')) {
+        setRequiresApproval(true)
+        setLocalError(t('drawer.approvalRequired'))
+      }
     }
   }
 
@@ -124,6 +145,25 @@ export function DrawerEventModal({
           autoFocus
           data-testid="drawer-amount"
         />
+
+        {requiresApproval ? (
+          <>
+            <label
+              htmlFor="drawer-approval-password"
+              className="mt-4 mb-1 block text-sm font-medium text-slate-700"
+            >
+              {t('drawer.approvalPassword')}
+            </label>
+            <input
+              id="drawer-approval-password"
+              type="password"
+              value={approvalPassword}
+              onChange={(e) => setApprovalPassword(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600"
+              data-testid="drawer-approval-password"
+            />
+          </>
+        ) : null}
 
         <label htmlFor="drawer-reason" className="mt-4 mb-1 block text-sm font-medium text-slate-700">
           {t('drawer.reason')}

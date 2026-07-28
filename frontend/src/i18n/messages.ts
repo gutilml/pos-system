@@ -63,6 +63,9 @@ export type MessageKey =
   | 'closedTickets.reimbursing'
   | 'closedTickets.reimburseFailed'
   | 'closedTickets.success'
+  | 'closedTickets.approvalRequired'
+  | 'closedTickets.approvalPassword'
+  | 'closedTickets.approvalPasswordRequired'
   | 'customer.change'
   | 'customer.assignTitle'
   | 'customer.assignHint'
@@ -133,6 +136,9 @@ export type MessageKey =
   | 'drawer.reason'
   | 'drawer.amountInvalid'
   | 'drawer.reasonRequired'
+  | 'drawer.approvalRequired'
+  | 'drawer.approvalPassword'
+  | 'drawer.approvalPasswordRequired'
   | 'drawer.saving'
   | 'drawer.save'
   | 'weight.title'
@@ -489,6 +495,9 @@ export const en: MessageDict = {
   'closedTickets.reimbursing': 'Reimbursing…',
   'closedTickets.reimburseFailed': 'Reimburse failed',
   'closedTickets.success': 'Reimburse completed.',
+  'closedTickets.approvalRequired': 'Approval password required: reimbursement exceeds drawer cash.',
+  'closedTickets.approvalPassword': 'Approval password',
+  'closedTickets.approvalPasswordRequired': 'Enter approval password to continue.',
   'customer.change': 'Change customer',
   'customer.assignTitle': 'Assign customer',
   'customer.assignHint': 'Attach a store-credit customer to this ticket before Pay.',
@@ -559,6 +568,9 @@ export const en: MessageDict = {
   'drawer.reason': 'Reason',
   'drawer.amountInvalid': 'Enter an amount greater than zero',
   'drawer.reasonRequired': 'Enter a reason',
+  'drawer.approvalRequired': 'Approval password required: amount exceeds drawer cash.',
+  'drawer.approvalPassword': 'Approval password',
+  'drawer.approvalPasswordRequired': 'Enter approval password to continue.',
   'drawer.saving': 'Saving…',
   'drawer.save': 'Save',
   'weight.title': 'Enter weight',
@@ -808,6 +820,9 @@ export const es: MessageDict = {
   'closedTickets.reimbursing': 'Reembolsando…',
   'closedTickets.reimburseFailed': 'Error al reembolsar',
   'closedTickets.success': 'Reembolso completado.',
+  'closedTickets.approvalRequired': 'Se requiere contraseña de aprobación: el reembolso excede el efectivo en caja.',
+  'closedTickets.approvalPassword': 'Contraseña de aprobación',
+  'closedTickets.approvalPasswordRequired': 'Ingresa la contraseña de aprobación para continuar.',
   'customer.change': 'Cambiar cliente',
   'customer.assignTitle': 'Asignar cliente',
   'customer.assignHint': 'Asigna un cliente con crédito de tienda a este ticket antes de cobrar.',
@@ -878,6 +893,9 @@ export const es: MessageDict = {
   'drawer.reason': 'Motivo',
   'drawer.amountInvalid': 'Ingresa un monto mayor que cero',
   'drawer.reasonRequired': 'Ingresa un motivo',
+  'drawer.approvalRequired': 'Se requiere contraseña de aprobación: el monto excede el efectivo en caja.',
+  'drawer.approvalPassword': 'Contraseña de aprobación',
+  'drawer.approvalPasswordRequired': 'Ingresa la contraseña de aprobación para continuar.',
   'drawer.saving': 'Guardando…',
   'drawer.save': 'Guardar',
   'weight.title': 'Ingresar peso',

@@ -176,6 +176,50 @@ describe('ClosedTicketsModal', () => {
     })
   })
 
+  it('asks for approval password and retries reimburse when backend requires approval', async () => {
+    const user = userEvent.setup()
+    const cashTx = sampleTx()
+    const after = sampleTx({
+      items: [
+        {
+          ...cashTx.items[0],
+          returnedQuantity: 1,
+          returnableQuantity: 1,
+        },
+      ],
+    })
+    vi.mocked(listTransactions).mockResolvedValue([cashTx])
+    vi.mocked(getTransaction).mockResolvedValue(cashTx)
+    vi.mocked(reimburseTransaction)
+      .mockRejectedValueOnce(new Error('Reimburse CASH exceeds available cash; approval password required'))
+      .mockResolvedValueOnce(after)
+
+    render(<ClosedTicketsModal open onClose={vi.fn()} />)
+    await waitFor(() => {
+      expect(screen.getByTestId(`closed-ticket-row-${cashTx.id}`)).toBeInTheDocument()
+    })
+    await user.click(screen.getByTestId(`closed-ticket-row-${cashTx.id}`))
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-reimburse')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByTestId('confirm-reimburse'))
+    await waitFor(() => {
+      expect(screen.getByTestId('reimburse-approval-password')).toBeInTheDocument()
+    })
+
+    await user.type(screen.getByTestId('reimburse-approval-password'), 'cashier-pass')
+    await user.click(screen.getByTestId('confirm-reimburse'))
+
+    await waitFor(() => {
+      expect(reimburseTransaction).toHaveBeenLastCalledWith(cashTx.id, {
+        lines: [{ transactionItemId: 'item-1', quantity: 2 }],
+        approvalPassword: 'cashier-pass',
+      })
+    })
+    expect(screen.getByTestId('closed-tickets-success')).toBeInTheDocument()
+  })
+
   it('shows productName when provided, falls back to id prefix when absent', async () => {
     const user = userEvent.setup()
     const txWithName = sampleTx({
