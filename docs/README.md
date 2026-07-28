@@ -163,7 +163,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 078 | FE | Done | [README](features/078-frontend-shift-history/README.md) | [spec](features/078-frontend-shift-history/spec.md) · [plan](features/078-frontend-shift-history/plan.md) · [tasks](features/078-frontend-shift-history/tasks.md) |
 | 079 | BE | Done | [README](features/079-backend-shift-audit-stamps/README.md) | [spec](features/079-backend-shift-audit-stamps/spec.md) · [plan](features/079-backend-shift-audit-stamps/plan.md) · [tasks](features/079-backend-shift-audit-stamps/tasks.md) |
 | 080 | FE | Done | [README](features/080-frontend-shift-user-labels/README.md) | [spec](features/080-frontend-shift-user-labels/spec.md) · [plan](features/080-frontend-shift-user-labels/plan.md) · [tasks](features/080-frontend-shift-user-labels/tasks.md) |
-| 081 | BE | Planned — Deferred (needs product caps/RBAC) | [README](features/081-backend-drawer-event-policy/README.md) | [spec](features/081-backend-drawer-event-policy/spec.md) · [plan](features/081-backend-drawer-event-policy/plan.md) · [tasks](features/081-backend-drawer-event-policy/tasks.md) |
+| 081 | BE | Done | [README](features/081-backend-drawer-event-policy/README.md) | [spec](features/081-backend-drawer-event-policy/spec.md) · [plan](features/081-backend-drawer-event-policy/plan.md) · [tasks](features/081-backend-drawer-event-policy/tasks.md) |
 | 082 | BE | Planned — Deferred (product design) | [README](features/082-backend-transaction-lifecycle/README.md) | [spec](features/082-backend-transaction-lifecycle/spec.md) · [plan](features/082-backend-transaction-lifecycle/plan.md) · [tasks](features/082-backend-transaction-lifecycle/tasks.md) |
 | 083 | FE | Planned — Deferred | [README](features/083-frontend-transaction-lifecycle/README.md) | [spec](features/083-frontend-transaction-lifecycle/spec.md) · [plan](features/083-frontend-transaction-lifecycle/plan.md) · [tasks](features/083-frontend-transaction-lifecycle/tasks.md) |
 | 084 | BE | Planned — Deferred (payment policy) | [README](features/084-backend-card-reimburse/README.md) | [spec](features/084-backend-card-reimburse/spec.md) · [plan](features/084-backend-card-reimburse/plan.md) · [tasks](features/084-backend-card-reimburse/tasks.md) |
@@ -188,6 +188,7 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 103 | FE | Done | [README](features/103-frontend-inventory-receive-price-ux/README.md) | [spec](features/103-frontend-inventory-receive-price-ux/spec.md) · [plan](features/103-frontend-inventory-receive-price-ux/plan.md) · [tasks](features/103-frontend-inventory-receive-price-ux/tasks.md) |
 | 104 | BE+FE | Done | [README](features/104-closed-ticket-line-names/README.md) | — |
 | 105 | FE | Done | [README](features/105-frontend-pay-cash-prefill-change/README.md) | — |
+| 106 | FE | Done | [README](features/106-frontend-over-cash-approval-password/README.md) | — |
 
 ---
 

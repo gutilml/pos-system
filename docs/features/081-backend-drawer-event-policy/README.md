@@ -6,16 +6,24 @@ Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`
 
 ## Status
 
-**Planned — Deferred (needs product caps/RBAC)**
+**Done**
 
 ## Summary
 
-Server-side validation for PAY_IN / PAY_OUT: max amounts and/or who may authorize. FE **031** already ships against the open API; this feature hardens the backend once product sets caps/RBAC.
+Server-side policy now enforces:
+
+- **PAY_IN:** no max cap.
+- **PAY_OUT:** allowed when amount is within current drawer cash.
+- **Over-cash PAY_OUT:** requires same-user password approval.
+- **Reason:** required, trimmed, minimum 10 chars, and must include at least one letter/number.
+- **Reimbursements (072):** cash portions follow the same over-cash approval rule.
 
 ## Unlocks
 
-None (hardens existing **007** events / **031** UI).
+- Hardens existing **007** events / **031** UI.
+- Enables FE follow-up: approval-password UX for over-cash drawer events and reimbursements.
 
 ## Out of scope
 
-* Redesigning FE **031**; full role matrix beyond agreed caps.
+* Redesigning FE **031** and closed-ticket reimbursement UI (frontend follow-up required).
+* Role split between ADMIN/CASHIER (still parity).

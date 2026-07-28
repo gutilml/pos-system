@@ -16,8 +16,6 @@ Phase A backend wire-up features are shipped (017, 019, 021). Paired frontend: 0
 
 ## Shift & cash drawer
 
-- [ ] **Pay-in / pay-out policy** — triad: [`081-backend-drawer-event-policy`](../features/081-backend-drawer-event-policy/README.md). **Deferred** until product sets caps/RBAC. FE **031** already ships.
-
 ## Catalog & checkout APIs
 
 - [ ] **Transaction lifecycle** — triad: [`082-backend-transaction-lifecycle`](../features/082-backend-transaction-lifecycle/README.md). **Deferred** (product design). Unlocks FE **083**. Reimburse of COMPLETED sales shipped as Feature [072](../features/072-backend-closed-tickets-reimburse/README.md).

@@ -4,6 +4,6 @@
 
 Ensure you adhere to our global rules in `PROJECT_CONTEXT.md` and `.cursorrules`.
 
-- [ ] 1. Record product caps/RBAC decisions in this triad.
-- [ ] 2. Implement validation on PAY_IN/PAY_OUT.
-- [ ] 3. Tests; pending + catalog Done; commit `feat(081): …`.
+- [x] 1. Record policy decisions in this triad (PAY_IN uncapped, PAY_OUT over-cash requires same-user password).
+- [x] 2. Implement validation on PAY_IN/PAY_OUT plus reimburse cash-outs.
+- [x] 3. Add tests and update pending/catalog.
