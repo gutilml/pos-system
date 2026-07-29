@@ -59,7 +59,7 @@ describe('AssignCustomerControl', () => {
 
     expect(selectActiveCustomer(useCartStore.getState())?.id).toBe('cust-1')
     expect(screen.queryByTestId('assign-customer-modal')).not.toBeInTheDocument()
-    expect(screen.getByTestId('header-customer')).toHaveTextContent('Dana Tab')
+    expect(screen.getByTestId('open-assign-customer')).toHaveTextContent(/change/i)
   })
 
   it('clears the assigned customer from the selling screen', async () => {

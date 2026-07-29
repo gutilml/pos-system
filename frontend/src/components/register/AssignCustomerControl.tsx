@@ -24,14 +24,6 @@ export function AssignCustomerControl() {
   return (
     <>
       <div className="flex min-w-0 flex-1 items-center gap-1" data-testid="assign-customer-control">
-        {customer ? (
-          <p
-            className="hidden max-w-[5rem] truncate text-xs text-slate-600 sm:block"
-            data-testid="header-customer"
-          >
-            {customer.name}
-          </p>
-        ) : null}
         <button
           type="button"
           data-testid="open-assign-customer"
