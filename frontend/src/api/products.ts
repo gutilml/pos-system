@@ -27,6 +27,9 @@ export type ProductApi = {
   trackInventory?: boolean
   currentStock?: number
   lowStockThreshold?: number | null
+  /** Feature 112 */
+  stockedProductId?: string | null
+  availableSellUnits?: number | null
 }
 
 export type ProductRequestBody = {
@@ -53,6 +56,11 @@ export type ProductRequestBody = {
 }
 
 export function toCartProduct(dto: ProductApi): CartProduct {
+  const available =
+    dto.availableSellUnits != null && Number.isFinite(Number(dto.availableSellUnits))
+      ? Number(dto.availableSellUnits)
+      : null
+  const showsStock = available != null || dto.trackInventory === true
   return {
     id: dto.id,
     sku: dto.primarySku ?? dto.sku ?? '',
@@ -61,8 +69,11 @@ export function toCartProduct(dto: ProductApi): CartProduct {
     sellByWeight: dto.sellByWeight === true,
     unitOfMeasure: dto.unitOfMeasure ?? undefined,
     excludeFromGlobalDiscounts: dto.excludeFromGlobalDiscounts === true,
-    trackInventory: dto.trackInventory === true,
-    currentStock: Number.isFinite(Number(dto.currentStock)) ? Number(dto.currentStock) : 0,
+    trackInventory: showsStock,
+    currentStock:
+      available ??
+      (Number.isFinite(Number(dto.currentStock)) ? Number(dto.currentStock) : 0),
+    stockedProductId: dto.stockedProductId ?? (showsStock ? dto.id : null),
   }
 }
 

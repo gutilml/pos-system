@@ -17,9 +17,13 @@ export const CART_ROW_GRID =
 export const CART_ROW_GRID_WITH_STOCK =
   'grid grid-cols-[minmax(0,1fr)_9.5rem_4.5rem_5.5rem_6.5rem_4.5rem] items-center gap-x-3'
 
-export function formatCartStockDisplay(item: CartItem): string {
+export function formatCartStockDisplay(item: CartItem, ticketItems: CartItem[] = [item]): string {
   if (item.trackInventory !== true) return '—'
-  return String(roundMoney((item.currentStock ?? 0) - item.quantity))
+  const poolId = item.stockedProductId ?? item.productId
+  const poolQty = ticketItems
+    .filter((row) => row.trackInventory === true && (row.stockedProductId ?? row.productId) === poolId)
+    .reduce((sum, row) => sum + row.quantity, 0)
+  return String(roundMoney((item.currentStock ?? 0) - poolQty))
 }
 
 type CartItemRowProps = {

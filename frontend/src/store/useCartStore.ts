@@ -118,6 +118,7 @@ function pushOrMergeItem(
       excludeFromGlobalDiscounts: product.excludeFromGlobalDiscounts === true,
       trackInventory: product.trackInventory === true,
       currentStock: product.currentStock ?? 0,
+      stockedProductId: product.stockedProductId ?? (product.trackInventory ? product.id : null),
     },
   ]
 }
@@ -155,6 +156,7 @@ function normalizeCartItem(raw: Partial<CartItem> & Pick<CartItem, 'productId' |
     excludeFromGlobalDiscounts: raw.excludeFromGlobalDiscounts === true,
     trackInventory: raw.trackInventory === true,
     currentStock: Number.isFinite(Number(raw.currentStock)) ? Number(raw.currentStock) : 0,
+    stockedProductId: raw.stockedProductId ?? null,
   }
 }
 

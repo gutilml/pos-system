@@ -31,8 +31,8 @@ export function RegisterScreen() {
       showStock &&
       items.some((item) => {
         if (item.trackInventory !== true) return false
-        const remaining = (item.currentStock ?? 0) - item.quantity
-        return remaining < 0
+        const remaining = Number.parseFloat(formatCartStockDisplay(item, items))
+        return Number.isFinite(remaining) && remaining < 0
       }),
     [items, showStock],
   )
@@ -83,7 +83,7 @@ export function RegisterScreen() {
                           key={item.productId}
                           item={item}
                           showStock={showStock}
-                          stockDisplay={formatCartStockDisplay(item)}
+                          stockDisplay={formatCartStockDisplay(item, items)}
                         />
                       ))}
                     </ul>
