@@ -1,6 +1,12 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type FocusEvent } from 'react'
 import { useT } from '@/i18n/useT'
 import { useAuthStore } from '@/store/useAuthStore'
+
+function selectIfNonEmpty(event: FocusEvent<HTMLInputElement>) {
+  const value = event.currentTarget.value
+  if (value.length === 0) return
+  event.currentTarget.select()
+}
 
 export function LoginForm() {
   const t = useT()
@@ -13,19 +19,26 @@ export function LoginForm() {
   const [localError, setLocalError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
-  async function handleSubmit(event: FormEvent) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     clearError()
     setLocalError(null)
 
-    if (!username.trim() || !password) {
+    // Prefer live form values so browser autofill works even when onChange never fired.
+    const data = new FormData(event.currentTarget)
+    const liveUsername = String(data.get('username') ?? username).trim()
+    const livePassword = String(data.get('password') ?? password)
+    setUsername(liveUsername)
+    setPassword(livePassword)
+
+    if (!liveUsername || !livePassword) {
       setLocalError(t('login.missingCredentials'))
       return
     }
 
     setSubmitting(true)
     try {
-      await login(username.trim(), password)
+      await login(liveUsername, livePassword)
     } catch {
       // error surfaced via store
     } finally {
@@ -53,10 +66,12 @@ export function LoginForm() {
         </label>
         <input
           id="login-username"
+          name="username"
           type="text"
           autoComplete="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          onFocus={selectIfNonEmpty}
           className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600"
           autoFocus
         />
@@ -66,10 +81,12 @@ export function LoginForm() {
         </label>
         <input
           id="login-password"
+          name="password"
           type="password"
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          onFocus={selectIfNonEmpty}
           className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-900 outline-none focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-600"
         />
 
