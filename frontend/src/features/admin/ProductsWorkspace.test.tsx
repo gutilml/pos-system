@@ -98,6 +98,43 @@ describe('ProductsWorkspace lookup', () => {
     expect(screen.getByLabelText(/^Name$/i)).toHaveValue('Cola')
   })
 
+  it('shows Back and New product on edit toolbar and Back returns to lookup when clean', async () => {
+    const user = userEvent.setup()
+    vi.mocked(searchProducts).mockResolvedValue([
+      {
+        id: 'p1',
+        name: 'Cola',
+        primarySku: '1001',
+        skus: ['1001'],
+        sellingPrice: 1.99,
+      },
+    ])
+    const { getProduct } = await import('@/api/products')
+    vi.mocked(getProduct).mockResolvedValue({
+      id: 'p1',
+      name: 'Cola',
+      primarySku: '1001',
+      skus: ['1001'],
+      sellingPrice: 1.99,
+      costPrice: 1,
+    })
+
+    render(<ProductsWorkspace />)
+    await user.type(screen.getByLabelText(/scan|barcode|name/i), '1001')
+    await user.click(screen.getByRole('button', { name: /find|lookup|search|enter/i }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId('product-editor-toolbar')).toBeInTheDocument()
+    })
+    expect(screen.getByTestId('product-editor-back')).toHaveTextContent('Back')
+    expect(screen.getByTestId('product-editor-new')).toHaveTextContent('New product')
+
+    await user.click(screen.getByTestId('product-editor-back'))
+    await waitFor(() => {
+      expect(screen.getByTestId('product-lookup')).toBeInTheDocument()
+    })
+  })
+
   it('ArrowDown + Enter selects highlighted suggestion for edit', async () => {
     const user = userEvent.setup()
     vi.mocked(searchProducts).mockResolvedValue([

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export type SearchableOption = {
   id: string
@@ -53,6 +53,18 @@ export function SearchableSelect({
     setOpen(false)
     setQuery('')
   }
+
+  useEffect(() => {
+    if (!open) return
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key !== 'Escape') return
+      event.preventDefault()
+      setOpen(false)
+      setQuery('')
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [open])
 
   return (
     <div className="relative block text-sm font-medium text-slate-700">

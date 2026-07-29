@@ -214,6 +214,8 @@ export type MessageKey =
   | 'products.lookupSubmit'
   | 'products.creatingFromLookup'
   | 'products.editingFromLookup'
+  | 'products.back'
+  | 'products.discardConfirm'
   | 'cashier.catalog'
   | 'admin.title'
   | 'admin.productsTab'
@@ -649,6 +651,8 @@ export const en: MessageDict = {
   'products.lookupSubmit': 'Find / create',
   'products.creatingFromLookup': 'New product — fill in the remaining fields, then Save.',
   'products.editingFromLookup': 'Editing product',
+  'products.back': 'Back',
+  'products.discardConfirm': 'Discard unsaved changes?',
 }
 
 export const es: MessageDict = {
@@ -976,6 +980,8 @@ export const es: MessageDict = {
   'products.lookupSubmit': 'Buscar / crear',
   'products.creatingFromLookup': 'Producto nuevo — completa los campos restantes y guarda.',
   'products.editingFromLookup': 'Editando producto',
+  'products.back': 'Volver',
+  'products.discardConfirm': '¿Descartar los cambios sin guardar?',
 }
 
 const dictionaries: Record<Locale, MessageDict> = { en, es }

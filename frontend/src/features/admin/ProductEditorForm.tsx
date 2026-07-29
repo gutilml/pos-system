@@ -28,6 +28,8 @@ type ProductEditorProps = {
   initialSkusText?: string
   onSaved: () => void
   onCancel: () => void
+  /** Feature 110 — notify parent when the form diverges from the loaded/create baseline. */
+  onDirtyChange?: (dirty: boolean) => void
 }
 
 function parseSkus(raw: string): string[] {
@@ -128,6 +130,7 @@ export function ProductEditorForm({
   initialSkusText = '',
   onSaved,
   onCancel,
+  onDirtyChange,
 }: ProductEditorProps) {
   const t = useT()
   const [loading, setLoading] = useState(Boolean(productId))
@@ -135,6 +138,7 @@ export function ProductEditorForm({
   const [error, setError] = useState<string | null>(null)
   const [categories, setCategories] = useState<CategoryApi[]>([])
   const [parents, setParents] = useState<ProductApi[]>([])
+  const [baseline, setBaseline] = useState<string | null>(null)
 
   const [name, setName] = useState(initialName)
   const [description, setDescription] = useState('')
@@ -177,7 +181,7 @@ export function ProductEditorForm({
   const parentOptions = useMemo(
     () =>
       parents
-        .filter((p) => p.id !== productId)
+        .filter((p) => p.id !== productId && !p.parentProductId)
         .map((p) => ({
           id: p.id,
           label: p.name,
@@ -185,6 +189,60 @@ export function ProductEditorForm({
         })),
     [parents, productId],
   )
+
+  const formFingerprint = useMemo(
+    () =>
+      JSON.stringify({
+        name,
+        description,
+        skusText,
+        categoryId,
+        sellByWeight,
+        parentProductId,
+        qtyPerPackage,
+        unitCode,
+        costPrice,
+        targetMarginPct,
+        sellingPrice,
+        wholesalePrice,
+        trackInventory,
+        currentStock,
+        lowStockThreshold,
+        active,
+      }),
+    [
+      name,
+      description,
+      skusText,
+      categoryId,
+      sellByWeight,
+      parentProductId,
+      qtyPerPackage,
+      unitCode,
+      costPrice,
+      targetMarginPct,
+      sellingPrice,
+      wholesalePrice,
+      trackInventory,
+      currentStock,
+      lowStockThreshold,
+      active,
+    ],
+  )
+
+  useEffect(() => {
+    if (loading) {
+      setBaseline(null)
+      onDirtyChange?.(false)
+      return
+    }
+    if (baseline === null) {
+      setBaseline(formFingerprint)
+      onDirtyChange?.(false)
+      return
+    }
+    onDirtyChange?.(formFingerprint !== baseline)
+  }, [loading, formFingerprint, baseline, onDirtyChange])
 
   function recalcSellingFromCostAndMargin(costRaw: string, marginPctRaw: string) {
     const cost = numOrNull(costRaw)

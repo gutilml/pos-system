@@ -45,7 +45,32 @@ describe('ProductEditorForm Feature 076', () => {
         primarySku: '7502',
         categoryIds: ['cat-2'],
       },
+      {
+        id: 'child-1',
+        name: 'Goma Luky single',
+        sellingPrice: 3,
+        costPrice: 1,
+        parentProductId: 'parent-1',
+        primarySku: '7503',
+      },
     ])
+  })
+
+  it('hides child products from the parent package dropdown', async () => {
+    const user = userEvent.setup()
+    render(
+      <ProductEditorForm
+        productId={null}
+        enableInventory={false}
+        onSaved={() => undefined}
+        onCancel={() => undefined}
+      />,
+    )
+    await waitFor(() => expect(listProducts).toHaveBeenCalled())
+    await user.click(screen.getByTestId('product-parent'))
+    const menu = screen.getByTestId('product-parent-menu')
+    expect(within(menu).getByText('Goma Luky osito')).toBeInTheDocument()
+    expect(within(menu).queryByText('Goma Luky single')).not.toBeInTheDocument()
   })
 
   it('fills margin from category and retail from cost', async () => {

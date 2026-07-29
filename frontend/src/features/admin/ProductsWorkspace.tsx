@@ -32,6 +32,7 @@ export function ProductsWorkspace() {
   const [suggestions, setSuggestions] = useState<ProductApi[]>([])
   const [highlightIndex, setHighlightIndex] = useState(-1)
   const [editor, setEditor] = useState<EditorSession>({ mode: 'idle' })
+  const [editorDirty, setEditorDirty] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
   const abortRef = useRef<AbortController | null>(null)
   const listboxId = useId()
@@ -82,9 +83,20 @@ export function ProductsWorkspace() {
 
   function resetToLookup() {
     setEditor({ mode: 'idle' })
+    setEditorDirty(false)
     setQuery('')
     clearSuggestions()
     setLookupError(null)
+  }
+
+  function confirmDiscardIfNeeded(): boolean {
+    if (!editorDirty) return true
+    return window.confirm(t('products.discardConfirm'))
+  }
+
+  function leaveEditor(next: () => void) {
+    if (!confirmDiscardIfNeeded()) return
+    next()
   }
 
   function openEdit(product: ProductApi) {
@@ -282,19 +294,47 @@ export function ProductsWorkspace() {
               </form>
             ) : (
               <>
-                <p className="text-sm text-slate-600" data-testid="product-editor-banner">
-                  {editor.mode === 'create'
-                    ? t('products.creatingFromLookup')
-                    : t('products.editingFromLookup')}
-                </p>
+                {editor.mode === 'edit' ? (
+                  <div
+                    className="mb-3 flex items-center justify-between gap-3"
+                    data-testid="product-editor-toolbar"
+                  >
+                    <div className="flex min-w-0 items-center gap-3">
+                      <button
+                        type="button"
+                        data-testid="product-editor-back"
+                        onClick={() => leaveEditor(resetToLookup)}
+                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                      >
+                        {t('products.back')}
+                      </button>
+                      <p className="truncate text-sm text-slate-600" data-testid="product-editor-banner">
+                        {t('products.editingFromLookup')}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      data-testid="product-editor-new"
+                      onClick={() => leaveEditor(() => openCreate(''))}
+                      className="shrink-0 rounded-lg border border-emerald-700 px-3 py-1.5 text-sm font-semibold text-emerald-800 hover:bg-emerald-50"
+                    >
+                      {t('admin.newProduct')}
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-600" data-testid="product-editor-banner">
+                    {t('products.creatingFromLookup')}
+                  </p>
+                )}
                 <ProductEditorForm
                   key={editor.key}
                   productId={editor.productId}
                   enableInventory={enableInventory}
                   initialName={editor.initialName}
                   initialSkusText={editor.initialSkusText}
-                  onCancel={resetToLookup}
+                  onCancel={() => leaveEditor(resetToLookup)}
                   onSaved={resetToLookup}
+                  onDirtyChange={setEditorDirty}
                 />
               </>
             )}
