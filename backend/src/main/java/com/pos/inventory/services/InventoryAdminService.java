@@ -61,9 +61,11 @@ public class InventoryAdminService {
             }
             if (!q.isEmpty()) {
                 String name = product.getName() == null ? "" : product.getName().toLowerCase(Locale.ROOT);
-                String sku = product.resolvePrimarySku();
-                String skuLower = sku == null ? "" : sku.toLowerCase(Locale.ROOT);
-                if (!name.contains(q) && !skuLower.contains(q)) {
+                boolean skuHit = product.getSkus() != null && product.getSkus().stream()
+                        .map(sku -> sku.getCode())
+                        .filter(code -> code != null && !code.isBlank())
+                        .anyMatch(code -> code.toLowerCase(Locale.ROOT).contains(q));
+                if (!name.contains(q) && !skuHit) {
                     continue;
                 }
             }

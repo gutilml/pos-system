@@ -2,6 +2,7 @@ package com.pos.inventory.services;
 
 import com.pos.core.exception.BusinessRuleException;
 import com.pos.core.models.Product;
+import com.pos.core.models.ProductSku;
 import com.pos.core.models.StoreSettings;
 import com.pos.core.repositories.ProductRepository;
 import com.pos.core.repositories.StoreSettingsRepository;
@@ -93,6 +94,34 @@ class InventoryAdminServiceTest {
         assertThat(all).hasSize(1);
         assertThat(low).hasSize(1);
         assertThat(low.get(0).lowStock()).isTrue();
+    }
+
+    @Test
+    void listProducts_matchesSecondarySku() {
+        when(storeSettingsRepository.findById(store.getId())).thenReturn(Optional.of(store));
+        product.setName("Cola 355ml");
+
+        ProductSku primary = new ProductSku();
+        primary.setCode("7501000000028");
+        primary.setIsPrimary(true);
+        primary.setProduct(product);
+
+        ProductSku secondary = new ProductSku();
+        secondary.setCode("7501000001025");
+        secondary.setIsPrimary(false);
+        secondary.setProduct(product);
+
+        product.setSkus(List.of(primary, secondary));
+        when(productRepository.findAll()).thenReturn(List.of(product));
+
+        List<InventoryProductDTO> bySecondary = service.listProducts(store.getId(), "7501000001025", false);
+        List<InventoryProductDTO> byPrimary = service.listProducts(store.getId(), "7501000000028", false);
+        List<InventoryProductDTO> miss = service.listProducts(store.getId(), "9999999999999", false);
+
+        assertThat(bySecondary).hasSize(1);
+        assertThat(bySecondary.get(0).name()).isEqualTo("Cola 355ml");
+        assertThat(byPrimary).hasSize(1);
+        assertThat(miss).isEmpty();
     }
 
     @Test
