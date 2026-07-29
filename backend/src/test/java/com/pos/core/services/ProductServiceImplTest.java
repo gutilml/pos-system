@@ -223,6 +223,72 @@ class ProductServiceImplTest {
     }
 
     @Test
+    void toDto_exposesParentSellableUnitsForChild() {
+        UUID parentId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        Product parent = new Product();
+        parent.setId(parentId);
+        parent.setName("Case of 24");
+        parent.setSellingPrice(new BigDecimal("48"));
+        parent.setCostPrice(new BigDecimal("24"));
+        parent.setUnitsPerPackage(new BigDecimal("24.0000"));
+        parent.setUnitOfMeasure("pc");
+        parent.setTrackInventory(true);
+        parent.setCurrentStock(new BigDecimal("2.0000"));
+        parent.setActive(true);
+
+        UUID childId = UUID.fromString("cccccccc-cccc-cccc-cccc-cccccccccccc");
+        Product child = new Product();
+        child.setId(childId);
+        child.setName("Single bottle");
+        child.setSellingPrice(new BigDecimal("2"));
+        child.setCostPrice(new BigDecimal("1"));
+        child.setParentProduct(parent);
+        child.setUnitOfMeasure("pc");
+        child.setTrackInventory(false);
+        child.setCurrentStock(BigDecimal.ZERO);
+        child.setActive(true);
+        when(productRepository.findById(parentId)).thenReturn(Optional.of(parent));
+        when(productRepository.findById(childId)).thenReturn(Optional.of(child));
+
+        ProductDTO dto = productService.findById(childId);
+        assertThat(dto.stockedProductId()).isEqualTo(parentId);
+        assertThat(dto.availableSellUnits()).isEqualByComparingTo("48.0000");
+        assertThat(dto.trackInventory()).isFalse();
+    }
+
+    @Test
+    void create_rejectsChildProductAsParent() {
+        UUID grandparentId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
+        Product grandparent = new Product();
+        grandparent.setId(grandparentId);
+        grandparent.setName("Case");
+        grandparent.setSellingPrice(new BigDecimal("100"));
+        grandparent.setCostPrice(new BigDecimal("50"));
+        grandparent.setUnitsPerPackage(new BigDecimal("24.0000"));
+        grandparent.setUnitOfMeasure("pc");
+
+        UUID childId = UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        Product childAsParent = new Product();
+        childAsParent.setId(childId);
+        childAsParent.setName("Bottle");
+        childAsParent.setSellingPrice(new BigDecimal("5"));
+        childAsParent.setCostPrice(new BigDecimal("2"));
+        childAsParent.setParentProduct(grandparent);
+        childAsParent.setUnitsPerPackage(new BigDecimal("1.0000"));
+        childAsParent.setUnitOfMeasure("pc");
+        when(productRepository.findById(childId)).thenReturn(Optional.of(childAsParent));
+
+        ProductRequestDTO request = new ProductRequestDTO(
+                null, null, "Single unit", null, null, null, null, null, null, null,
+                false, "pc", childId, null, null, null, null, null, null, null
+        );
+
+        assertThatThrownBy(() -> productService.create(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("child product cannot be used as a parent");
+    }
+
+    @Test
     void create_rejectsIncompleteParentPackage() {
         UUID parentId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         Product parent = new Product();

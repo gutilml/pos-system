@@ -239,6 +239,9 @@ public class ProductServiceImpl implements ProductService {
                 throw new BusinessRuleException("Product cannot be its own parent");
             }
             Product parent = getProduct(request.parentProductId());
+            if (parent.getParentProduct() != null) {
+                throw new BusinessRuleException("A child product cannot be used as a parent");
+            }
             ensureParentPackageComplete(parent);
             if (Boolean.TRUE.equals(product.getSellByWeight())
                     && ProductPricing.isPiecePackageUnit(parent.getUnitOfMeasure())) {
@@ -488,6 +491,43 @@ public class ProductServiceImpl implements ProductService {
                 && product.getUnitsPerPackage().compareTo(BigDecimal.ZERO) > 0
                 && product.getParentProduct() == null;
 
+        UUID stockedProductId = null;
+        BigDecimal availableSellUnits = null;
+        Product parent = product.getParentProduct();
+        if (parent != null) {
+            Product resolvedParent = parent.getId() != null
+                    ? productRepository.findById(parent.getId()).orElse(parent)
+                    : parent;
+            if (Boolean.TRUE.equals(resolvedParent.getTrackInventory())
+                    && resolvedParent.getUnitsPerPackage() != null
+                    && resolvedParent.getUnitsPerPackage().compareTo(BigDecimal.ZERO) > 0
+                    && resolvedParent.getUnitOfMeasure() != null
+                    && !resolvedParent.getUnitOfMeasure().isBlank()) {
+                stockedProductId = resolvedParent.getId();
+                BigDecimal packages = resolvedParent.getCurrentStock() == null
+                        ? BigDecimal.ZERO
+                        : resolvedParent.getCurrentStock();
+                BigDecimal sellableInParentUnit = packages.multiply(resolvedParent.getUnitsPerPackage());
+                String childUnit = product.getUnitOfMeasure() != null && !product.getUnitOfMeasure().isBlank()
+                        ? product.getUnitOfMeasure()
+                        : resolvedParent.getUnitOfMeasure();
+                try {
+                    availableSellUnits = ProductPricing.convertQuantity(
+                            sellableInParentUnit,
+                            resolvedParent.getUnitOfMeasure(),
+                            childUnit
+                    );
+                } catch (BusinessRuleException ex) {
+                    availableSellUnits = sellableInParentUnit;
+                }
+            }
+        } else if (Boolean.TRUE.equals(product.getTrackInventory())) {
+            stockedProductId = product.getId();
+            availableSellUnits = product.getCurrentStock() == null
+                    ? BigDecimal.ZERO.setScale(MONEY_SCALE)
+                    : product.getCurrentStock();
+        }
+
         return new ProductDTO(
                 product.getId(),
                 primarySku,
@@ -516,7 +556,9 @@ public class ProductServiceImpl implements ProductService {
                         : product.getCurrentStock(),
                 product.getLowStockThreshold() == null
                         ? BigDecimal.ZERO.setScale(MONEY_SCALE)
-                        : product.getLowStockThreshold()
+                        : product.getLowStockThreshold(),
+                stockedProductId,
+                availableSellUnits
         );
     }
 

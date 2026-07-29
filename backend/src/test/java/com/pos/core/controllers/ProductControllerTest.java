@@ -61,7 +61,9 @@ class ProductControllerTest {
                 false,
                 true,
                 new BigDecimal("12.0000"),
-                null
+                null,
+                id,
+                new BigDecimal("12.0000")
         );
     }
 

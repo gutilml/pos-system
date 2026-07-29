@@ -26,10 +26,15 @@ public record ProductDTO(
         Boolean excludeFromGlobalDiscounts,
         Boolean trackInventory,
         BigDecimal currentStock,
-        BigDecimal lowStockThreshold
+        BigDecimal lowStockThreshold,
+        /** Product whose stock is shown/deducted (self or parent). Null when inventory not applicable. */
+        UUID stockedProductId,
+        /** Sellable quantity in this product's sell unit (parent packages converted for children). */
+        BigDecimal availableSellUnits
 ) {
     /**
      * {@code sku} is a transitional alias of {@code primarySku} (nullable when the product has no codes).
      * Parent package: {@code qtyPerPackage}/{@code packageUnit} map to entity unitsPerPackage/unitOfMeasure.
+     * Feature 112: {@code stockedProductId}/{@code availableSellUnits} drive register Inv for children.
      */
 }
