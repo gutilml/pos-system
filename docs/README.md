@@ -30,6 +30,7 @@ Use this table when you know the *subject*, not the feature number.
 | **Shifts / cash drawer (API)** | [007](features/007-backend-shift-management/README.md), [017](features/017-backend-shift-current/README.md), [077](features/077-backend-shift-history/README.md), [079](features/079-backend-shift-audit-stamps/README.md), [081](features/081-backend-drawer-event-policy/README.md) | Open / events / close; **077** history done; **079** audit stamps done; **081** deferred caps/RBAC |
 | **Shift gate / history UI** | [008](features/008-frontend-shift-ui/README.md), [018](features/018-frontend-shift-gate-hydration/README.md), [078](features/078-frontend-shift-history/README.md), [080](features/080-frontend-shift-user-labels/README.md) | Gate + persist; **078** history; **080** opener/closer labels |
 | **Cashier menu + modal escape UX** | [107](features/107-frontend-cashier-menu-modal-ux/README.md) | Consolidated money movement action, Settings relocation, Escape-to-close across overlays, drawer reason min-length copy. |
+| **Login / product edit / inventory polish (108–113)** | [108](features/108-frontend-login-field-select-autofill/README.md), [109](features/109-backend-inventory-search-any-sku/README.md), [110](features/110-frontend-product-edit-toolbar/README.md), [111](features/111-parent-package-dropdown-rules/README.md), [112](features/112-frontend-child-sellable-stock/README.md), [113](features/113-frontend-customer-below-total/README.md) | Login select/autofill; inventory any-SKU search; product edit Back/New; parent dropdown rules; child Inv from parent; customer below Total. |
 | **Register E2E / regression** | [101](features/101-e2e-register-smoke/README.md) | Tagged BE + FE regression smoke (weight sale included) |
 | **Multi-ticket tabs** | [009](features/009-frontend-open-tickets/README.md) | Client-side held tickets |
 | **Stripe (backend)** | [010](features/010-backend-stripe-integration/README.md) | Checkout Session + webhook — **keep code; Stripe-in-POS ON HOLD** |
@@ -191,6 +192,12 @@ Status: **Done** = implemented & committed · **Planned** = triad written, not i
 | 105 | FE | Done | [README](features/105-frontend-pay-cash-prefill-change/README.md) | — |
 | 106 | FE | Done | [README](features/106-frontend-over-cash-approval-password/README.md) | — |
 | 107 | FE | Done | [README](features/107-frontend-cashier-menu-modal-ux/README.md) | — |
+| 108 | FE | Done | [README](features/108-frontend-login-field-select-autofill/README.md) | — |
+| 109 | BE | Done | [README](features/109-backend-inventory-search-any-sku/README.md) | — |
+| 110 | FE | Done | [README](features/110-frontend-product-edit-toolbar/README.md) | — |
+| 111 | BE+FE | Done | [README](features/111-parent-package-dropdown-rules/README.md) | — |
+| 112 | BE+FE | Done | [README](features/112-frontend-child-sellable-stock/README.md) | — |
+| 113 | FE | Done | [README](features/113-frontend-customer-below-total/README.md) | — |
 
 ---
 
